@@ -28,7 +28,11 @@ app_license = "agpl-3.0"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Purchase Order":"public/js/purchase_order.js",
+             "Supplier Quotation":"public/js/supplier_quotation.js",
+             "Request for Quotation":"public/js/request_for_quotation.js",
+             "Purchase Invoice":"public/js/purchase_invoice.js",
+             "Purchase Receipt":"public/js/purchase_receipt.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -69,6 +73,7 @@ app_license = "agpl-3.0"
 
 # before_install = "refteck.install.before_install"
 # after_install = "refteck.install.after_install"
+after_migrate = "refteck.migrate.after_migrate"
 
 # Uninstallation
 # ------------
@@ -122,13 +127,30 @@ app_license = "agpl-3.0"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Request for Quotation": {
+		"before_save":"refteck.api.set_warehouse_in_child_table"
+	},
+    "Supplier Quotation":{
+        "before_save":"refteck.api.set_warehouse_in_child_table"
+    },
+    "Purchase Order":{
+        "before_save":["refteck.api.fetch_rate_from_supplier_quotation",
+                       "refteck.api.validation_for_supplier"]
+    },
+    "Opportunity":{
+        "before_save":"refteck.api.set_common_brands"
+    },
+    "Quotation":{
+        "before_save":"refteck.api.set_common_brands"
+    },
+    "Purchase Invoice":{
+        "before_save": "refteck.api.validation_for_supplier"
+    },
+    "Purchase Receipt":{
+        "before_save": "refteck.api.validation_for_supplier"
+    }
+}
 
 # Scheduled Tasks
 # ---------------
