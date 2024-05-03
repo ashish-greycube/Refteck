@@ -5,5 +5,14 @@ frappe.ui.form.on("Request for Quotation", {
         }
         refresh_field("items"); 
         frappe.show_alert('Item Warehouse is set in all row of item table', 5);
+    },
+    setup:function(frm){
+        frm.set_query("set_warehouse_cf", function(){
+            return {
+                filters: {
+                    company: frm.doc.company
+                },
+            };
+        })
     }
 })
