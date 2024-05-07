@@ -5,9 +5,10 @@ from frappe import msgprint, _
 from frappe.utils import flt
 
 def set_warehouse_in_child_table(self,method):
-    if self.set_warehouse_cf:
+    if self.set_warehouse_cf and len(self.get('items'))>0:
         for row in self.get('items'):
             row.warehouse = self.set_warehouse_cf
+        frappe.msgprint(_("Item Warehouse {0} is set in all rows of item table").format(self.set_warehouse_cf), alert=True)
 
 def fetch_rate_from_supplier_quotation(self,method):
     if self.custom_supplier_quotation:
