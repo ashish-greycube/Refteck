@@ -44,10 +44,9 @@ def set_common_brands(self,method):
         if i.brand:
             if i.brand not in item_brands:
                 item_brands.append(i.brand)
-        else:
-            self.common_brands_in_item_cf = ''
-    
     if len(item_brands) > 0:
         common_brand = ", ".join(str(elem) for elem in item_brands)
         self.common_brands_in_item_cf = common_brand
         frappe.msgprint(_("Common brands field is updated based on item brands"),alert=True)
+    else:
+        self.common_brands_in_item_cf = ''
