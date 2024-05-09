@@ -138,12 +138,6 @@ doc_events = {
         "before_save":["refteck.api.fetch_rate_from_supplier_quotation",
                        "refteck.api.validation_for_supplier"]
     },
-    "Opportunity":{
-        "before_save":"refteck.api.set_common_brands"
-    },
-    "Quotation":{
-        "before_save":"refteck.api.set_common_brands"
-    },
     "Purchase Invoice":{
         "before_save": "refteck.api.validation_for_supplier"
     },
