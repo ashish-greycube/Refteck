@@ -38,6 +38,16 @@ def after_migrate():
 				"is_custom_field":1,
 				"is_system_generated":0
 			}			
+		],
+        "Quotation": [	
+			{
+				"fieldname":"common_brands_in_item_cf",
+				"label":"Common Brands",
+				"fieldtype":"Small Text",
+				"insert_after": "customer_name",
+				"is_custom_field":1,
+				"is_system_generated":0
+			}			
 		]
     }
 
