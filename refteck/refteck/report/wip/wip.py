@@ -25,13 +25,13 @@ def get_columns(filters):
 			"label": _("Name"),
 			"fieldtype": "Link",
 			"options": "User",
-			"width": 170
+			"width": 160
 		},
 		{
 			"fieldname": "rfq_no",
 			"fieldtype": "Data",
 			"label": _("RFQ No."),
-			"width": 130
+			"width": 110
 		},
 		{
 			"fieldname": "buyer",
@@ -56,7 +56,7 @@ def get_columns(filters):
 			"fieldname": "refteck_ref_no",
 			"fieldtype": "Data",
 			"label": _("Refteck Ref No"),
-			"width": 120
+			"width": 110
 		},
 		{
 			"fieldname": "erp_ref_no", 
@@ -64,6 +64,12 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"options": "Opportunity",
 			"width": 190
+		},
+		{
+			"fieldname": "status",
+			"fieldtype": "Data",
+			"label": _("Status"),
+			"width": 80
 		},
 		{
 			"fieldname": "client_name",
@@ -76,78 +82,82 @@ def get_columns(filters):
 			"fieldname": "oems",
 			"fieldtype": "Data",
 			"label": _("OEM'S"),
-			"width": 150
+			"width": 200
 		},
 		{
 			"fieldname": "comments",
 			"fieldtype": "Small Text",
 			"label": _("Comments"),
-			"width": 200,
+			"width": 230,
 		}
 	]
 
 	return columns
 
 def get_conditions(filters):
-	conditions = ""
-	if filters.from_date:
-		conditions += "  date(creation) >= %(from_date)s"
-	if filters.to_date:
-		conditions += " and date(creation) <= %(to_date)s"
-	print('conditions----',conditions)
+	conditions = []
+
+	if filters.get("from_date") and filters.get("to_date"):
+		if filters.get("to_date") >= filters.get("from_date"):
+			conditions.append(["creation","between", [filters.get("from_date"), filters.get("to_date")]])
+		else:
+			frappe.throw(_("To Date should be greater then From Date"))
+		
+	if filters.due_date:
+		conditions.append({"expected_closing":filters.due_date})
+
+	if filters.status:
+		conditions.append({"status":filters.status})
+
 	return conditions
-	# conditions = {}
 
-	# if filters.get("from_date") and filters.get("to_date"):
-	# 	# print(filters)
-	# 	from_date=filters.get("from_date")+' 00:00:00.000000'
-	# 	to_date=filters.get("to_date")+' 00:00:00.000000'
-	# 	print(from_date, "----from_date", to_date, "----to_date")
-	# 	# conditions["creation"] = ("between", [from_date, to_date])
-	# 	conditions["creation"] <= from_date
-	# 	conditions["creation"] >= to_date 	 
+def get_child_conditions(filters, op_parent):
+	conditions = []
 
-	# 	# return date
-	# print(conditions, '-----conditions')
-	# return conditions
+	conditions.append({"parent": op_parent})
+
+	if filters.sourcing_person:
+		conditions.append({"custom_sourcing_person":filters.sourcing_person})
+
+	return conditions
+
 
 def get_data(filters):
 	 
 	data = []
 	conditions = get_conditions(filters)
-	print('conditions',conditions,filters)
+	
 	opportunity_list = frappe.db.get_list(
 			"Opportunity", fields=["custom_customer_opportunity_reference",
 						"contact_person", 
 						"creation",
 						"expected_closing", 
 						"custom_refteck_opportunity_reference",
-						"name", 
+						"name",
+						"status", 
 						"party_name"],
-						limit=5
-						
+						filters=conditions,					
 	)
 	  
 	for op in opportunity_list:
 
-		# print(op.creation,"------date")
-
+		op_parent = op.name 
+		child_conditions = get_child_conditions(filters,op_parent)
+		
 		items = frappe.db.get_list(
-			"Opportunity Item", fields=["qty","custom_sourcing_person", "parent","custom_refteck_item_comment", "doctype", "brand"], 
-			filters={"parent":op.name},
+			"Opportunity Item", 
+			parent_doctype='Opportunity',
+			fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand"], 
+			filters=child_conditions
 		) 
 
-		
+		# get unique sourcing persons
 		unique_sourcing_persons = []
-		
 		for item in items:
 			if item.custom_sourcing_person not in unique_sourcing_persons:
 				unique_sourcing_persons.append(item.custom_sourcing_person)	
 		
-		# dulicate_items = item
-
-		# print(dulicate_items.parent, "----parent")	
-		
+		# loop unique sourcing persons list for brand & comments 
 		for sourcing_person in unique_sourcing_persons:
 			unique_brands = []
 			comments = []
@@ -158,8 +168,11 @@ def get_data(filters):
 				if sourcing_person == values.custom_sourcing_person and values.custom_refteck_item_comment:
 					comments.append(values.custom_refteck_item_comment)
 			
-			brands = ", ".join(ele for ele in unique_brands)
-			comments = ", ".join(ele for ele in comments)
+			if(len(unique_brands) > 0):
+				brands = ", ".join((ele if ele!=None else '') for ele in unique_brands)
+			
+			if(len(comments) > 0):
+				comments = ", ".join((ele if ele!=None else '') for ele in comments)
 
 			row = {
 					"name": sourcing_person,
@@ -169,6 +182,7 @@ def get_data(filters):
 					"due_date": op.expected_closing,
 					"refteck_ref_no": op.custom_refteck_opportunity_reference,
 					"erp_ref_no": op.name,
+					"status": op.status,
 					"client_name": op.party_name,
 					"oems": brands,
 					"comments": comments
