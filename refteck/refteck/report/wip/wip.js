@@ -29,6 +29,12 @@ frappe.query_reports["WIP"] = {
 			"options": "User",
 		},
 		{
+			"fieldname": "territory",
+			"label":__("Territory"),
+			"fieldtype": "Link",
+			"options": "Territory",
+		},
+		{
 			"fieldname": "status",
 			"label":__("Status"),
 			"fieldtype": "Select",

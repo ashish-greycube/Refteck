@@ -22,8 +22,8 @@ def get_columns(filters):
 	columns = [
 		{
 			"fieldname": "name",
-			"label": _("Name"),
 			"fieldtype": "Link",
+			"label": _("Name"),
 			"options": "User",
 			"width": 160
 		},
@@ -66,6 +66,14 @@ def get_columns(filters):
 			"width": 190
 		},
 		{
+			"fieldname": "territory",
+			"fieldtype": "Data",
+			"label": _("territory"),
+			"fieldtype": "Link",
+			"options": "Territory",
+			"width": 100
+		},
+		{
 			"fieldname": "status",
 			"fieldtype": "Data",
 			"label": _("Status"),
@@ -106,6 +114,9 @@ def get_conditions(filters):
 	if filters.due_date:
 		conditions.append({"expected_closing":filters.due_date})
 
+	if filters.territory:
+		conditions.append({"territory":filters.territory})
+
 	if filters.status:
 		conditions.append({"status":filters.status})
 
@@ -134,6 +145,7 @@ def get_data(filters):
 						"expected_closing", 
 						"custom_refteck_opportunity_reference",
 						"name",
+						"territory",
 						"status", 
 						"party_name"],
 						filters=conditions,					
@@ -182,6 +194,7 @@ def get_data(filters):
 					"due_date": op.expected_closing,
 					"refteck_ref_no": op.custom_refteck_opportunity_reference,
 					"erp_ref_no": op.name,
+					"territory":op.territory,
 					"status": op.status,
 					"client_name": op.party_name,
 					"oems": brands,
