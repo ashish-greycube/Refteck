@@ -129,23 +129,23 @@ after_migrate = "refteck.migrate.after_migrate"
 
 doc_events = {
 	"Request for Quotation": {
-		"before_save":"refteck.api.set_warehouse_in_child_table"
+		"before_validate":"refteck.api.set_warehouse_in_child_table"
 	},
     "Supplier Quotation":{
-        "before_save":"refteck.api.set_warehouse_in_child_table"
+        "before_validate":"refteck.api.set_warehouse_in_child_table"
     },
     "Purchase Order":{
-        "before_save":["refteck.api.fetch_rate_from_supplier_quotation",
+        "before_validate":["refteck.api.fetch_rate_from_supplier_quotation",
                        "refteck.api.validation_for_supplier"]
     },
     "Quotation":{
-        "before_save":"refteck.api.set_common_brands"
+        "before_validate":"refteck.api.set_common_brands"
     },
     "Purchase Invoice":{
-        "before_save": "refteck.api.validation_for_supplier"
+        "before_validate": "refteck.api.validation_for_supplier"
     },
     "Purchase Receipt":{
-        "before_save": "refteck.api.validation_for_supplier"
+        "before_validate": "refteck.api.validation_for_supplier"
     }
 }
 
