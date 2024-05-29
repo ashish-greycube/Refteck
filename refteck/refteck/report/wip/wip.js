@@ -48,5 +48,11 @@ frappe.query_reports["WIP"] = {
 				'Closed'
 			],
 		},
+		{
+			"fieldname": "client",
+			"label":__("Client"),
+			"fieldtype": "Link",
+			"options": "Customer",
+		},
 	]
 };

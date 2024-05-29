@@ -120,6 +120,9 @@ def get_conditions(filters):
 	if filters.status:
 		conditions.append({"status":filters.status})
 
+	if filters.client:
+		conditions.append({"party_name":filters.client})
+
 	return conditions
 
 def get_child_conditions(filters, op_parent):
