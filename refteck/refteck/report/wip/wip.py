@@ -201,7 +201,7 @@ def get_data(filters):
 					"status": op.status,
 					"client_name": op.party_name,
 					"oems": brands,
-					"comments": " ".join(comments)
+					"comments": "".join(comments)
 			}
 			data.append(row)
 		
