@@ -22,7 +22,7 @@ def fetch_rate_from_supplier_quotation(self,method):
             for row in sq_items:
                 sq_item_code.append(row.item_code)
                 if r.item_code == row.item_code:
-                    r.rate = row.rate
+                    r.rate = row.net_rate
             if r.item_code not in sq_item_code:
                 found_rate=False
                 frappe.msgprint(_("Row {0}: Value is not changed for {1}").format(r.idx,r.item_code))
