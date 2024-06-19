@@ -4,6 +4,7 @@
 import frappe
 from frappe import msgprint, _
 from datetime import datetime
+from frappe.utils import getdate
 
 def execute(filters=None):
 	columns, data = [], []
@@ -193,7 +194,7 @@ def get_data(filters):
 					"name": sourcing_person,
 					"rfq_no": op.custom_customer_opportunity_reference,
 					"buyer": op.contact_person,
-					"recpt_dt": op.creation,
+					"recpt_dt": getdate(op.creation),
 					"due_date": op.expected_closing,
 					"refteck_ref_no": op.custom_refteck_opportunity_reference,
 					"erp_ref_no": op.name,
