@@ -83,7 +83,7 @@ def get_columns(filters):
 		{
 			"fieldname": "client_name",
 			"label": _("Client Name"),
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"options": "Customer",
 			"width": 180
 		},
@@ -177,6 +177,8 @@ def get_data(filters):
 		# loop unique sourcing persons list for brand & comments 
 		for sourcing_person in unique_sourcing_persons:
 
+			customer_name = frappe.db.get_value('Customer', op.party_name, 'customer_name')
+
 			unique_brands = []
 			comments = []
 			for values in items:
@@ -202,7 +204,7 @@ def get_data(filters):
 					"erp_ref_no": op.name,
 					"territory":op.territory,
 					"status": op.status,
-					"client_name": op.customer_name,
+					"client_name": customer_name,
 					"oems": brands,
 					"comments": "".join(comments)
 			}
