@@ -39,12 +39,12 @@ def get_columns(filters):
 			"label": _("Buyer"),
 			"fieldtype": "Link",
 			"options": "Contact",
-			"width": 150
+			"width": 120
 		},
 		{
 			"fieldname": "recpt_dt",
 			"fieldtype": "Date",
-			"label": _("Recpt DT"),
+			"label": _("Opp DT"),
 			"width": 110
 		},
 		{
@@ -85,7 +85,7 @@ def get_columns(filters):
 			"label": _("Client Name"),
 			"fieldtype": "Link",
 			"options": "Customer",
-			"width": 150
+			"width": 180
 		},
 		{
 			"fieldname": "oems",
@@ -144,8 +144,9 @@ def get_data(filters):
 	
 	opportunity_list = frappe.db.get_list(
 			"Opportunity", fields=["custom_customer_opportunity_reference",
-						"contact_person", 
-						"creation",
+						  "customer_name",
+						"contact_display", 
+						"transaction_date",
 						"expected_closing", 
 						"custom_refteck_opportunity_reference",
 						"name",
@@ -175,6 +176,7 @@ def get_data(filters):
 		
 		# loop unique sourcing persons list for brand & comments 
 		for sourcing_person in unique_sourcing_persons:
+
 			unique_brands = []
 			comments = []
 			for values in items:
@@ -192,15 +194,15 @@ def get_data(filters):
 
 			row = {
 					"name": sourcing_person,
-					"rfq_no": op.custom_customer_opportunity_reference,
-					"buyer": op.contact_person,
-					"recpt_dt": getdate(op.creation),
+					"rfq_no": op.custom_customer_opportunity_reference ,
+					"buyer": op.contact_display,
+					"recpt_dt": op.transaction_date,
 					"due_date": op.expected_closing,
 					"refteck_ref_no": op.custom_refteck_opportunity_reference,
 					"erp_ref_no": op.name,
 					"territory":op.territory,
 					"status": op.status,
-					"client_name": op.party_name,
+					"client_name": op.customer_name,
 					"oems": brands,
 					"comments": "".join(comments)
 			}
