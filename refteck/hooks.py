@@ -146,6 +146,9 @@ doc_events = {
     },
     "Purchase Receipt":{
         "before_validate": "refteck.api.validation_for_supplier"
+    },
+    "Appraisal":{
+        "after_insert": "refteck.api.share_appraisal_to_employee_from_appraisal"
     }
 }
 

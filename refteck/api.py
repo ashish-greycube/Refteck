@@ -3,6 +3,7 @@ import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.utils import flt
+from frappe.share import add
 
 def set_warehouse_in_child_table(self,method):
     if self.set_warehouse_cf and len(self.get('items'))>0:
@@ -50,3 +51,20 @@ def set_common_brands(self,method):
         frappe.msgprint(_("Common brands field is updated based on item brands"),alert=True)
     else:
         self.common_brands_in_item_cf = ''
+
+def share_appraisal_to_employee_from_appraisal(self,method):
+    report_to_employee_id = frappe.db.get_value("Employee",self.employee,"reports_to")
+    if report_to_employee_id == None or report_to_employee_id == "":
+        frappe.msgprint(_("Appraisal is not share with any user as no employee found for report in {0}").format(self.employee),alert=1)
+    else :
+        user_id = frappe.db.get_value("Employee",report_to_employee_id,"user_id")
+        if user_id == "" or user_id == None:
+            frappe.msgprint(_("Appriasal is not share with any user as there is no user id found in {0}").format(report_to_employee_id),alert=1)
+        else :
+            shared_with_user=add(self.doctype, self.name, user=user_id, read=1, write=1, submit=1)
+            if shared_with_user:
+                    frappe.msgprint(
+                        _("Appraisal {0} is shared with {1} user").format(self.name,user_id),
+                        alert=1,
+                    )
+        
