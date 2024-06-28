@@ -55,11 +55,11 @@ def set_common_brands(self,method):
 def share_appraisal_to_employee_from_appraisal(self,method):
     report_to_employee_id = frappe.db.get_value("Employee",self.employee,"reports_to")
     if report_to_employee_id == None or report_to_employee_id == "":
-        frappe.msgprint(_("Appraisal is not share with any user as no employee found for report in {0}").format(self.employee),alert=1)
+        frappe.msgprint(_("Appraisal is not shared with any user as no employee found for report to {0}").format(self.employee),alert=1)
     else :
         user_id = frappe.db.get_value("Employee",report_to_employee_id,"user_id")
         if user_id == "" or user_id == None:
-            frappe.msgprint(_("Appriasal is not share with any user as there is no user id found in {0}").format(report_to_employee_id),alert=1)
+            frappe.msgprint(_("Appriasal is not shared with any user as there is no user id found in {0}").format(report_to_employee_id),alert=1)
         else :
             shared_with_user=add(self.doctype, self.name, user=user_id, read=1, write=1, submit=1)
             if shared_with_user:
