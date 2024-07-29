@@ -103,7 +103,7 @@ def get_data(filters):
 					  customer as customer,
 					  custom_airway_bill_date as awb_date, posting_date as invoice_date, due_date as due_date, grand_total as invoice_amount
 					  FROM `tabSales Invoice` 
-					  WHERE outstanding_amount > 0
+					  WHERE outstanding_amount > 0 and docstatus = 1
 					  {0}
 					 """.format(conditions), filters, as_dict=1)
 	
@@ -144,6 +144,6 @@ def get_data(filters):
 	# 	}
 	# 	data.append(row)
 
-	print(data)
+	# print(data)
 
 	return data
