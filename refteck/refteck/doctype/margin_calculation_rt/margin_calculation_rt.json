@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-08 10:08:44.432586",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sap_code",
+  "uom",
+  "qty",
+  "sq_price",
+  "buying_value",
+  "offer_price_without_freight",
+  "other_charges",
+  "offer_price_with_charges",
+  "offer_value_with_charges",
+  "material_margin",
+  "margin",
+  "supplier_quotation",
+  "item_ref"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "sap_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SAP Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sq_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "SQ Price"
+  },
+  {
+   "columns": 1,
+   "fieldname": "buying_value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Buying Value"
+  },
+  {
+   "columns": 1,
+   "fieldname": "offer_price_without_freight",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Offer Price without freight"
+  },
+  {
+   "columns": 1,
+   "fieldname": "other_charges",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Other Charges"
+  },
+  {
+   "columns": 1,
+   "fieldname": "offer_price_with_charges",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Offer Price with charges"
+  },
+  {
+   "columns": 1,
+   "fieldname": "offer_value_with_charges",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Offer Value with Charges"
+  },
+  {
+   "columns": 1,
+   "fieldname": "material_margin",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Material Margin"
+  },
+  {
+   "columns": 1,
+   "fieldname": "margin",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Margin"
+  },
+  {
+   "fieldname": "supplier_quotation",
+   "fieldtype": "Data",
+   "label": "Supplier Quotation"
+  },
+  {
+   "fieldname": "item_ref",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Item Ref"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-24 04:54:02.996932",
+ "modified_by": "Administrator",
+ "module": "Refteck",
+ "name": "Margin Calculation RT",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

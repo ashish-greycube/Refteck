@@ -1,0 +1,45 @@
+<h4>{{pervious_qo}}</h4>
+
+<div>
+    {% if pervious_qo | length > 0 %}
+        {% for name in pervious_qo %} <br>
+        {% set qo = frappe.get_doc('Quotation', name) %}
+        <h4>{{qo.name}}</h4>
+        <table border="1">
+            <thead>
+                <th>SAP CODE</th>
+                <th>UOM</th>
+                <th>QTY</th>
+                <th>Quote</th>
+                <th>BUYING VALUE</th>
+                <th>OFFER VALUE without freight</th>
+                <th>Freight (EA)</th>
+                <th>Final Offer value</th>
+                <th>Extended</th>
+                <th>Material Margin</th>
+                <th>MARGIN</th>
+                <th>Weight in KGs</th>
+            </thead>
+            {% for margin in qo.custom_margin_calculation%}
+        <tbody>
+            <tr>
+                <td>{{ margin.sap_code }} </td>
+                <td> {{ margin.uom }}</td>
+                <td> {{ margin.qty }}</td>
+                <td> {{ margin.sq_price }}</td>
+                <td> {{ margin.buying_value }}</td>
+                <td> {{ margin.offer_price_without_freight }}</td>
+                <td> {{ margin.other_charges}}</td>
+                <td> {{ margin.offer_price_with_charges}}</td>
+                <td> {{ margin.offer_value_with_charges}}</td>
+                <td>{{ margin.material_margin}}</td>
+                <td>{{margin.margin}}</td>
+                <td></td>
+            </tr>
+        </tbody>  
+    </table>
+    {% endfor %}
+    {% endfor %}
+    {% endif %}
+
+</div>

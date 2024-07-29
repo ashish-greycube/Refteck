@@ -6,65 +6,164 @@ from frappe.utils import flt
 from frappe.share import add
 
 def set_warehouse_in_child_table(self,method):
-    if self.set_warehouse_cf and len(self.get('items'))>0:
-        for row in self.get('items'):
-            row.warehouse = self.set_warehouse_cf
-        frappe.msgprint(_("Item Warehouse {0} is set in all rows of item table").format(self.set_warehouse_cf), alert=True)
+	if self.set_warehouse_cf and len(self.get('items'))>0:
+		for row in self.get('items'):
+			row.warehouse = self.set_warehouse_cf
+		frappe.msgprint(_("Item Warehouse {0} is set in all rows of item table").format(self.set_warehouse_cf), alert=True)
 
 def fetch_rate_from_supplier_quotation(self,method):
-    if self.custom_supplier_quotation:
-        sq_name = self.custom_supplier_quotation
-        sq = frappe.get_doc("Supplier Quotation",sq_name)
-        sq_items = sq.get("items")
-        po_item = self.get("items")
-        sq_item_code = []
-        found_rate=True
-        for r in po_item:
-            for row in sq_items:
-                sq_item_code.append(row.item_code)
-                if r.item_code == row.item_code:
-                    r.rate = row.rate
-            if r.item_code not in sq_item_code:
-                found_rate=False
-                frappe.msgprint(_("Row {0}: Value is not changed for {1}").format(r.idx,r.item_code))
-        if found_rate==True:
-            frappe.msgprint(_("All item's rate are changed successfully "))   
-                
+	if self.custom_supplier_quotation:
+		sq_name = self.custom_supplier_quotation
+		sq = frappe.get_doc("Supplier Quotation",sq_name)
+		sq_items = sq.get("items")
+		po_item = self.get("items")
+		sq_item_code = []
+		found_rate=True
+		for r in po_item:
+			for row in sq_items:
+				sq_item_code.append(row.item_code)
+				if r.item_code == row.item_code:
+					r.rate = row.rate
+			if r.item_code not in sq_item_code:
+				found_rate=False
+				frappe.msgprint(_("Row {0}: Value is not changed for {1}").format(r.idx,r.item_code))
+		if found_rate==True:
+			frappe.msgprint(_("All item's rate are changed successfully "))   
+				
 def validation_for_supplier(self,method):
-    po_supplier = self.supplier
-    supplier = frappe.get_doc("Supplier",po_supplier)
-    if supplier.is_approved_for_purchase_cf == 1:
-        pass
-    else :
-        frappe.throw(_('<a href="/app/supplier/{0}" >{0}</a>'+" Supplier is not valid for {1} ").format(po_supplier,self.doctype))
-    
+	po_supplier = self.supplier
+	supplier = frappe.get_doc("Supplier",po_supplier)
+	if supplier.is_approved_for_purchase_cf == 1:
+		pass
+	else :
+		frappe.throw(_('<a href="/app/supplier/{0}" >{0}</a>'+" Supplier is not valid for {1} ").format(po_supplier,self.doctype))
+	
 def set_common_brands(self,method):
-    items = self.get("items")
-    item_brands = []
-    for i in items:
-        if i.brand:
-            if i.brand not in item_brands:
-                item_brands.append(i.brand)
-    if len(item_brands) > 0:
-        common_brand = ", ".join(str(elem) for elem in item_brands)
-        self.common_brands_in_item_cf = common_brand
-        frappe.msgprint(_("Common brands field is updated based on item brands"),alert=True)
-    else:
-        self.common_brands_in_item_cf = ''
+	items = self.get("items")
+	item_brands = []
+	for i in items:
+		if i.brand:
+			if i.brand not in item_brands:
+				item_brands.append(i.brand)
+	if len(item_brands) > 0:
+		common_brand = ", ".join(str(elem) for elem in item_brands)
+		self.common_brands_in_item_cf = common_brand
+		frappe.msgprint(_("Common brands field is updated based on item brands"),alert=True)
+	else:
+		self.common_brands_in_item_cf = ''
 
 def share_appraisal_to_employee_from_appraisal(self,method):
-    report_to_employee_id = frappe.db.get_value("Employee",self.employee,"reports_to")
-    if report_to_employee_id == None or report_to_employee_id == "":
-        frappe.msgprint(_("Appraisal is not shared with any user as no employee found for report to {0}").format(self.employee),alert=1)
-    else :
-        user_id = frappe.db.get_value("Employee",report_to_employee_id,"user_id")
-        if user_id == "" or user_id == None:
-            frappe.msgprint(_("Appriasal is not shared with any user as there is no user id found in {0}").format(report_to_employee_id),alert=1)
-        else :
-            shared_with_user=add(self.doctype, self.name, user=user_id, read=1, write=1, submit=1)
-            if shared_with_user:
-                    frappe.msgprint(
-                        _("Appraisal {0} is shared with {1} user").format(self.name,user_id),
-                        alert=1,
-                    )
-        
+	report_to_employee_id = frappe.db.get_value("Employee",self.employee,"reports_to")
+	if report_to_employee_id == None or report_to_employee_id == "":
+		frappe.msgprint(_("Appraisal is not shared with any user as no employee found for report to {0}").format(self.employee),alert=1)
+	else :
+		user_id = frappe.db.get_value("Employee",report_to_employee_id,"user_id")
+		if user_id == "" or user_id == None:
+			frappe.msgprint(_("Appriasal is not shared with any user as there is no user id found in {0}").format(report_to_employee_id),alert=1)
+		else :
+			shared_with_user=add(self.doctype, self.name, user=user_id, read=1, write=1, submit=1)
+			if shared_with_user:
+					frappe.msgprint(
+						_("Appraisal {0} is shared with {1} user").format(self.name,user_id),
+						alert=1,
+					)
+
+
+def set_items_for_margin_calculaion(self, method):
+
+	calculated_duplicate_items=[]
+
+	for item in self.items:
+		match_found_in_margin_calculation = False
+		for row in self.custom_margin_calculation:
+			if item.name == row.item_ref:
+				calculated_duplicate_items.append({
+					"sap_code" : item.item_code,
+					"uom" : item.uom,
+					"qty" : item.qty,
+					"sq_price" :item.rate,
+					"supplier_quotation" : item.custom_supplier_quotation,
+					"offer_price_without_freight" : row.offer_price_without_freight,
+					"other_charges" : row.other_charges,
+					"item_ref" : item.name
+				})
+				print(calculated_duplicate_items, '------update existing row')
+				match_found_in_margin_calculation=True
+				break
+		if match_found_in_margin_calculation==False:
+			calculated_duplicate_items.append({
+				"sap_code" : item.item_code,
+				"uom" : item.uom,
+				"qty" : item.qty,
+				"sq_price" :item.rate,
+				"supplier_quotation" : item.custom_supplier_quotation,
+				"offer_price_without_freight" : '',
+				"other_charges" : '',
+				"item_ref" : item.name
+			})
+			print(calculated_duplicate_items,  '------add new row')
+
+	self.custom_margin_calculation = []
+	# self.custom_margin_calculation = calculated_duplicate_items
+	for row in calculated_duplicate_items:
+		print(row.get("sap_code"))
+		self.append('custom_margin_calculation', row)
+
+	for row in self.custom_margin_calculation:
+		row.buying_value = row.qty * row.sq_price
+		row.offer_value_with_charges = row.offer_price_without_freight + row.other_charges
+		row.offer_value_with_charges = row.qty or 0 * row.offer_value_with_charges or 0
+		row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
+		row.margin = (row.offer_price_without_freight or 0  - row.sq_price or 0) * row.qty or 0
+
+
+# original_items=self.items
+# duplicate_items=self.margin...
+# calculated_duplicate_items=[]
+
+# for original in original_items:
+# 	match_found_in_duplicate=False
+# 	for duplicate in duplicate_items:
+# 		if original.name==duplicate.name:
+# 			calculated_duplicate_items.append({})
+# 			match_found_in_duplicate=True
+# 			break
+# 	if match_found_in_duplicate==False:
+# 		calculated_duplicate_items.append({})	
+
+
+# self.margin..=[]
+# self.margin=calculated_duplicate_items
+
+
+# SAL-QTN-2024-00337
+def get_connected_qo(quotation_name):
+	def get_connected(quotation_name):
+		amended_from = frappe.db.get_value('Quotation',quotation_name, 'amended_from')
+		if amended_from !=None:
+			connected_qo_list.append(amended_from)  
+			get_connected(amended_from)     
+		else:
+			return
+			
+	connected_qo_list=[]
+	get_connected(quotation_name)
+	print(connected_qo_list, '----connected_qo_list')
+	return connected_qo_list
+	
+
+def set_previous_quotation_data(self,method):
+		connected_qo = get_connected_qo(self)
+		template_path = "templates/previous_quotation_table.html"
+		html = frappe.render_template(template_path,  dict(pervious_qo=connected_qo))    
+		self.set_onload("custom_html_data", html) 
+
+
+def qo_margin_calculations(self, method):
+	if self.custom_margin_calculation:
+		for row in self.custom_margin_calculation:
+			row.buying_value = row.qty * row.sq_price
+			row.offer_value_with_charges = row.offer_price_without_freight + row.other_charges
+			row.offer_value_with_charges = row.qty or 0 * row.offer_value_with_charges or 0
+			row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
+			row.margin = (row.offer_price_without_freight - row.sq_price) * row.qty

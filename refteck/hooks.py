@@ -32,7 +32,9 @@ doctype_js = {"Purchase Order":"public/js/purchase_order.js",
              "Supplier Quotation":"public/js/supplier_quotation.js",
              "Request for Quotation":"public/js/request_for_quotation.js",
              "Purchase Invoice":"public/js/purchase_invoice.js",
-             "Purchase Receipt":"public/js/purchase_receipt.js"}
+             "Purchase Receipt":"public/js/purchase_receipt.js",
+            #  "Quotation":"public/js/quotation.js"
+             }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -139,7 +141,12 @@ doc_events = {
                        "refteck.api.validation_for_supplier"]
     },
     "Quotation":{
-        "before_validate":"refteck.api.set_common_brands"
+        "before_validate":"refteck.api.set_common_brands",
+        # "validate":[
+        #             # "refteck.api.get_connected_qo", 
+        #             # "refteck.api.qo_margin_calculations",
+        #             "refteck.api.set_items_for_margin_calculaion"],
+        # "onload":"refteck.api.set_previous_quotation_data"
     },
     "Purchase Invoice":{
         "before_validate": "refteck.api.validation_for_supplier"
