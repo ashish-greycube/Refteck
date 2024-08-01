@@ -1,0 +1,68 @@
+
+<h3 class="text-center">Statement Of Account</h3>
+<h4>To : {{customer}} <br>
+Due Date : {{to_date}}</h4>
+
+<table class="table table-bordered" style="width: 35%;">
+    {% for summ in report_summary %}
+    <tr>
+        <td style="border: 1px solid #000; width: 50%"><b>{{summ.label}}</b></td>
+        <td style="border: 1px solid #000; width: 50%">{{ ' %0.2f ' % summ.value | float }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<br><br>
+<table  class="table table-bordered" style="border-top: 1px solid #000;">
+    <thead>
+        <th class="text-center" style="border: 1px solid #000;">Purchase Order Number</th>
+        <th class="text-center" style="border: 1px solid #000;">Client Name</th>
+        <th class="text-center" style="border: 1px solid #000;">Invoice Number</th>
+        <th class="text-center" style="border: 1px solid #000;">Invoice Date</th>
+        <th class="text-center" style="border: 1px solid #000;">AWB Date</th>
+        <th class="text-center" style="border: 1px solid #000;">Due Date</th>
+        <th class="text-center" style="border: 1px solid #000;">Days Late</th>
+        <th class="text-center" style="border: 1px solid #000;">USD</th>
+        <th class="text-center" style="border: 1px solid #000;">GBP</th>
+        <th class="text-center" style="border: 1px solid #000;">EURO</th>
+    </thead>
+    <tbody>
+        
+        {% for si in si_data %}
+        {% if not loop.last%}
+        <tr style="border: 1px solid black;">
+            <td class="text-center" style="border: 1px solid #000;">{{si.purchase_order_number}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{si.client_name}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{si.invoice_number}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{si.invoice_date}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{si.awb_date}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{si.due_date}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{si.days_late}}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{ ' %0.2f ' % si.usd | float }}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{ ' %0.2f ' % si.gbp | float }}</td>
+            <td class="text-center" style="border: 1px solid #000;">{{ ' %0.2f ' % si.euro | float }} </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.purchase_order_number}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.client_name}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.invoice_number}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.invoice_date}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.awb_date}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.due_date}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{si.days_late}}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{ ' %0.2f ' % si.usd | float }}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{ ' %0.2f ' % si.gbp | float }}</b></td>
+            <td class="text-center" style="border: 1px solid #000;"><b>{{ ' %0.2f ' % si.euro | float }} </b></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>    
+</table>
+<br>
+<div>
+    For and on behalf of Refteck Group Companies
+    <br><br>
+    <b>Accounts Department</b>
+</div>
+
+

@@ -136,10 +136,11 @@ def set_items_for_margin_calculaion(self, method):
 # self.margin=calculated_duplicate_items
 
 
-# SAL-QTN-2024-00337
 def get_connected_qo(quotation_name):
 	def get_connected(quotation_name):
+		# print(quotation_name, '--quotation_name')
 		amended_from = frappe.db.get_value('Quotation',quotation_name, 'amended_from')
+		# print(amended_from, '------amended_from')
 		if amended_from !=None:
 			connected_qo_list.append(amended_from)  
 			get_connected(amended_from)     
@@ -148,22 +149,70 @@ def get_connected_qo(quotation_name):
 			
 	connected_qo_list=[]
 	get_connected(quotation_name)
-	print(connected_qo_list, '----connected_qo_list')
+	# print(connected_qo_list, '----connected_qo_list')
 	return connected_qo_list
 	
 
 def set_previous_quotation_data(self,method):
-		connected_qo = get_connected_qo(self)
+		connected_qo = get_connected_qo(self.name)
 		template_path = "templates/previous_quotation_table.html"
-		html = frappe.render_template(template_path,  dict(pervious_qo=connected_qo))    
+		html = frappe.render_template(template_path,  dict(pervious_qo=connected_qo))  
+		# print(html, '---html')  
 		self.set_onload("custom_html_data", html) 
 
 
 def qo_margin_calculations(self, method):
 	if self.custom_margin_calculation:
+		margin_total = 0
+		material_margin_total = 0
 		for row in self.custom_margin_calculation:
-			row.buying_value = row.qty * row.sq_price
-			row.offer_value_with_charges = row.offer_price_without_freight + row.other_charges
-			row.offer_value_with_charges = row.qty or 0 * row.offer_value_with_charges or 0
-			row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
-			row.margin = (row.offer_price_without_freight - row.sq_price) * row.qty
+			row.buying_value = flt((row.qty * row.sq_price),2)
+			
+			row.offer_price_with_charges = flt((row.offer_price_without_freight + row.other_charges),2)
+			# print(row.offer_price_with_charges, '--row.offer_price_with_charges')
+
+			row.offer_value_with_charges = flt(((row.qty or 0) * (row.offer_price_with_charges or 0)),2)
+			# print(row.offer_value_with_charges, '--row.offer_value_with_charges')
+
+			# print(type(row.offer_price_without_freight), type(row.sq_price))
+			row.material_margin = flt((((row.offer_price_without_freight or 0) / row.sq_price) - 1),2)
+			# print(row.material_margin, '---row.material_margin')
+
+			# print(type(row.offer_price_without_freight), 'row.offer_price_without_freight', type(row.sq_price), 'row.sq_price')
+			row.margin = flt(((flt(row.offer_price_without_freight) - row.sq_price) * row.qty),2)
+			# print(row.margin, '---row.margin')
+
+			margin_total = margin_total + row.buying_value
+			material_margin_total = material_margin_total + row.material_margin
+
+		self.custom_margin_total = margin_total
+		self.custom_final_values = flt((self.custom_margin_total 
+								  + self.custom_freight + self.custom_packing 
+								  + self.custom_cipcpt + self.custom_bank_charges),2)
+		self.custom_final_margin = self.custom_final_values - material_margin_total
+		self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
+		print(self.custom_overall_margin, '----self')
+		
+def validate_admin_checklist(self, method):
+	supplier, sq_owner = frappe.db.get_value('Supplier Quotation', self.supplier_quotation, ['supplier','owner'])
+	# print(type(supplier), '---supplier')
+	self.custom_supplier = supplier
+	self.custom_procurement_representative = sq_owner
+	self.custom_offer_prepared_by = self.owner
+	# print(self.contact_person, '---self.contact_person')
+	self.custom_buyer = self.contact_display
+	self.custom_rfq_no = self.custom_customer_opportunity_reference
+	self.custom_offer_payment_terms_ = self.payment_terms_template
+	self.custom_qo_incoterm = self.incoterm
+	self.custom_qo_offer_lead_time = self.custom_lead_time
+	self.custom_qo_validity = self.valid_till
+	
+	# vendor_code = frappe.db.get_value('Customer', self.party_name, 'custom_vendor_code')
+
+	vendor_code = frappe.db.get_value('Customer Vendor Reference', {'parent': self.party_name, 'company': self.company}, ['vendor_code'])
+	self.custom_vendor_code = vendor_code
+	print(vendor_code, '------vendor_code')
+	# for vc in vendor_code:
+	# 	if vc.company == self.company:
+	# 		self.custom_vendor_code = vc.vendor_code
+	# 		break

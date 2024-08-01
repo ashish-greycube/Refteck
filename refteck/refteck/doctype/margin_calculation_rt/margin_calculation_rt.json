@@ -47,56 +47,64 @@
    "fieldname": "sq_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "SQ Price"
+   "label": "SQ Price",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "buying_value",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Buying Value"
+   "label": "Buying Value",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "offer_price_without_freight",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Offer Price without freight"
+   "label": "Offer Price without freight",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "other_charges",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Other Charges"
+   "label": "Other Charges",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "offer_price_with_charges",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Offer Price with charges"
+   "label": "Offer Price with charges",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "offer_value_with_charges",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Offer Value with Charges"
+   "label": "Offer Value with Charges",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "material_margin",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Material Margin"
+   "label": "Material Margin",
+   "precision": "2"
   },
   {
    "columns": 1,
    "fieldname": "margin",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Margin"
+   "label": "Margin",
+   "precision": "2"
   },
   {
    "fieldname": "supplier_quotation",
@@ -113,7 +121,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-24 04:54:02.996932",
+ "modified": "2024-07-30 07:00:03.723478",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "Margin Calculation RT",

@@ -1,3 +1,5 @@
+{% if pervious_qo %}
+
 <h4>{{pervious_qo}}</h4>
 
 <div>
@@ -10,14 +12,14 @@
                 <th>SAP CODE</th>
                 <th>UOM</th>
                 <th>QTY</th>
-                <th>Quote</th>
-                <th>BUYING VALUE</th>
-                <th>OFFER VALUE without freight</th>
-                <th>Freight (EA)</th>
-                <th>Final Offer value</th>
-                <th>Extended</th>
+                <th>SQ price</th>
+                <th>Buying Value</th>
+                <th>Offer Price without freight</th>
+                <th>Other Charges</th>
+                <th>Offer Price with charges</th>
+                <th>Offer Value with Charges</th>
                 <th>Material Margin</th>
-                <th>MARGIN</th>
+                <th>Margin</th>
                 <th>Weight in KGs</th>
             </thead>
             {% for margin in qo.custom_margin_calculation%}
@@ -36,10 +38,91 @@
                 <td>{{margin.margin}}</td>
                 <td></td>
             </tr>
-        </tbody>  
+        </tbody>
+        {% endfor %}  
     </table>
-    {% endfor %}
+<br>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Margin Total: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_margin_total or 0}}
+                </div>
+            </div> 
+        </div>
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Freight: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_freight or 0}}
+                </div>
+            </div> 
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Packing: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_packing or 0}}
+                </div>
+            </div> 
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>CIP/CPT: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_cipcpt or 0}}
+                </div>
+            </div> 
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Bank Charges: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_bank_charges or 0}}
+                </div>
+            </div> 
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Final Values: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_final_values or 0}}
+                </div>
+            </div> 
+        </div>
+    </div>
+<br>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Final Margin: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_final_margin or 0}}
+                </div>
+            </div> 
+        </div>
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Overall Margin: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_overall_margin or 0}}
+                </div>
+            </div> 
+        </div>
+    </div>
+   
     {% endfor %}
     {% endif %}
 
 </div>
+
+{% endif %}

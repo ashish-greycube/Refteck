@@ -3,19 +3,22 @@
 
 import frappe
 from frappe import msgprint, _
-from frappe.utils import date_diff, today, getdate
+from frappe.utils import date_diff, today, getdate, flt
+from frappe.core.doctype.communication.email import make
+import json
 
 def execute(filters=None):
 	columns, data = [], []
 
 	columns = get_columns(filters)
-	data = get_data(filters)
+	data, report_summary = get_data(filters)
 
 	if not data:
 		msgprint(_("No records found"))
 		return columns, data
 		
-	return columns, data
+	# print(data, '---data')
+	return columns, data, None, None, report_summary
 
 
 def get_columns(filters):
@@ -28,10 +31,10 @@ def get_columns(filters):
 		},
 		{
 			"fieldname": "client_name",
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"label": _("Client Name"),
-			"options": "Contact",
-			"width": 170
+			# "options": "Contact",
+			"width": 120
 		},
 		{
 			"fieldname": "customer",
@@ -42,11 +45,19 @@ def get_columns(filters):
 			"hidden": 1
 		},
 		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": _("Company"),
+			"options": "Company",
+			"width": 170,
+			"hidden": 1
+		},
+		{
 			"fieldname": "invoice_number",
 			"fieldtype": "Link",
 			"label": _("Invoice Number"),
 			"options": "Sales Invoice",
-			"width": 170
+			"width": 150
 		},
 		{
 			"fieldname": "invoice_date",
@@ -69,14 +80,52 @@ def get_columns(filters):
 		{
 			"fieldname": "days_late",
 			"fieldtype": "Data",
-			"label": _("Days Late"),   # Today - SI.due_date
+			"label": _("Days Late"), 
+			"width": 90
+		},
+		{
+			"fieldname": "usd",
+			"fieldtype": "Float",
+			"label": _("USD"), 
+			"precision": 2,
+			"width": 100
+		},
+		{
+			"fieldname": "gbp",
+			"fieldtype": "Float",
+			"label": _("GBP"),
+			"precision": 2, 
+			"width": 100
+		},
+		{
+			"fieldname": "euro",
+			"fieldtype": "Float",
+			"label": _("EURO"), 
+			"precision": 2,
 			"width": 100
 		},
 		{
 			"fieldname": "invoice_amount",
-			"fieldtype": "Data", 
+			"fieldtype": "Float", 
 			"label": _("Invoice Amount"),
-			"width": 150
+			"precision": 2,
+			"width": 120
+		},
+		{
+			"fieldname": "amount_paid",
+			"fieldtype": "Float", 
+			"label": _("Amount Paid"),
+			"precision": 2,
+			"width": 120,
+			# "hidden":1
+		},
+		{
+			"fieldname": "invoice_outstanding",
+			"fieldtype": "Float", 
+			"label": _("Invoice Outstanding"),
+			"precision": 2,
+			"width": 120,
+			# "hidden":1
 		},
 		]
 	return columns
@@ -84,13 +133,19 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions = ""
 
-	if filters.get("to_date") >= filters.get("from_date"):
-			conditions += " and posting_date between '{0}' and '{1}'".format(filters.get("from_date"),filters.get("to_date"))
-	else:
-		frappe.throw(_("To Date should be greater then From Date"))
+	# if filters.get("to_date") >= filters.get("from_date"):
+	# 		conditions += " and posting_date between '{0}' and '{1}'".format(filters.get("from_date"),filters.get("to_date"))
+	# else:
+	# 	frappe.throw(_("To Date should be greater then From Date"))
+
+	if filters.get("to_date"):
+		conditions += " and posting_date <= %(to_date)s"
 
 	if filters.customer:
 		conditions += " and customer = %(customer)s"
+	
+	if filters.company:
+		conditions += " and company = %(company)s"
 	
 	return conditions
 
@@ -101,49 +156,83 @@ def get_data(filters):
 
 	data = frappe.db.sql(""" SELECT name as invoice_number, po_no as purchase_order_number, contact_display as client_name,
 					  customer as customer,
-					  custom_airway_bill_date as awb_date, posting_date as invoice_date, due_date as due_date, grand_total as invoice_amount
+					  custom_airway_bill_date as awb_date, posting_date as invoice_date, due_date as due_date, 
+					  if(currency='USD', grand_total, '-') as usd,
+					  if(currency='GBP', grand_total, '-') as gbp,
+					  if(currency='EUR', grand_total, '-') as euro,
+					  grand_total as invoice_amount,
+					  outstanding_amount as invoice_outstanding
 					  FROM `tabSales Invoice` 
-					  WHERE outstanding_amount > 0 and docstatus = 1
+					  WHERE  outstanding_amount > 0 and docstatus = 1
 					  {0}
 					 """.format(conditions), filters, as_dict=1)
 	
 	to_date = getdate(today())
+	total_invoice_amount = 0
+	balance_due = 0
+	amount_paid = 0
 	for row in data:
 		row['days_late'] =  date_diff(to_date, row['due_date'])
+		row['amount_paid'] = flt((row['invoice_amount'] - row['invoice_outstanding']),2)
+		total_invoice_amount = flt((total_invoice_amount + row['invoice_amount']),2)
+		balance_due = flt((balance_due + row['invoice_outstanding']),2)
+		amount_paid = flt((amount_paid + row['amount_paid']),2)
 
-	# data = []
+	report_summary=[
+		{'label':'Total Invoice Amount','value':total_invoice_amount},
+		{'label':'Amount Paid','value':amount_paid},
+		{'label':'Balance Due','value':balance_due}		
+		]
+
+	return data, report_summary
+
+@frappe.whitelist()
+def send_email_to_customer(to_date, customer, data, report_summary):
+	STANDARD_USERS = ("Guest", "Administrator")
+
+	contact_details = frappe.db.get_all('Dynamic Link', 
+									 filters={'link_doctype': 'Customer', 'link_name': ['=', customer], 'parenttype': 'Contact'}, 
+									 fields=['parent'])
 	
+	contact_emails = []
+	for email in contact_details:
+		# print(email.parent, '---------parent')
+		email_id = frappe.db.get_value('Contact', email.parent, 'email_id')
+		if email_id:
+			contact_emails.append(email_id)
 
+	# print(contact_emails, '----contact_emails')
 
+	if len(contact_emails) > 0:
+		recipients_emails = ", ".join((ele if ele!=None else '') for ele in contact_emails)
+	else:
+		frappe.throw(_('No primary contact found'))
 
-	# si_list = frappe.db.get_list('Sales Invoice',
-	# 			fields=['name', 'po_no', 'contact_display', 'posting_date', 'posting_date', 'due_date', 'grand_total'],
-	# 			filters=conditions,
-	# 			# group_by='contact_display'
-	# )
-	
-	# for si in si_list:
-	# 	to_date = getdate(today())
-	# 	# print(to_date, '---todate')
-	# 	# print(type(to_date))
-	# 	# print(type(si.due_date) ,'----------si.due_date')
-	# 	# print(date_diff(to_date, si.due_date) ,'------days', si.name)
+	sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
+	recipients = recipients_emails
+	subject = "Statement Of Account" + " - " + customer + " till " + to_date
 
-	# 	days_late = date_diff(to_date, si.due_date)
-	# 	# print(type(days_late), '-----days_late')
+	si_data = data = json.loads(data)
+	report_summary = json.loads(report_summary)
 
-	# 	row = {
-	# 			"purchase_order_number": si.po_no,
-	# 			"client_name":  si.contact_display,
-	# 			"invoice_number":  si.name,
-	# 			"invoice_date":  si.posting_date,
-	# 			"awb_date":  si.custom_airway_bill_date,
-	# 			"due_date":  si.due_date,
-	# 			"days_late":   days_late,
-	# 			"invoice_amount":  si.grand_total,
-	# 	}
-	# 	data.append(row)
+	template_path = "templates/statement_of_account_email.html"
+	email_template = frappe.render_template(template_path,  dict(si_data=si_data, customer=customer, to_date=to_date, report_summary=report_summary)) 
+	message = email_template
 
-	# print(data)
+	# print(message)
 
-	return data
+	send_email(recipients, sender, subject, message)
+
+def send_email(recipients, sender, subject, message):
+	make(
+		recipients=recipients,
+		sender=sender,
+		subject=subject,
+		content=message,	
+		attachments=None,
+		send_email=True,
+	)["name"]
+
+	# print(make)
+	frappe.msgprint(_("Email Sent to Users {0}").format(recipients))	
+

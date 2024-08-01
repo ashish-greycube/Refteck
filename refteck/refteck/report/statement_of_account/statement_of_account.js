@@ -3,13 +3,13 @@
 
 frappe.query_reports["Statement of Account"] = {
 	"filters": [
-		{
-			"fieldname": "from_date",
-			"label":__("From Date"),
-			"fieldtype": "Date",
-            "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
-			"reqd": 1
-		},
+		// {
+		// 	"fieldname": "from_date",
+		// 	"label":__("From Date"),
+		// 	"fieldtype": "Date",
+        //     "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
+		// 	"reqd": 1
+		// },
 		{
 			"fieldname": "to_date",
 			"label":__("To Date"),
@@ -22,6 +22,44 @@ frappe.query_reports["Statement of Account"] = {
 			"label":__("Customer"),
 			"fieldtype": "Link",
 			"options": "Customer",
+			"reqd": 1
 		},
-	]
+		{
+			"fieldname": "company",
+			"label":__("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+		},
+	],
+	onload: create_send_email_button,
 };
+
+function create_send_email_button(report) {
+    report.page.add_inner_button(
+		__("Send Email"),
+        () => send_email_to_customer(report)
+    );
+}
+// report.get_values()
+
+
+function send_email_to_customer(report) {
+	frappe.call({
+        method: "refteck.refteck.report.statement_of_account.statement_of_account.send_email_to_customer",
+        args: {
+			to_date: report.get_values().to_date,
+            // company: report.get_values().company,
+			customer : report.get_values().customer,
+			data : report.data,
+			report_summary : report.raw_data.report_summary 
+        },
+        callback: function (r) {
+			console.log(r)
+		}	
+	})	
+	console.log(report.get_values(), '--------get_value')
+	console.log(report.data, '--------get_value')
+	console.log(report.raw_data.report_summary, '--------get_value')
+	console.log(report.get_values().company, '--------company')
+	// console.log(report.columns)
+}
