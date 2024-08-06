@@ -146,7 +146,8 @@ doc_events = {
                     # "refteck.api.get_connected_qo", 
                     "refteck.api.set_items_for_margin_calculaion",
                     "refteck.api.qo_margin_calculations",
-                    "refteck.api.validate_admin_checklist"],
+                    # "refteck.api.validate_admin_checklist"
+                    ],
         "onload":"refteck.api.set_previous_quotation_data"
     },
     "Purchase Invoice":{

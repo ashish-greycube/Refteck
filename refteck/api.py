@@ -113,7 +113,8 @@ def set_items_for_margin_calculaion(self, method):
 		row.buying_value = row.qty * row.sq_price
 		row.offer_value_with_charges = row.offer_price_without_freight + row.other_charges
 		row.offer_value_with_charges = row.qty or 0 * row.offer_value_with_charges or 0
-		row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
+		if row.sq_price and row.sq_price>0:
+			row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
 		row.margin = (row.offer_price_without_freight or 0  - row.sq_price or 0) * row.qty or 0
 
 
@@ -175,32 +176,37 @@ def qo_margin_calculations(self, method):
 			# print(row.offer_value_with_charges, '--row.offer_value_with_charges')
 
 			# print(type(row.offer_price_without_freight), type(row.sq_price))
-			row.material_margin = flt((((row.offer_price_without_freight or 0) / row.sq_price) - 1),2)
+			if row.sq_price and row.sq_price>0:
+				row.material_margin = flt((((row.offer_price_without_freight or 0) / row.sq_price) - 1),2)
 			# print(row.material_margin, '---row.material_margin')
 
 			# print(type(row.offer_price_without_freight), 'row.offer_price_without_freight', type(row.sq_price), 'row.sq_price')
 			row.margin = flt(((flt(row.offer_price_without_freight) - row.sq_price) * row.qty),2)
 			# print(row.margin, '---row.margin')
 
-			margin_total = margin_total + row.buying_value
-			material_margin_total = material_margin_total + row.material_margin
+			margin_total = margin_total + (row.buying_value or 0)
+			material_margin_total = material_margin_total + (row.material_margin or 0)
 
 		self.custom_margin_total = margin_total
 		self.custom_final_values = flt((self.custom_margin_total 
 								  + self.custom_freight + self.custom_packing 
 								  + self.custom_cipcpt + self.custom_bank_charges),2)
 		self.custom_final_margin = self.custom_final_values - material_margin_total
-		self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
+		if  self.custom_final_values and  self.custom_final_values>0:
+			self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
 		print(self.custom_overall_margin, '----self')
 		
 def validate_admin_checklist(self, method):
-	supplier, sq_owner = frappe.db.get_value('Supplier Quotation', self.supplier_quotation, ['supplier','owner'])
+	sq_values = frappe.db.get_value('Supplier Quotation', self.supplier_quotation, ['supplier','owner'],as_dict=1)
+	supplier=sq_values.supplier
+	sq_owner=sq_values.owner
 	# print(type(supplier), '---supplier')
 	self.custom_supplier = supplier
 	self.custom_procurement_representative = sq_owner
 	self.custom_offer_prepared_by = self.owner
 	# print(self.contact_person, '---self.contact_person')
-	self.custom_buyer = self.contact_display
+	# fix this
+	# self.custom_buyer = self.contact_display
 	self.custom_rfq_no = self.custom_customer_opportunity_reference
 	self.custom_offer_payment_terms_ = self.payment_terms_template
 	self.custom_qo_incoterm = self.incoterm

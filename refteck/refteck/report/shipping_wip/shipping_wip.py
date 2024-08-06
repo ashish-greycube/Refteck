@@ -255,5 +255,6 @@ def get_data(filters):
 			report_summary=[
 				{'label':_('<h3 style="color: #6F4E37">Order Status is Pipeline</h3>')}	
 				]
-	
+		else:
+			report_summary=""	
 	return data, report_summary
