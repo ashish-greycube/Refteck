@@ -18,18 +18,18 @@ frappe.query_reports["Statement of Account"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname": "customer",
-			"label":__("Customer"),
-			"fieldtype": "Link",
-			"options": "Customer",
-			"reqd": 1
-		},
-		{
 			"fieldname": "company",
 			"label":__("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 		},
+		{
+			"fieldname": "customer",
+			"label":__("Customer"),
+			"fieldtype": "Link",
+			"options": "Customer",
+			"reqd": 1
+		}
 	],
 	onload: create_send_email_button,
 };
@@ -48,7 +48,7 @@ function send_email_to_customer(report) {
         method: "refteck.refteck.report.statement_of_account.statement_of_account.send_email_to_customer",
         args: {
 			to_date: report.get_values().to_date,
-            company: report.get_values().company,
+            company: report.get_values().company || '',
 			customer : report.get_values().customer,
 			data : report.data,
 			report_summary : report.raw_data.report_summary,

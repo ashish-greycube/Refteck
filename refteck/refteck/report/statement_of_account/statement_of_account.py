@@ -80,12 +80,6 @@ def get_columns(filters):
 			"width": 110
 		},
 		{
-			"fieldname": "days_late",
-			"fieldtype": "Data",
-			"label": _("Days Late"), 
-			"width": 90
-		},
-		{
 			"fieldname": "usd",
 			"fieldtype": "Float",
 			"label": _("USD"), 
@@ -119,7 +113,6 @@ def get_columns(filters):
 			"label": _("Amount Paid"),
 			"precision": 2,
 			"width": 120,
-			# "hidden":1
 		},
 		{
 			"fieldname": "invoice_outstanding",
@@ -127,8 +120,13 @@ def get_columns(filters):
 			"label": _("Invoice Outstanding"),
 			"precision": 2,
 			"width": 120,
-			# "hidden":1
 		},
+		{
+			"fieldname": "days_late",
+			"fieldtype": "Data",
+			"label": _("Days Late"), 
+			"width": 90
+		}		
 		]
 	return columns
 
@@ -189,19 +187,11 @@ def get_data(filters):
 	return data, report_summary
 
 def get_excel_of_report(columns, data):
-	# report = frappe.get_doc("Report", self.report)
-	# print(report, '-----report')
-	# return report
-
 	report_data = frappe._dict()
 	report_data["columns"] = columns
 	report_data["result"] = data
-
-	xlsx_data, column_widths = build_xlsx_data(report_data, [], 1, ignore_visible_idx=True)
-	xlsx_file = make_xlsx(xlsx_data, "Auto Email Report", column_widths=column_widths)
-	print(report_data, '---report_data')
-	print(xlsx_data, '--xlsx_data')
-	print(xlsx_file, '---xlsx_file')
+	xlsx_data, column_widths = build_xlsx_data(report_data, [], 1,include_filters=False ,ignore_visible_idx=True)
+	xlsx_file = make_xlsx(xlsx_data, "Statement Of Accounts", column_widths=column_widths)
 	return xlsx_file.getvalue()
 	
 
@@ -212,18 +202,11 @@ def send_email_to_customer(to_date, customer, company, data, columns, report_sum
 	report_summary = json.loads(report_summary)
 	columns = json.loads(columns)
 
-	# from refteck.refteck.report.statement_of_account.statement_of_account import get_excel_of_report
-	# excel_of_report = get_excel_of_report(columns, data)
+	excel_of_report = get_excel_of_report(columns, data)
+	attachments = excel_of_report
+	file_name="SOA_{0}_from_{1}_{2}.xls".format(customer,to_date,frappe.generate_hash()[:2])
+	attachments = [{"fname": file_name, "fcontent": excel_of_report}]
 
-	# attachments = excel_of_report
-
-	# filters = frappe._dict({
-	# 	'to_date':to_date,
-	# 	'customer':customer,
-	# 	'company': company
-	# })
-	# report_data = execute(filters=filters)
-	# print(report_data, '---report_data')
 
 	STANDARD_USERS = ("Guest", "Administrator")
 
@@ -255,7 +238,6 @@ def send_email_to_customer(to_date, customer, company, data, columns, report_sum
 	email_template = frappe.render_template(template_path,  dict(si_data=si_data, customer=customer, to_date=to_date, report_summary=report_summary)) 
 	message = email_template	
 
-	# print(message)
 
 	send_email(recipients, sender, subject, message, attachments)
 
@@ -265,11 +247,10 @@ def send_email(recipients, sender, subject, message, attachments):
 		sender=sender,
 		subject=subject,
 		content=message,
-		# attachments=attachments,	
-		attachments=None,
+		attachments=attachments,	
+		# attachments=None,
 		send_email=True,
 	)["name"]
 
-	# print(make)
 	frappe.msgprint(_("Email Sent to Users {0}").format(recipients))	
 
