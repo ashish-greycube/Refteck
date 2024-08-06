@@ -11,13 +11,13 @@ def execute(filters=None):
 	columns, data = [], []
 
 	columns = get_columns(filters)
-	data = get_data(filters)
+	data, report_summary = get_data(filters)
 
 	if not data:
 		msgprint(_("No records found"))
 		return columns, data
 	
-	return columns, data
+	return columns, data, None, None, report_summary
 
 def get_columns(filters):
 	columns = [
@@ -151,6 +151,12 @@ def get_conditions(filters):
 	if filters.client:
 		conditions.append({"customer_name":filters.client})
 
+	if filters.order_status == "Open":
+		conditions.append({"custom_is_order_ready": 0})
+
+	if filters.order_status == "Pipeline":
+		conditions.append({"custom_is_order_ready": 1})
+
 	conditions.append({"per_delivered": ['<', 100], "status": ['!=', "Closed"]})
 
 	return conditions
@@ -170,7 +176,8 @@ def get_data(filters):
 						"delivery_date", 
 						"company",
 						"grand_total",
-						"currency"
+						"currency",
+						"custom_is_order_ready"
 						],
 						filters=conditions,)
 	
@@ -239,5 +246,14 @@ def get_data(filters):
 							"comments": po.custom_shipping_remarks
 						}
 					data.append(row)
+
+		if so.custom_is_order_ready == 0:
+			report_summary=[
+				{'label':_('<h3 style="color:#A02334">Order Status is Open</h3>')}
+				]
+		elif so.custom_is_order_ready == 1:
+			report_summary=[
+				{'label':_('<h3 style="color: #6F4E37">Order Status is Pipeline</h3>')}	
+				]
 	
-	return data
+	return data, report_summary

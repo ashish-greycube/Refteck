@@ -48,18 +48,14 @@ function send_email_to_customer(report) {
         method: "refteck.refteck.report.statement_of_account.statement_of_account.send_email_to_customer",
         args: {
 			to_date: report.get_values().to_date,
-            // company: report.get_values().company,
+            company: report.get_values().company,
 			customer : report.get_values().customer,
 			data : report.data,
-			report_summary : report.raw_data.report_summary 
+			report_summary : report.raw_data.report_summary,
+			columns : report.columns 
         },
         callback: function (r) {
 			console.log(r)
 		}	
 	})	
-	console.log(report.get_values(), '--------get_value')
-	console.log(report.data, '--------get_value')
-	console.log(report.raw_data.report_summary, '--------get_value')
-	console.log(report.get_values().company, '--------company')
-	// console.log(report.columns)
 }

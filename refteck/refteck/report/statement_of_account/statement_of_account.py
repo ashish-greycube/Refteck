@@ -5,6 +5,8 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import date_diff, today, getdate, flt
 from frappe.core.doctype.communication.email import make
+from frappe.desk.query_report import build_xlsx_data
+from frappe.utils.xlsxutils import make_xlsx
 import json
 
 def execute(filters=None):
@@ -186,8 +188,43 @@ def get_data(filters):
 
 	return data, report_summary
 
+def get_excel_of_report(columns, data):
+	# report = frappe.get_doc("Report", self.report)
+	# print(report, '-----report')
+	# return report
+
+	report_data = frappe._dict()
+	report_data["columns"] = columns
+	report_data["result"] = data
+
+	xlsx_data, column_widths = build_xlsx_data(report_data, [], 1, ignore_visible_idx=True)
+	xlsx_file = make_xlsx(xlsx_data, "Auto Email Report", column_widths=column_widths)
+	print(report_data, '---report_data')
+	print(xlsx_data, '--xlsx_data')
+	print(xlsx_file, '---xlsx_file')
+	return xlsx_file.getvalue()
+	
+
 @frappe.whitelist()
-def send_email_to_customer(to_date, customer, data, report_summary):
+def send_email_to_customer(to_date, customer, company, data, columns, report_summary):
+
+	si_data = data = json.loads(data)
+	report_summary = json.loads(report_summary)
+	columns = json.loads(columns)
+
+	# from refteck.refteck.report.statement_of_account.statement_of_account import get_excel_of_report
+	# excel_of_report = get_excel_of_report(columns, data)
+
+	# attachments = excel_of_report
+
+	# filters = frappe._dict({
+	# 	'to_date':to_date,
+	# 	'customer':customer,
+	# 	'company': company
+	# })
+	# report_data = execute(filters=filters)
+	# print(report_data, '---report_data')
+
 	STANDARD_USERS = ("Guest", "Administrator")
 
 	contact_details = frappe.db.get_all('Dynamic Link', 
@@ -212,23 +249,23 @@ def send_email_to_customer(to_date, customer, data, report_summary):
 	recipients = recipients_emails
 	subject = "Statement Of Account" + " - " + customer + " till " + to_date
 
-	si_data = data = json.loads(data)
-	report_summary = json.loads(report_summary)
+	
 
 	template_path = "templates/statement_of_account_email.html"
 	email_template = frappe.render_template(template_path,  dict(si_data=si_data, customer=customer, to_date=to_date, report_summary=report_summary)) 
-	message = email_template
+	message = email_template	
 
 	# print(message)
 
-	send_email(recipients, sender, subject, message)
+	send_email(recipients, sender, subject, message, attachments)
 
-def send_email(recipients, sender, subject, message):
+def send_email(recipients, sender, subject, message, attachments):
 	make(
 		recipients=recipients,
 		sender=sender,
 		subject=subject,
-		content=message,	
+		content=message,
+		# attachments=attachments,	
 		attachments=None,
 		send_email=True,
 	)["name"]
