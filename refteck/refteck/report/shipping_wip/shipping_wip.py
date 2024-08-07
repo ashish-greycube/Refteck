@@ -5,6 +5,7 @@ import frappe
 from frappe import msgprint, _
 from datetime import datetime
 from frappe.utils import fmt_money
+from frappe.desk.form.assign_to import get
 
 
 def execute(filters=None):
@@ -40,6 +41,13 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"label": _("Client"),
 			"options": "Customer",
+			"width": 200
+		},
+		{
+			"fieldname": "assigned_to",
+			"fieldtype": "Link",
+			"label": _("Assigned to"),
+			"options": "User",
 			"width": 200
 		},
 		{
@@ -208,6 +216,13 @@ def get_data(filters):
 			others = fmt_money(so.grand_total, currency=so.currency)
 		else: others = " - "
 
+		assignees = get({"doctype": "Sales Order", "name": so.name})
+		if len(assignees) > 0:
+			assign_to = assignees[0].owner
+		else:
+			assign_to = ''
+		
+
 		po_items = frappe.db.get_list(
 			"Purchase Order Item", 
 			parent_doctype='Purchase Order',fields=["parent"],filters={"sales_order": so.name})
@@ -229,6 +244,7 @@ def get_data(filters):
 							"so":  so.name,
 							"po_date": so.po_date,
 							"client": so.customer_name,
+							"assigned_to": assign_to,
 							"incoterm": so.incoterm,
 							"code": po.custom_order_code,
 							"po_no": so.po_no,
@@ -256,5 +272,6 @@ def get_data(filters):
 				{'label':_('<h3 style="color: #6F4E37">Order Status is Pipeline</h3>')}	
 				]
 		else:
-			report_summary=""	
+			report_summary=""
+
 	return data, report_summary

@@ -23,5 +23,11 @@ frappe.query_reports["Commercial & Accounts WIP"] = {
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
+		{
+			"fieldname": "company",
+			"label":__("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+		},
 	]
 };

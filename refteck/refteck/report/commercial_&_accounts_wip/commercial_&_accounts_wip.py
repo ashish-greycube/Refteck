@@ -113,7 +113,14 @@ def get_columns(filters):
 			"fieldname": "accounts_wip_status", 
 			"fieldtype": "Data",
 			"label": _("Accounts WIP status"),
-			"width": 110
+			"width": 170
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": _("Company"),
+			"options": "Company",
+			"width": 230,
 		},
 		{
 			"fieldname": "usd",
@@ -196,6 +203,9 @@ def get_conditions(filters):
 	if filters.client:
 		conditions.append({"customer_name":filters.client})
 
+	if filters.company:
+		conditions.append({"company":filters.company})
+
 	return conditions
 
 def get_data(filters):
@@ -211,7 +221,8 @@ def get_data(filters):
 						"customer_name",
 						"rounded_total",
 						"advance_paid",
-						"custom_ld_applicable"
+						"custom_ld_applicable",
+						"company"
 						],
 						filters=conditions,)
 
@@ -250,7 +261,7 @@ def get_data(filters):
 							"rounded_total"
 							],
 							filters={"name":po_name})
-				print(po_list[0].name, '--------po_name')
+				# print(po_list[0].name, '--------po_name')
 				
 				usd = ""
 				gbp = ""
@@ -294,7 +305,7 @@ def get_data(filters):
 						pi_list = frappe.db.get_list(
 						"Purchase Invoice", fields=["name","bill_no","bill_date", "docstatus", "total_advance", "rounded_total"],
 									filters={"name":pi_items[0].parent})
-						print(pi_list[0].name, '---------pi_list')
+						# print(pi_list[0].name, '---------pi_list')
 
 						supplier_invoice_number = pi_list[0].bill_no
 						supplier_invoice_date = pi_list[0].bill_date or ''
@@ -334,7 +345,8 @@ def get_data(filters):
 						"supplier_invoice_date": supplier_invoice_date,
 						"ld_applicable": so.custom_ld_applicable,
 						"bank_details": po.custom_bank_details,
-						"accounts_wip_status": po.status,
+						"accounts_wip_status": po.custom_po_acknowledgement_status,
+						"company": so.company,
 						"usd": usd,
 						"gbp": gbp,
 						"euro": euro,
