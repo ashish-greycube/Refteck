@@ -86,6 +86,36 @@ def get_columns(filters):
 			"width": 110
 		},
 		{
+			"fieldname": "usd",
+			"fieldtype": "Data",
+			"label": _("USD"), 
+			"width": 100
+		},
+				{
+			"fieldname": "gbp",
+			"fieldtype": "Data",
+			"label": _("GBP"), 
+			"width": 100
+		},
+		{
+			"fieldname": "euro",
+			"fieldtype": "Data",
+			"label": _("EURO"), 
+			"width": 100
+		},
+		{
+			"fieldname": "inr",
+			"fieldtype": "Data",
+			"label": _("INR"), 
+			"width": 100
+		},
+		{
+			"fieldname": "others",
+			"fieldtype": "Data",
+			"label": _("OTHERS"), 
+			"width": 100
+		},
+		{
 			"fieldname": "supplier_invoice_number", 
 			"fieldtype": "Data",
 			"label": _("Supplier Invoice number"),
@@ -121,36 +151,6 @@ def get_columns(filters):
 			"label": _("Company"),
 			"options": "Company",
 			"width": 230,
-		},
-		{
-			"fieldname": "usd",
-			"fieldtype": "Data",
-			"label": _("USD"), 
-			"width": 100
-		},
-				{
-			"fieldname": "gbp",
-			"fieldtype": "Data",
-			"label": _("GBP"), 
-			"width": 100
-		},
-		{
-			"fieldname": "euro",
-			"fieldtype": "Data",
-			"label": _("EURO"), 
-			"width": 100
-		},
-		{
-			"fieldname": "inr",
-			"fieldtype": "Data",
-			"label": _("INR"), 
-			"width": 100
-		},
-		{
-			"fieldname": "others",
-			"fieldtype": "Data",
-			"label": _("OTHERS"), 
-			"width": 100
 		},
 		{
 			"fieldname": "updated_payment_terms",

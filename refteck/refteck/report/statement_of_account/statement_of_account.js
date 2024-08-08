@@ -40,22 +40,37 @@ function create_send_email_button(report) {
         () => send_email_to_customer(report)
     );
 }
-// report.get_values()
-
 
 function send_email_to_customer(report) {
 	frappe.call({
-        method: "refteck.refteck.report.statement_of_account.statement_of_account.send_email_to_customer",
-        args: {
-			to_date: report.get_values().to_date,
-            company: report.get_values().company || '',
+		method: "refteck.refteck.report.statement_of_account.statement_of_account.get_recipients_send_email",
+		args: {
 			customer : report.get_values().customer,
-			data : report.data,
-			report_summary : report.raw_data.report_summary,
-			columns : report.columns 
-        },
-        callback: function (r) {
-			console.log(r)
-		}	
-	})	
+		},
+		callback: function(r) {
+			console.log(r.message)
+			let recipients = r.message
+			frappe.confirm(__("<b>Do You Want To Send Email To :</b> <br> {0}", [recipients]),
+				() => {
+					frappe.call({
+						method: "refteck.refteck.report.statement_of_account.statement_of_account.send_email_to_customer",
+						args: {
+							to_date: report.get_values().to_date,
+            				company: report.get_values().company || '',
+							customer : report.get_values().customer,
+							data : report.data,
+							report_summary : report.raw_data.report_summary,
+							columns : report.columns
+						},
+						callback: function (r) {
+							frappe.msgprint(__("<b>Email Sent to Users </b> <br> {0}", [recipients]));
+						},
+				})
+					
+				}, () => {
+					return
+				}
+			)
+		}
+	})
 }
