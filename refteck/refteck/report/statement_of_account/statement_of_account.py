@@ -196,26 +196,33 @@ def get_excel_of_report(columns, data):
 
 @frappe.whitelist()
 def get_recipients_send_email(customer):
-	contact_details = frappe.db.get_all('Dynamic Link', 
-									 filters={'link_doctype': 'Customer', 'link_name': ['=', customer], 'parenttype': 'Contact'}, 
-									 fields=['parent'])
-	
-	contact_emails = []
-	for email in contact_details:
-		# print(email.parent, '---------parent')
-		email_id = frappe.db.get_value('Contact', email.parent, 'email_id')
-		if email_id:
-			contact_emails.append(email_id)
-
-	# print(contact_emails, '----contact_emails')
-
-	if len(contact_emails) > 0:
-		recipients_emails = ", ".join((ele if ele!=None else '') for ele in contact_emails)
+	billing_email = frappe.db.sql(
+		"""
+		SELECT
+			email.email_id
+		FROM
+			`tabContact Email` AS email
+		JOIN
+			`tabDynamic Link` AS link
+		ON
+			email.parent=link.parent
+		JOIN
+			`tabContact` AS contact
+		ON
+			contact.name=link.parent
+		WHERE
+			link.link_doctype='Customer'
+			and link.link_name=%s
+			and contact.is_billing_contact=1
+		ORDER BY
+			contact.creation desc
+		""",customer,as_dict=1,debug=0)	
+	if len(billing_email) == 0 :
+		frappe.throw(_("No billing email found for customer: {0}").format(customer))
 	else:
-		frappe.throw(_('No primary contact found'))
+		recipients_emails = ", ".join((ele.email_id if ele!=None else '') for ele in billing_email)
 
 	recipients = recipients_emails
-
 	return recipients
 	
 @frappe.whitelist()
@@ -232,25 +239,7 @@ def send_email_to_customer(to_date, customer, company, data, columns, report_sum
 
 
 	STANDARD_USERS = ("Guest", "Administrator")
-
-	contact_details = frappe.db.get_all('Dynamic Link', 
-									 filters={'link_doctype': 'Customer', 'link_name': ['=', customer], 'parenttype': 'Contact'}, 
-									 fields=['parent'])
-	
-	contact_emails = []
-	for email in contact_details:
-		# print(email.parent, '---------parent')
-		email_id = frappe.db.get_value('Contact', email.parent, 'email_id')
-		if email_id:
-			contact_emails.append(email_id)
-
-	# print(contact_emails, '----contact_emails')
-
-	if len(contact_emails) > 0:
-		recipients_emails = ", ".join((ele if ele!=None else '') for ele in contact_emails)
-	else:
-		frappe.throw(_('No primary contact found'))
-
+	recipients_emails=get_recipients_send_email(customer)
 	sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
 	recipients = recipients_emails
 	subject = "Statement Of Account" + " - " + customer + " till " + to_date
