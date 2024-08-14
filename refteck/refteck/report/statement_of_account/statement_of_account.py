@@ -223,7 +223,8 @@ def get_recipients_send_email(customer):
 		recipients_emails = ", ".join((ele.email_id if ele!=None else '') for ele in billing_email)
 
 	recipients = recipients_emails
-	return recipients
+	cc = frappe.db.get_single_value('Refteck Settings RT', 'statement_of_account_email_cc')
+	return recipients, cc
 	
 @frappe.whitelist()
 def send_email_to_customer(to_date, customer, company, data, columns, report_summary):
@@ -239,8 +240,14 @@ def send_email_to_customer(to_date, customer, company, data, columns, report_sum
 
 
 	STANDARD_USERS = ("Guest", "Administrator")
-	recipients_emails=get_recipients_send_email(customer)
+	recipients_emails, cc=get_recipients_send_email(customer)
 	sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
+	
+	# if cc:
+	# 	frappe.msgprint(_('Email Sent to cc {0}.').format(cc),alert=True)
+	# else:
+	# 	frappe.msgprint(_('No email account found for cc.'),alert=True)
+	
 	recipients = recipients_emails
 	subject = "Statement Of Account" + " - " + customer + " till " + to_date
 
@@ -251,12 +258,13 @@ def send_email_to_customer(to_date, customer, company, data, columns, report_sum
 	message = email_template	
 
 
-	send_email(recipients, sender, subject, message, attachments)
+	send_email(recipients, sender, cc, subject, message, attachments)
 
-def send_email(recipients, sender, subject, message, attachments):
+def send_email(recipients, sender, cc, subject, message, attachments):
 	make(
 		recipients=recipients,
 		sender=sender,
+		cc=cc,
 		subject=subject,
 		content=message,
 		attachments=attachments,	

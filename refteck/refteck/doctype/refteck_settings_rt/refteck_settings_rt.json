@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-14 03:51:31.276702",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "statement_of_account_email_cc"
+ ],
+ "fields": [
+  {
+   "fieldname": "statement_of_account_email_cc",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Statement of Account Email CC",
+   "options": "Email"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-08-14 04:47:18.798603",
+ "modified_by": "Administrator",
+ "module": "Refteck",
+ "name": "Refteck Settings RT",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

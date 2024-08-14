@@ -49,7 +49,8 @@ function send_email_to_customer(report) {
 		},
 		callback: function(r) {
 			console.log(r.message)
-			let recipients = r.message
+			let recipients = r.message[0]
+			let cc = r.message[1]
 			frappe.confirm(__("<b>Do You Want To Send Email To :</b> <br> {0}", [recipients]),
 				() => {
 					frappe.call({
@@ -63,7 +64,7 @@ function send_email_to_customer(report) {
 							columns : report.columns
 						},
 						callback: function (r) {
-							frappe.msgprint(__("<b>Email Sent to Users </b> <br> {0}", [recipients]));
+							frappe.msgprint(__("<b>Email Sent to Users : </b> <br> {0} <br> <b> CC </b>: {1}", [recipients,cc]));
 						},
 				})
 					

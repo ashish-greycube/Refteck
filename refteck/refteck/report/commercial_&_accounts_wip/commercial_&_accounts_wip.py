@@ -166,7 +166,7 @@ def get_columns(filters):
 		},
 		{
 			"fieldname": "lead_time",
-			"fieldtype": "Date",
+			"fieldtype": "Data",
 			"label": _("Current Lead Time / Ship Date"),
 			"width": 110
 		},
@@ -175,6 +175,12 @@ def get_columns(filters):
 			"fieldtype": "Data",
 			"label": _("Commercial Delegation"),
 			"width": 150
+		},
+		{
+			"fieldname": "invoice_due_date",
+			"fieldtype": "Date",
+			"label": _("Invoice Due Date"),
+			"width": 110
 		},
 		{
 			"fieldname": "payment_status",
@@ -298,15 +304,17 @@ def get_data(filters):
 						parent_doctype='Purchase Invoice',fields=["parent"],filters={"purchase_order": po.name})
 					
 					payment_status = ""
+					invoice_due_date = ""
 					supplier_invoice_number = ""
 					supplier_invoice_date = ""
 					if (len(pi_items) > 0):
 							
 						pi_list = frappe.db.get_list(
-						"Purchase Invoice", fields=["name","bill_no","bill_date", "docstatus", "total_advance", "rounded_total"],
+						"Purchase Invoice", fields=["name","bill_no","bill_date", "docstatus", "total_advance", "rounded_total", "due_date"],
 									filters={"name":pi_items[0].parent})
 						# print(pi_list[0].name, '---------pi_list')
 
+						invoice_due_date = pi_list[0].due_date or ''
 						supplier_invoice_number = pi_list[0].bill_no
 						supplier_invoice_date = pi_list[0].bill_date or ''
 	
@@ -356,6 +364,7 @@ def get_data(filters):
 						"supplier_delivery_date": po.schedule_date,
 						"lead_time": po.custom_current_lead_time_ship_date,
 						"commercial_delegation": po.custom_commercial_delegation_status,
+						"invoice_due_date": invoice_due_date,
 						"payment_status": payment_status,
 						"finance_remarks":po.custom_finance_remarks
 					}
