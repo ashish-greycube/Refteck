@@ -16,7 +16,7 @@ def execute(filters=None):
 
 	if not data:
 		msgprint(_("No records found"))
-		return columns, data
+		return columns, data, None, None, report_summary
 	
 	return columns, data, None, None, report_summary
 
@@ -38,9 +38,9 @@ def get_columns(filters):
 		},
 		{
 			"fieldname": "client",
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"label": _("Client"),
-			"options": "Customer",
+			# "options": "Customer",
 			"width": 200
 		},
 		{
@@ -66,7 +66,7 @@ def get_columns(filters):
 		{
 			"fieldname": "po_no",
 			"fieldtype": "Data",
-			"label": _("po_no"),
+			"label": _("PO No."),
 			"width": 140
 		},
 		{
@@ -157,7 +157,7 @@ def get_conditions(filters):
 			frappe.throw(_("To Date should be greater then From Date"))
 	
 	if filters.client:
-		conditions.append({"customer_name":filters.client})
+		conditions.append({"customer":filters.client})
 
 	if filters.order_status == "Open":
 		conditions.append({"custom_is_order_ready": 0})
@@ -170,8 +170,8 @@ def get_conditions(filters):
 	return conditions
 
 def get_data(filters):
-
 	data = []
+	report_summary=''
 	conditions = get_conditions(filters)
 	
 	so_list = frappe.db.get_list(
@@ -272,6 +272,13 @@ def get_data(filters):
 				{'label':_('<h3 style="color: #6F4E37">Order Status is Pipeline</h3>')}	
 				]
 		else:
-			report_summary=""
+			return
 
 	return data, report_summary
+
+@frappe.whitelist()
+def create_dialog_data(sales_order):
+	print(sales_order, '----------------sales_order')
+	template_path = "templates/report_dialog_data.html"
+	# frappe.render_template(template_path,  dict(sales_order=sales_order))  
+	return frappe.render_template(template_path,  dict(sales_order=sales_order)) 
