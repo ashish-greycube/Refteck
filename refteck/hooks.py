@@ -138,7 +138,8 @@ doc_events = {
     },
     "Purchase Order":{
         "before_validate":["refteck.api.fetch_rate_from_supplier_quotation",
-                       "refteck.api.validation_for_supplier"]
+                       "refteck.api.validation_for_supplier"],
+        "validate":"refteck.api.set_po_tracking_status_in_po_item"
     },
     "Quotation":{
         "before_validate":"refteck.api.set_common_brands",
@@ -146,7 +147,8 @@ doc_events = {
                     # "refteck.api.get_connected_qo", 
                     "refteck.api.set_items_for_margin_calculaion",
                     "refteck.api.qo_margin_calculations",
-                    # "refteck.api.validate_admin_checklist"
+                    # "refteck.api.validate_admin_checklist",
+                    "refteck.api.set_item_descripion_in_qn_item"
                     ],
         "onload":"refteck.api.set_previous_quotation_data"
     },

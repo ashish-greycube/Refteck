@@ -222,3 +222,29 @@ def validate_admin_checklist(self, method):
 	# 	if vc.company == self.company:
 	# 		self.custom_vendor_code = vc.vendor_code
 	# 		break
+
+def set_item_descripion_in_qn_item(self, method):
+	if self.custom_fetch_sq_details_in_qn == 1:
+		opportunity_name = self.opportunity
+		if opportunity_name:
+			supplier_quotation = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity}, fields=["name"],limit=1)
+			if len(supplier_quotation) > 0:
+				print('supplier_quotation[0]',supplier_quotation[0])
+				supplier_quotation_doc = frappe.get_doc("Supplier Quotation",supplier_quotation[0].name)
+				supplier_quotation_items = supplier_quotation_doc.get("items")
+				item_list = []
+				for sq_item in supplier_quotation_items:
+					for qo_item in self.items:
+						if qo_item.item_code == sq_item.item_code:
+							qo_item.description = "<b>REFTECK SCOPE OF SUPPLY:</b> <br>"+sq_item.custom_refteck_scope_of_supply
+							qo_item.custom_legacy_data = sq_item.description
+							if qo_item.item_code not in item_list:
+								item_list.append(qo_item.item_code)
+				item_name = ", ".join((ele if ele!=None else '') for ele in item_list)
+				frappe.msgprint(_("Description for item code {0} is changed.").format(item_name),alert=1)
+
+def set_po_tracking_status_in_po_item(self,method):
+	if self.custom_apply_to_all_line_item == 1 and self.custom_po_tracking_status:
+		for row in self.items:
+			row.custom_po_line_item_tracking_status = self.custom_po_tracking_status
+		frappe.msgprint(_("PO tracking status is set to {0} in {1} PO items").format(self.custom_po_tracking_status,len(self.items)),alert=1)
