@@ -188,13 +188,14 @@ def qo_margin_calculations(self, method):
 			material_margin_total = material_margin_total + (row.material_margin or 0)
 
 		self.custom_margin_total = margin_total
-		self.custom_final_values = flt((self.custom_margin_total 
-								  + self.custom_freight + self.custom_packing 
-								  + self.custom_cipcpt + self.custom_bank_charges),2)
-		self.custom_final_margin = self.custom_final_values - material_margin_total
-		if  self.custom_final_values and  self.custom_final_values>0:
-			self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
-		print(self.custom_overall_margin, '----self')
+		if self.custom_margin_total:
+			self.custom_final_values = flt((self.custom_margin_total 
+									+ self.custom_freight + self.custom_packing 
+									+ self.custom_cipcpt + self.custom_bank_charges),2)
+			self.custom_final_margin = self.custom_final_values - material_margin_total
+			if  self.custom_final_values and  self.custom_final_values>0:
+				self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
+			print(self.custom_overall_margin, '----self')
 		
 def validate_admin_checklist(self, method):
 	sq_values = frappe.db.get_value('Supplier Quotation', self.supplier_quotation, ['supplier','owner'],as_dict=1)
