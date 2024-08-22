@@ -228,7 +228,7 @@ def get_data(filters):
 				`tabSales Invoice Item` tsii )
 			{0}
 		group by
-			tsoi.parent
+			tpo.name
 		""".format(conditions),filters,as_dict=1,debug=1
 	)
 
