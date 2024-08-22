@@ -225,7 +225,9 @@ def get_data(filters):
 			select
 				tsii.sales_order
 			from
-				`tabSales Invoice Item` tsii )
+				`tabSales Invoice Item` tsii 
+			where tsii.docstatus!=2
+			)
 			{0}
 		group by
 			tpo.name
