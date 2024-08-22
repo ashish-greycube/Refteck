@@ -4,7 +4,7 @@
 import frappe
 from frappe import msgprint, _
 from datetime import datetime
-from frappe.utils import fmt_money
+from frappe.utils import fmt_money,add_days
 from frappe.desk.form.assign_to import get
 
 
@@ -160,7 +160,7 @@ def get_conditions(filters):
 		if filters.get("to_date") >= filters.get("from_date"):
 			conditions += " and tso.creation between {0} and {1}".format(
         		frappe.db.escape(filters.get("from_date")),
-        		frappe.db.escape(filters.get("to_date")))		
+        		frappe.db.escape(add_days(filters.get("to_date"),1)))		
 		else:
 			frappe.throw(_("To Date should be greater then From Date"))
 	
