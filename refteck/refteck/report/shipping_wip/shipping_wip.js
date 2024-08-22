@@ -23,13 +23,7 @@ frappe.query_reports["Shipping-WIP"] = {
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
-		{
-			"fieldname": "order_status",
-			"label":__("Order Status"),
-			"fieldtype": "Select",
-			"options": ['Open', 'Pipeline'],
-			"default": 'Open'
-		},
+
 	],
 	// formatter: function (value, row, column, data, default_formatter) {
 	// 	value = default_formatter(value, row, column, data);

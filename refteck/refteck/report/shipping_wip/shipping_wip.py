@@ -12,13 +12,13 @@ def execute(filters=None):
 	columns, data = [], []
 
 	columns = get_columns(filters)
-	data, report_summary = get_data(filters)
+	data = get_data(filters)
 
 	if not data:
 		msgprint(_("No records found"))
-		return columns, data, None, None, report_summary
+		return columns, data, None, None
 	
-	return columns, data, None, None, report_summary
+	return columns, data, None, None
 
 def get_columns(filters):
 	columns = [
@@ -138,6 +138,12 @@ def get_columns(filters):
 			"label": _("OTHERS"), 
 			"width": 100
 		},
+ 		{
+            "fieldname": "order_total",
+            "fieldtype": "Data",
+            "label": _("Order Total"),
+            "width": 100
+        },		
 		{
 			"fieldname": "comments",
 			"fieldtype": "Data",
@@ -148,133 +154,87 @@ def get_columns(filters):
 	return columns
 
 def get_conditions(filters):
-	conditions = []
+	conditions =""
 
 	if filters.get("from_date") and filters.get("to_date"):
 		if filters.get("to_date") >= filters.get("from_date"):
-			conditions.append(["creation","between", [filters.get("from_date"), filters.get("to_date")]])
+			conditions += " and tso.creation between {0} and {1}".format(
+        		frappe.db.escape(filters.get("from_date")),
+        		frappe.db.escape(filters.get("to_date")))		
 		else:
 			frappe.throw(_("To Date should be greater then From Date"))
 	
 	if filters.client:
-		conditions.append({"customer":filters.client})
+		conditions += " and tso.customer = %(filters.client)s"
 
-	if filters.order_status == "Open":
-		conditions.append({"custom_is_order_ready": 0})
-
-	if filters.order_status == "Pipeline":
-		conditions.append({"custom_is_order_ready": 1})
-
-	conditions.append({"per_delivered": ['<', 100], "status": ['!=', "Closed"]})
+	# conditions.append({"per_delivered": ['<', 100], "status": ['!=', "Closed"]})
 
 	return conditions
 
 def get_data(filters):
 	data = []
-	report_summary=''
 	conditions = get_conditions(filters)
 	
-	so_list = frappe.db.get_list(
-			"Sales Order", fields=["name",
-						"po_date",
-						"customer_name",
-						"incoterm", 
-						"po_no",
-						"contact_person",
-						"delivery_date", 
-						"company",
-						"grand_total",
-						"currency",
-						"custom_is_order_ready"
-						],
-						filters=conditions,)
-	
-	usd = ""
-	gbp = ""
-	euro = ""
-	inr = ""
-	others = ""
-	for so in so_list:
-		# print(so.name, so.grand_total, so.customer_name)
-		if so.currency == "USD":
-			usd = fmt_money(so.grand_total, currency=so.currency)
-		else: usd = " - "
-		
-		if so.currency == "GBP":
-			gbp = fmt_money(so.grand_total, currency=so.currency)
-		else: gbp = " - "
-		
-		if so.currency == "EUR":
-			euro = fmt_money(so.grand_total, currency=so.currency)
-		else: euro = " - "
+	data = frappe.db.sql(
+		"""SELECT
+			tso.name as so,
+			tso.po_date,
+			tso.customer_name as client,
+			tso.owner as assigned_to,
+			tso.incoterm,
+			tpo.custom_order_code as code,
+			tso.po_no,
+			tso.contact_person as buyer,
+			tpo.supplier,
+			tso.delivery_date,
+			tso.company,
+			tpo.custom_updated_payment_terms as updated_payment_terms,
+			tpo.custom_current_lead_time_ship_date as current_lead_time_ship_date,
+			IF(tso.currency = 'GBP',
+			CONCAT('£ ',ROUND(sum(tsoi.net_amount),2)),
+			'-') as gbp,
+			IF(tso.currency = 'EUR',
+			CONCAT('€ ',ROUND(sum(tsoi.net_amount),2)),
+			'-') as euro,
+			IF(tso.currency = 'USD',
+			CONCAT('$ ',ROUND(sum(tsoi.net_amount),2)),
+			'-') as usd,
+			IF(tso.currency = 'INR',
+			CONCAT('₹ ',ROUND(sum(tsoi.net_amount),2)),
+			'-') as inr,
+			IF(tso.currency NOT IN ('GBP', 'EUR', 'USD', 'INR'), ROUND(sum(tsoi.net_amount),2), '-') as OTHERS,
+			tso.grand_total as order_total,
+			tpo.custom_shipping_remarks as comments,
+			tso.currency,
+			tso.creation
+		FROM
+			`tabSales Order` tso
+		inner join `tabSales Order Item` tsoi 
+		on
+			tsoi.parent = tso.name
+		inner join `tabPurchase Order Item` tpoi 
+		on
+			tpoi.sales_order = tso.name
+		inner join `tabPurchase Order` tpo
+		on
+			tpo.name = tpoi.parent
+			and tpoi.sales_order_item = tsoi.name
+		where
+			tso.per_billed <100
+			and tso.name not in (
+			select
+				tsii.sales_order
+			from
+				`tabSales Invoice Item` tsii )
+			{0}
+		group by
+			tsoi.parent
+		""".format(conditions),filters,as_dict=1,debug=1
+	)
 
-		if so.currency == "INR":
-			inr = fmt_money(so.grand_total, currency=so.currency)
-		else: inr = " - "
-
-		if so.currency != "USD" and  so.currency != "GBP" and so.currency != "EUR" and so.currency != "INR":
-			others = fmt_money(so.grand_total, currency=so.currency)
-		else: others = " - "
-
-		assignees = get({"doctype": "Sales Order", "name": so.name})
-		if len(assignees) > 0:
-			assign_to = assignees[0].owner
-		else:
-			assign_to = ''
-		
-
-		po_items = frappe.db.get_list(
-			"Purchase Order Item", 
-			parent_doctype='Purchase Order',fields=["parent"],filters={"sales_order": so.name})
-		
-		if (len(po_items) > 0):
-			for item in po_items:
-				po_list = frappe.db.get_list(
-				"Purchase Order", fields=["supplier_name",
-							"custom_updated_payment_terms",
-							"custom_current_lead_time_ship_date",
-							"custom_order_code",
-							"custom_shipping_remarks"
-							],
-							filters={"name":item.parent})
-			
-				for po in po_list:
-	
-					row = {
-							"so":  so.name,
-							"po_date": so.po_date,
-							"client": so.customer_name,
-							"assigned_to": assign_to,
-							"incoterm": so.incoterm,
-							"code": po.custom_order_code,
-							"po_no": so.po_no,
-							"buyer": so.contact_person,
-							"supplier": po.supplier_name,
-							"delivery_date": so.delivery_date,
-							"company": so.company,
-							"updated_payment_terms": po.custom_updated_payment_terms,
-							"current_lead_time_ship_date": po.custom_current_lead_time_ship_date,
-							"gbp": gbp,
-							"euro": euro,
-							"usd": usd,
-							"inr": inr,
-							"others": others,
-							"comments": po.custom_shipping_remarks
-						}
-					data.append(row)
-
-		if so.custom_is_order_ready == 0:
-			report_summary=[
-				{'label':_('<h3 style="color:#A02334">Order Status is Open</h3>')}
-				]
-		elif so.custom_is_order_ready == 1:
-			report_summary=[
-				{'label':_('<h3 style="color: #6F4E37">Order Status is Pipeline</h3>')}	
-				]
-		else:
-			return
-
-	return data, report_summary
+	for d in data:
+		d['order_total']=fmt_money(d['order_total'], currency=d['currency'])
+	return data
 
 @frappe.whitelist()
 def create_dialog_data(sales_order):
