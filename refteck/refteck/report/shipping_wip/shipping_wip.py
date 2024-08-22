@@ -165,7 +165,7 @@ def get_conditions(filters):
 			frappe.throw(_("To Date should be greater then From Date"))
 	
 	if filters.client:
-		conditions += " and tso.customer = %(filters.client)s"
+		conditions += " and tso.customer = '{0}'".format(filters.client)
 
 	# conditions.append({"per_delivered": ['<', 100], "status": ['!=', "Closed"]})
 
