@@ -145,8 +145,8 @@ doc_events = {
         "before_validate":"refteck.api.set_common_brands",
         "validate":[
                     # "refteck.api.get_connected_qo", 
-                    "refteck.api.set_items_for_margin_calculaion",
-                    "refteck.api.qo_margin_calculations",
+                    # "refteck.api.set_items_for_margin_calculaion",
+                    # "refteck.api.qo_margin_calculations",
                     # "refteck.api.validate_admin_checklist",
                     "refteck.api.set_item_descripion_in_qn_item"
                     ],
