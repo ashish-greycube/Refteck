@@ -158,9 +158,9 @@ def get_conditions(filters):
 
 	if filters.get("from_date") and filters.get("to_date"):
 		if filters.get("to_date") >= filters.get("from_date"):
-			conditions += " and tso.creation between {0} and {1}".format(
+			conditions += " and DATE(tso.creation) between {0} and {1}".format(
         		frappe.db.escape(filters.get("from_date")),
-        		frappe.db.escape(add_days(filters.get("to_date"),1)))		
+        		frappe.db.escape(filters.get("to_date")))		
 		else:
 			frappe.throw(_("To Date should be greater then From Date"))
 	
