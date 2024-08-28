@@ -13,12 +13,12 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	data = get_data(filters)
-
+	msg="Shipping WIP report returns data only if there are SO without SI"
 	if not data:
-		msgprint(_("No records found"))
-		return columns, data, None, None
-	
-	return columns, data, None, None
+		# msgprint(_("No records found"))
+		return columns, data, msg, None
+		
+	return columns, data, msg, None
 
 def get_columns(filters):
 	columns = [
