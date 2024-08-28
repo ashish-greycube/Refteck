@@ -219,15 +219,11 @@ def get_data(filters):
 		on
 			tpo.name = tpoi.parent
 			and tpoi.sales_order_item = tsoi.name
+		left join `tabSales Invoice Item` tsii
+		on tsii.sales_order=tso.name		
 		where
 			tso.per_billed <100
-			and tso.name not in (
-			select
-				tsii.sales_order
-			from
-				`tabSales Invoice Item` tsii 
-			where tsii.docstatus!=2
-			)
+			and tsii.sales_order IS NULL
 			{0}
 		group by
 			tpo.name
