@@ -144,12 +144,12 @@ doc_events = {
     "Quotation":{
         "before_validate":"refteck.api.set_common_brands",
         "validate":[
-                    # "refteck.api.get_connected_qo", 
                     "refteck.api.set_items_for_margin_calculaion",
-                    "refteck.api.qo_margin_calculations",
                     "refteck.api.validate_admin_checklist",
-                    "refteck.api.set_item_descripion_in_qn_item"
+                    "refteck.api.set_item_descripion_in_qn_item",
+                    "refteck.api.remove_items_from_margin_calculation"
                     ],
+        "before_save":"refteck.api.qo_margin_calculations",
         "onload":["refteck.api.set_previous_quotation_data",
                   "refteck.api.get_connected_sq_details"]
     },
@@ -163,7 +163,6 @@ doc_events = {
         "after_insert": "refteck.api.share_appraisal_to_employee_from_appraisal"
     }
 }
-
 # Scheduled Tasks
 # ---------------
 

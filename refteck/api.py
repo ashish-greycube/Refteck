@@ -89,18 +89,25 @@ def set_items_for_margin_calculaion(self, method):
 										match_found_in_margin_calculation=True
 										break
 								if match_found_in_margin_calculation==False:
-									self.append("custom_margin_calculation",{
-										"sap_code" : sq_item.item_code,
-										"uom" : sq_item.uom,
-										"qty" : sq_item.qty,
-										"sq_price" :sq_item.rate,
-										"supplier_quotation" : sq_item.parent,
-										"offer_price_without_freight" : '',
-										"other_charges" : '',
-										"item_ref" : sq_item.name
-									})
+									row=self.append("custom_margin_calculation",{})
+									row.sap_code=sq_item.item_code
+									row.uom=sq_item.uom
+									row.qty=sq_item.qty
+									row.sq_price=sq_item.rate
+									row.supplier_quotation=sq_item.parent
+									row.item_ref=sq_item.name
+
 							if qo_item_found == True:
 								break
+
+def remove_items_from_margin_calculation(self, method):
+	item_list=[]
+	for item in self.items:
+		item_list.append(item.item_code)
+
+	for row in self.custom_margin_calculation:
+		if row.sap_code not in item_list:
+			self.custom_margin_calculation.remove(row)
 
 def get_connected_sq_details(self,method):
 	connected_sq_list = []
@@ -127,19 +134,6 @@ def get_connected_sq_details(self,method):
 				notes_list.append(sq.custom_notes)
 				reviewed_by_list.append(sq.custom_supplier_quotation_reviewed_by)
 				procurement_representative_list.append(sq.owner)
-
-			print(connected_sq_list, '-----connected_sq')
-			print(supplier_name_list, '---------supplier_name_list')
-
-			# for co_sq in connected_sq:
-			# 	sq_row=sq_row+'<td>'+co_sq+'</td>'
-			# sq_row=sq_row+'</tr>'
-
-			# for supplier in supplier_name_list:
-			# 	supplier_row=supplier_row+'<td>'+supplier+'</td>'
-			# supplier_row=supplier_row+'</tr>'
-
-
 			
 			template_path = "templates/connected_sq_details.html"
 			html = frappe.render_template(template_path,  dict(connected_sq=connected_sq_list, 
@@ -148,9 +142,6 @@ def get_connected_sq_details(self,method):
 													  notes=notes_list, reviewed_by=reviewed_by_list,
 													  procurement_representative=procurement_representative_list))  
 			self.set_onload("custom_sq_html_data", html) 
-
-	
-	# return list_a
 
 def get_connected_qo(quotation_name):
 	def get_connected(quotation_name):
@@ -178,39 +169,33 @@ def set_previous_quotation_data(self,method):
 
 
 def qo_margin_calculations(self, method):
-	if self.custom_margin_calculation:
+	if self.custom_margin_calculation and len(self.custom_margin_calculation)>0:
 		margin_total = 0
 		material_margin_total = 0
 		for row in self.custom_margin_calculation:
-			row.buying_value = flt((row.qty * row.sq_price),2)
+			row.buying_value = flt(((row.qty or 0) * (row.sq_price or 0)),2)
 			
-			row.offer_price_with_charges = flt((row.offer_price_without_freight + row.other_charges),2)
-			# print(row.offer_price_with_charges, '--row.offer_price_with_charges')
+			row.offer_price_with_charges = flt(((row.offer_price_without_freight or 0) + (row.other_charges or 0)),2)
 
 			row.offer_value_with_charges = flt(((row.qty or 0) * (row.offer_price_with_charges or 0)),2)
-			# print(row.offer_value_with_charges, '--row.offer_value_with_charges')
 
-			# print(type(row.offer_price_without_freight), type(row.sq_price))
 			if row.sq_price and row.sq_price > 0:
 				row.material_margin = flt((((row.offer_price_without_freight or 0) / row.sq_price) - 1),2)
-			# print(row.material_margin, '---row.material_margin')
 
-			# print(type(row.offer_price_without_freight), 'row.offer_price_without_freight', type(row.sq_price), 'row.sq_price')
-			row.margin = flt(((flt(row.offer_price_without_freight) - row.sq_price) * row.qty),2)
-			# print(row.margin, '---row.margin')
+			row.margin = flt(((flt(row.offer_price_without_freight or 0) - (row.sq_price or 0)) * row.qty),2)
 
 			margin_total = margin_total + (row.buying_value or 0)
 			material_margin_total = material_margin_total + (row.material_margin or 0)
 
 		self.custom_margin_total = margin_total
 		if self.custom_margin_total:
-			self.custom_final_values = flt((self.custom_margin_total 
-									+ self.custom_freight + self.custom_packing 
-									+ self.custom_cipcpt + self.custom_bank_charges),2)
+			self.custom_final_values = flt(((self.custom_margin_total or 0) 
+									+ (self.custom_freight or 0) + (self.custom_packing or 0) 
+									+ (self.custom_cipcpt or 0) + (self.custom_bank_charges or 0)),2)
 			self.custom_final_margin = material_margin_total - self.custom_final_values
 			if  self.custom_final_values and  self.custom_final_values>0:
 				self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
-			print(self.custom_overall_margin, '----self')
+			# print(self.custom_overall_margin, '----self')
 		
 def validate_admin_checklist(self, method):
 
