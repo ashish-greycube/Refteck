@@ -1,0 +1,67 @@
+
+<table border="1">
+    <tr>
+        <td><b>Supplier Quotation</b></td>
+        {% if connected_sq | length > 0 %}
+        {% for name in connected_sq %} 
+        <td>{{name}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Supplier</b></td>
+        {% if supplier_name | length > 0 %}
+        {% for supplier in supplier_name %} 
+        <td>{{supplier}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Payment Terms</b></td>
+        {% if payment_terms | length > 0 %}
+        {% for payment in payment_terms %} 
+        <td>{{payment}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Currency</b></td>
+        {% if currency | length > 0 %}
+        {% for cur in currency %} 
+        <td>{{cur}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Actual Lead Time</b></td>
+        {% if actual_lead_time | length > 0 %}
+        {% for lead_time in actual_lead_time %} 
+        <td>{{lead_time}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Notes</b></td>
+        {% if notes | length > 0 %}
+        {% for nt in notes %} 
+        <td>{{nt}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Supplier Quotation Reviewed By</b></td>
+        {% if reviewed_by | length > 0 %}
+        {% for reviewed in reviewed_by %} 
+        <td>{{reviewed}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
+        <td><b>Procurement Representative</b></td>
+        {% if procurement_representative | length > 0 %}
+        {% for owner in procurement_representative %} 
+        <td>{{owner}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+</table>

@@ -7,5 +7,12 @@ frappe.ui.form.on("Quotation", {
         ) {
             frm.set_df_property('custom_previous_quotation_details', 'options', frm.doc.__onload.custom_html_data)
         }
+        if (
+            frm.fields_dict["custom_sq_details"] &&
+            frm.is_new() == undefined &&
+            frm.doc.__onload && "custom_sq_html_data" in frm.doc.__onload
+        ) {
+            frm.set_df_property('custom_sq_details', 'options', frm.doc.__onload.custom_sq_html_data)
+        }
     }
 })

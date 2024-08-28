@@ -70,72 +70,180 @@ def share_appraisal_to_employee_from_appraisal(self,method):
 
 
 def set_items_for_margin_calculaion(self, method):
+	if self.opportunity:
+		calculated_duplicate_items=[]
+		# op connected Supplier Quotation
+		supplier_quotation = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity}, fields=["name", "company"])
+		if len(supplier_quotation) > 0:
+			for sq in supplier_quotation:
+				print('--------------------------------------------------')
+				print(sq.name, '-----sq.name')
+				# sq_item
+				sq_items = frappe.db.get_all("Supplier Quotation Item", 
+								 parent_doctype="Supplier Quotation",filters={"parent": sq.name}, 
+								 fields=["item_code", "uom", "qty", "rate", "parent", "name"])
 
-	calculated_duplicate_items=[]
+				# print(sq_items, '------sq_items')
+				if len(sq_items) > 0:
+					# print('sq_itemssssss')
+					
+					for sq_item in sq_items:
+						print(sq_item.item_code, '------item code')
+						
+						# qo_item
+						for qo_item in self.items:
+							print(qo_item.item_code, '-----------qo_item.item_code')
+							match_found_in_margin_calculation = False
+							if qo_item.item_code == sq_item.item_code:
+								print(sq_item.item_code, qo_item.item_code, 'sq_item.item_code', 'qo_item.item_code')
+								print(len(self.custom_margin_calculation),self.custom_margin_calculation,"self.custom_margin_calculation")
+								
+								for row in self.custom_margin_calculation:
+									match_found_in_margin_calculation = False
+									print('=',sq_item.name == row.item_ref)
+									if sq_item.name == row.item_ref:
+										calculated_duplicate_items.append({
+											"sap_code" : sq_item.item_code,
+											"uom" : sq_item.uom,
+											"qty" : sq_item.qty,
+											"sq_price" :sq_item.rate,
+											"supplier_quotation" : sq_item.parent,
+											"offer_price_without_freight" : row.offer_price_without_freight,
+											"other_charges" : row.other_charges,
+											"item_ref" : sq_item.name
+										})
+										print(calculated_duplicate_items, '------update existing row')
+										match_found_in_margin_calculation=True
+										break
+									
+								if match_found_in_margin_calculation==False:
+									calculated_duplicate_items.append({
+										"sap_code" : sq_item.item_code,
+										"uom" : sq_item.uom,
+										"qty" : sq_item.qty,
+										"sq_price" :sq_item.rate,
+										"supplier_quotation" : sq_item.parent,
+										"offer_price_without_freight" : '',
+										"other_charges" : '',
+										"item_ref" : sq_item.name
+									})
+									print(calculated_duplicate_items,  '------add new row')
+							
+							else:
+								continue
+					
+						# print(calculated_duplicate_items, '----calculated_duplicate_items')
+							self.custom_margin_calculation = []
+						# self.custom_margin_calculation = calculated_duplicate_items
+							for row in calculated_duplicate_items:
+								# print(row.get("sap_code"), '---------sapcode')
+								self.append('custom_margin_calculation', row)
+								# print(sq_items, '----sq_item')
+								# print('supplier_quotation',supplier_quotation)
+			# supplier_quotation_doc = frappe.get_doc("Supplier Quotation",supplier_quotation[0].name)
+			# supplier_quotation_items = supplier_quotation_doc.get("items")
+			# item_list = []
+			# for sq in supplier_quotation:
+			# 	for sq_item in sq.items:
+			# 		print(sq_item,'--------sq_item')
+					# if qo_item.item_code == sq_item.item_code:
+					# 	pass
 
-	for item in self.items:
-		match_found_in_margin_calculation = False
-		for row in self.custom_margin_calculation:
-			if item.name == row.item_ref:
-				calculated_duplicate_items.append({
-					"sap_code" : item.item_code,
-					"uom" : item.uom,
-					"qty" : item.qty,
-					"sq_price" :item.rate,
-					"supplier_quotation" : item.custom_supplier_quotation,
-					"offer_price_without_freight" : row.offer_price_without_freight,
-					"other_charges" : row.other_charges,
-					"item_ref" : item.name
-				})
-				print(calculated_duplicate_items, '------update existing row')
-				match_found_in_margin_calculation=True
-				break
-		if match_found_in_margin_calculation==False:
-			calculated_duplicate_items.append({
-				"sap_code" : item.item_code,
-				"uom" : item.uom,
-				"qty" : item.qty,
-				"sq_price" :item.rate,
-				"supplier_quotation" : item.custom_supplier_quotation,
-				"offer_price_without_freight" : '',
-				"other_charges" : '',
-				"item_ref" : item.name
-			})
-			print(calculated_duplicate_items,  '------add new row')
+	# calculated_duplicate_items=[]
 
-	self.custom_margin_calculation = []
-	# self.custom_margin_calculation = calculated_duplicate_items
-	for row in calculated_duplicate_items:
-		print(row.get("sap_code"))
-		self.append('custom_margin_calculation', row)
+	# for item in self.items:
+	# 	match_found_in_margin_calculation = False
+	# 	for row in self.custom_margin_calculation:
+	# 		if item.name == row.item_ref:
+	# 			calculated_duplicate_items.append({
+	# 				"sap_code" : item.item_code,
+	# 				"uom" : item.uom,
+	# 				"qty" : item.qty,
+	# 				"sq_price" :item.rate,
+	# 				"supplier_quotation" : item.custom_supplier_quotation,
+	# 				"offer_price_without_freight" : row.offer_price_without_freight,
+	# 				"other_charges" : row.other_charges,
+	# 				"item_ref" : item.name
+	# 			})
+	# 			print(calculated_duplicate_items, '------update existing row')
+	# 			match_found_in_margin_calculation=True
+	# 			break
+	# 	if match_found_in_margin_calculation==False:
+	# 		calculated_duplicate_items.append({
+	# 			"sap_code" : item.item_code,
+	# 			"uom" : item.uom,
+	# 			"qty" : item.qty,
+	# 			"sq_price" :item.rate,
+	# 			"supplier_quotation" : item.custom_supplier_quotation,
+	# 			"offer_price_without_freight" : '',
+	# 			"other_charges" : '',
+	# 			"item_ref" : item.name
+	# 		})
+	# 		print(calculated_duplicate_items,  '------add new row')
 
-	for row in self.custom_margin_calculation:
-		row.buying_value = row.qty * row.sq_price
-		row.offer_value_with_charges = row.offer_price_without_freight + row.other_charges
-		row.offer_value_with_charges = row.qty or 0 * row.offer_value_with_charges or 0
-		if row.sq_price and row.sq_price>0:
-			row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
-		row.margin = (row.offer_price_without_freight or 0  - row.sq_price or 0) * row.qty or 0
+	# self.custom_margin_calculation = []
+	# # self.custom_margin_calculation = calculated_duplicate_items
+	# for row in calculated_duplicate_items:
+	# 	print(row.get("sap_code"))
+	# 	self.append('custom_margin_calculation', row)
+
+	# for row in self.custom_margin_calculation:
+	# 	row.buying_value = row.qty * row.sq_price
+	# 	row.offer_value_with_charges = row.offer_price_without_freight + row.other_charges
+	# 	row.offer_value_with_charges = row.qty or 0 * row.offer_value_with_charges or 0
+	# 	if row.sq_price and row.sq_price>0:
+	# 		row.material_margin = (row.offer_price_without_freight or 0 / row.sq_price) - 1
+	# 	row.margin = (row.offer_price_without_freight or 0  - row.sq_price or 0) * row.qty or 0
+
+def get_connected_sq_details(self,method):
+	connected_sq_list = []
+	supplier_name_list=[]
+	payment_terms_list = []
+	currency_list = []
+	actual_lead_time_list = []
+	notes_list = []
+	reviewed_by_list = []
+	procurement_representative_list = []
+
+	if self.opportunity:
+		supplier_quotation = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity}, 
+										 fields=["name", "supplier", "custom_payment_terms", "currency", 
+				   								"custom_actual_lead_time", "custom_notes", "custom_supplier_quotation_reviewed_by", "owner"])
+		if len(supplier_quotation) > 0:
+			
+			for sq in supplier_quotation:
+				supplier_name_list.append(sq.supplier)
+				connected_sq_list.append(sq.name)
+				payment_terms_list.append(sq.custom_payment_terms)
+				currency_list.append(sq.currency)
+				actual_lead_time_list.append(sq.custom_actual_lead_time)
+				notes_list.append(sq.custom_notes)
+				reviewed_by_list.append(sq.custom_supplier_quotation_reviewed_by)
+				procurement_representative_list.append(sq.owner)
+
+			print(connected_sq_list, '-----connected_sq')
+			print(supplier_name_list, '---------supplier_name_list')
+
+			# for co_sq in connected_sq:
+			# 	sq_row=sq_row+'<td>'+co_sq+'</td>'
+			# sq_row=sq_row+'</tr>'
+
+			# for supplier in supplier_name_list:
+			# 	supplier_row=supplier_row+'<td>'+supplier+'</td>'
+			# supplier_row=supplier_row+'</tr>'
 
 
-# original_items=self.items
-# duplicate_items=self.margin...
-# calculated_duplicate_items=[]
+			
+			template_path = "templates/connected_sq_details.html"
+			html = frappe.render_template(template_path,  dict(connected_sq=connected_sq_list, 
+													  supplier_name=supplier_name_list, payment_terms=payment_terms_list, 
+													  currency=currency_list, actual_lead_time=actual_lead_time_list,
+													  notes=notes_list, reviewed_by=reviewed_by_list,
+													  procurement_representative=procurement_representative_list))  
+			self.set_onload("custom_sq_html_data", html) 
 
-# for original in original_items:
-# 	match_found_in_duplicate=False
-# 	for duplicate in duplicate_items:
-# 		if original.name==duplicate.name:
-# 			calculated_duplicate_items.append({})
-# 			match_found_in_duplicate=True
-# 			break
-# 	if match_found_in_duplicate==False:
-# 		calculated_duplicate_items.append({})	
-
-
-# self.margin..=[]
-# self.margin=calculated_duplicate_items
-
+	
+	# return list_a
 
 def get_connected_qo(quotation_name):
 	def get_connected(quotation_name):
@@ -176,7 +284,7 @@ def qo_margin_calculations(self, method):
 			# print(row.offer_value_with_charges, '--row.offer_value_with_charges')
 
 			# print(type(row.offer_price_without_freight), type(row.sq_price))
-			if row.sq_price and row.sq_price>0:
+			if row.sq_price and row.sq_price > 0:
 				row.material_margin = flt((((row.offer_price_without_freight or 0) / row.sq_price) - 1),2)
 			# print(row.material_margin, '---row.material_margin')
 
@@ -192,22 +300,15 @@ def qo_margin_calculations(self, method):
 			self.custom_final_values = flt((self.custom_margin_total 
 									+ self.custom_freight + self.custom_packing 
 									+ self.custom_cipcpt + self.custom_bank_charges),2)
-			self.custom_final_margin = self.custom_final_values - material_margin_total
+			self.custom_final_margin = material_margin_total - self.custom_final_values
 			if  self.custom_final_values and  self.custom_final_values>0:
 				self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
 			print(self.custom_overall_margin, '----self')
 		
 def validate_admin_checklist(self, method):
-	sq_values = frappe.db.get_value('Supplier Quotation', self.supplier_quotation, ['supplier','owner'],as_dict=1)
-	supplier=sq_values.supplier
-	sq_owner=sq_values.owner
-	# print(type(supplier), '---supplier')
-	self.custom_supplier = supplier
-	self.custom_procurement_representative = sq_owner
+
 	self.custom_offer_prepared_by = self.owner
-	# print(self.contact_person, '---self.contact_person')
-	# fix this
-	# self.custom_buyer = self.contact_display
+	self.custom_buyer = self.contact_person
 	self.custom_rfq_no = self.custom_customer_opportunity_reference
 	self.custom_offer_payment_terms_ = self.payment_terms_template
 	self.custom_qo_incoterm = self.incoterm
@@ -218,11 +319,7 @@ def validate_admin_checklist(self, method):
 
 	vendor_code = frappe.db.get_value('Customer Vendor Reference', {'parent': self.party_name, 'company': self.company}, ['vendor_code'])
 	self.custom_vendor_code = vendor_code
-	print(vendor_code, '------vendor_code')
-	# for vc in vendor_code:
-	# 	if vc.company == self.company:
-	# 		self.custom_vendor_code = vc.vendor_code
-	# 		break
+	# print(vendor_code, '------vendor_code')
 
 def set_item_descripion_in_qn_item(self, method):
 	if self.custom_fetch_sq_details_in_qn == 1:

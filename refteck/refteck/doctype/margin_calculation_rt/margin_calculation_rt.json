@@ -27,20 +27,23 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "SAP Code",
-   "options": "Item"
+   "options": "Item",
+   "read_only": 1
   },
   {
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
-   "options": "UOM"
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Qty",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -48,7 +51,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "SQ Price",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -56,7 +60,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Buying Value",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -80,7 +85,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Offer Price with charges",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -88,7 +94,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Offer Value with Charges",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -96,7 +103,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Material Margin",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -104,12 +112,14 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Margin",
-   "precision": "2"
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "supplier_quotation",
    "fieldtype": "Data",
-   "label": "Supplier Quotation"
+   "label": "Supplier Quotation",
+   "read_only": 1
   },
   {
    "fieldname": "item_ref",
@@ -121,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-30 07:00:03.723478",
+ "modified": "2024-08-28 05:21:05.852287",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "Margin Calculation RT",
