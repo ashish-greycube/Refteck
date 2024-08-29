@@ -118,15 +118,19 @@ def get_connected_sq_details(self,method):
 	notes_list = []
 	reviewed_by_list = []
 	procurement_representative_list = []
+	sq_ref_list=[]
 
 	if self.opportunity:
-		if len(self.custom_margin_calculation) > 0:
+		if len(self.custom_margin_calculation) > 0:	
 			for sq_ref in self.custom_margin_calculation:
 				if sq_ref.supplier_quotation:
-					sq_doc = frappe.get_doc('Supplier Quotation', sq_ref.supplier_quotation)
-					if sq_doc:
-						print(sq_doc.name, '------sq_doc')
+					if sq_ref.supplier_quotation not in sq_ref_list:
+						sq_ref_list.append(sq_ref.supplier_quotation)
 
+			if len(sq_ref_list) > 0:
+				for sq	in sq_ref_list:
+					sq_doc = frappe.get_doc('Supplier Quotation', sq)
+					if sq_doc:
 						supplier_name_list.append(sq_doc.supplier)
 						connected_sq_list.append(sq_doc.name)
 						payment_terms_list.append(sq_doc.custom_payment_terms)
@@ -135,14 +139,15 @@ def get_connected_sq_details(self,method):
 						notes_list.append(sq_doc.custom_notes)
 						reviewed_by_list.append(sq_doc.custom_supplier_quotation_reviewed_by)
 						procurement_representative_list.append(sq_doc.owner)
-					
-					template_path = "templates/connected_sq_details.html"
-					html = frappe.render_template(template_path,  dict(connected_sq=connected_sq_list, 
-															supplier_name=supplier_name_list, payment_terms=payment_terms_list, 
-															currency=currency_list, actual_lead_time=actual_lead_time_list,
-															notes=notes_list, reviewed_by=reviewed_by_list,
-															procurement_representative=procurement_representative_list))  
-					self.set_onload("custom_sq_html_data", html) 
+
+			if len(supplier_name_list) > 0:	
+				template_path = "templates/connected_sq_details.html"
+				html = frappe.render_template(template_path,  dict(connected_sq=connected_sq_list, 
+														supplier_name=supplier_name_list, payment_terms=payment_terms_list, 
+														currency=currency_list, actual_lead_time=actual_lead_time_list,
+														notes=notes_list, reviewed_by=reviewed_by_list,
+														procurement_representative=procurement_representative_list))  
+				self.set_onload("custom_sq_html_data", html) 
 
 def get_connected_qo(quotation_name):
 	def get_connected(quotation_name):
