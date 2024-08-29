@@ -224,6 +224,7 @@ def get_data(filters):
 		where
 			tso.per_billed <100
 			and tsii.sales_order IS NULL
+			and tsii.docstatus!=2
 			{0}
 		group by
 			tpo.name
