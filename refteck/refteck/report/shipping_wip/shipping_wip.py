@@ -220,11 +220,10 @@ def get_data(filters):
 			tpo.name = tpoi.parent
 			and tpoi.sales_order_item = tsoi.name
 		left join `tabSales Invoice Item` tsii
-		on tsii.sales_order=tso.name		
+		on tsii.sales_order=tso.name and tsii.docstatus!=2
 		where
 			tso.per_billed <100
-			and tsii.sales_order IS NULL
-			and tsii.docstatus!=2
+			and tsii.sales_order IS NULL			
 			{0}
 		group by
 			tpo.name
