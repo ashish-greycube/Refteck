@@ -86,6 +86,8 @@ def set_items_for_margin_calculaion(self, method):
 								match_found_in_margin_calculation = False
 								for row in self.custom_margin_calculation:
 									if row.item_ref == sq_item.name :
+										if not row.supplier_quotation:
+											row.supplier_quotation=sq_item.parent
 										match_found_in_margin_calculation=True
 										break
 								if match_found_in_margin_calculation==False:
@@ -101,13 +103,18 @@ def set_items_for_margin_calculaion(self, method):
 								break
 
 def remove_items_from_margin_calculation(self, method):
+	to_remove = []
 	item_list=[]
 	for item in self.items:
 		item_list.append(item.item_code)
 
 	for row in self.custom_margin_calculation:
 		if row.sap_code not in item_list:
-			self.custom_margin_calculation.remove(row)
+			to_remove.append(row)
+		elif row.supplier_quotation==None or row.supplier_quotation=='':
+			to_remove.append(row)
+	
+	[self.custom_margin_calculation.remove(d) for d in to_remove]
 
 def get_connected_sq_details(self,method):
 	connected_sq_list = []
@@ -126,7 +133,6 @@ def get_connected_sq_details(self,method):
 				if sq_ref.supplier_quotation:
 					if sq_ref.supplier_quotation not in sq_ref_list:
 						sq_ref_list.append(sq_ref.supplier_quotation)
-
 			if len(sq_ref_list) > 0:
 				for sq	in sq_ref_list:
 					sq_doc = frappe.get_doc('Supplier Quotation', sq)
