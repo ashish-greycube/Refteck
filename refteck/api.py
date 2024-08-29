@@ -120,20 +120,19 @@ def get_connected_sq_details(self,method):
 	procurement_representative_list = []
 
 	if self.opportunity:
-		supplier_quotation = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity}, 
-										 fields=["name", "supplier", "custom_payment_terms", "currency", 
-				   								"custom_actual_lead_time", "custom_notes", "custom_supplier_quotation_reviewed_by", "owner"])
-		if len(supplier_quotation) > 0:
-			
-			for sq in supplier_quotation:
-				supplier_name_list.append(sq.supplier)
-				connected_sq_list.append(sq.name)
-				payment_terms_list.append(sq.custom_payment_terms)
-				currency_list.append(sq.currency)
-				actual_lead_time_list.append(sq.custom_actual_lead_time)
-				notes_list.append(sq.custom_notes)
-				reviewed_by_list.append(sq.custom_supplier_quotation_reviewed_by)
-				procurement_representative_list.append(sq.owner)
+		if len(self.custom_margin_calculation) > 0:
+			for sq_ref in self.custom_margin_calculation:
+				sq_doc = frappe.get_doc('Supplier Quotation', sq_ref.supplier_quotation)
+				print(sq_doc.name, '------sq_doc')
+
+				supplier_name_list.append(sq_doc.supplier)
+				connected_sq_list.append(sq_doc.name)
+				payment_terms_list.append(sq_doc.custom_payment_terms)
+				currency_list.append(sq_doc.currency)
+				actual_lead_time_list.append(sq_doc.custom_actual_lead_time)
+				notes_list.append(sq_doc.custom_notes)
+				reviewed_by_list.append(sq_doc.custom_supplier_quotation_reviewed_by)
+				procurement_representative_list.append(sq_doc.owner)
 			
 			template_path = "templates/connected_sq_details.html"
 			html = frappe.render_template(template_path,  dict(connected_sq=connected_sq_list, 
