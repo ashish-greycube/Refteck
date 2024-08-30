@@ -239,7 +239,7 @@ def set_item_descripion_in_qn_item(self, method):
 				for sq_item in supplier_quotation_items:
 					for qo_item in self.items:
 						if qo_item.item_code == sq_item.item_code:
-							qo_item.description = "<b>REFTECK SCOPE OF SUPPLY:</b> <br>"+ (sq_item.custom_refteck_scope_of_supply or '')
+							qo_item.description = "<b>Scope of Supply:</b> <br>"+ (sq_item.custom_refteck_scope_of_supply or '')
 							qo_item.custom_legacy_data = sq_item.description
 							if qo_item.item_code not in item_list:
 								item_list.append(qo_item.item_code)

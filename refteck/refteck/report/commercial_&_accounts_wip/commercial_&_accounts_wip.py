@@ -119,12 +119,18 @@ def get_columns(filters):
 			"fieldname": "supplier_invoice_number", 
 			"fieldtype": "Data",
 			"label": _("Supplier Invoice number"),
-			"width": 110
+			"width": 150
 		},
 		{
 			"fieldname": "supplier_invoice_date", 
 			"fieldtype": "Date",
 			"label": _("Supplier Invoice Date"),
+			"width": 110
+		},
+		{
+			"fieldname": "invoice_amount", 
+			"fieldtype": "Data",
+			"label": _("Invoice Amount"),
 			"width": 110
 		},
 		{
@@ -307,15 +313,17 @@ def get_data(filters):
 					invoice_due_date = ""
 					supplier_invoice_number = ""
 					supplier_invoice_date = ""
+					supplier_invoice_amount = ""
 					if (len(pi_items) > 0):
 							
 						pi_list = frappe.db.get_list(
-						"Purchase Invoice", fields=["name","bill_no","bill_date", "docstatus", "total_advance", "rounded_total", "due_date"],
+						"Purchase Invoice", fields=["name","bill_no","bill_date", "currency","docstatus", "total_advance", "rounded_total", "due_date"],
 									filters={"name":pi_items[0].parent})
 						# print(pi_list[0].name, '---------pi_list')
 
 						invoice_due_date = pi_list[0].due_date or ''
-						supplier_invoice_number = pi_list[0].bill_no
+						supplier_invoice_number = pi_list[0].bill_no or ''
+						supplier_invoice_amount =  fmt_money( pi_list[0].rounded_total, currency=pi_list[0].currency)
 						supplier_invoice_date = pi_list[0].bill_date or ''
 	
 					if(len(pi_items) > 0 and pi_list[0].docstatus == 1):
@@ -351,6 +359,7 @@ def get_data(filters):
 						"date_invoice_received": po.custom_date_invoice_received,
 						"supplier_invoice_number": supplier_invoice_number,
 						"supplier_invoice_date": supplier_invoice_date,
+						"invoice_amount":supplier_invoice_amount,
 						"ld_applicable": so.custom_ld_applicable,
 						"bank_details": po.custom_bank_details,
 						"accounts_wip_status": po.custom_po_acknowledgement_status,
