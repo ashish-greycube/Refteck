@@ -4,25 +4,26 @@
 
 <div>
     {% if pervious_qo | length > 0 %}
-        {% for name in pervious_qo %} <br>
-        {% set qo = frappe.get_doc('Quotation', name) %}
-        <h4>{{qo.name}}</h4>
-        <table border="1">
-            <thead>
-                <th>SAP CODE</th>
-                <th>UOM</th>
-                <th>QTY</th>
-                <th>SQ price</th>
-                <th>Buying Value</th>
-                <th>Offer Price without freight</th>
-                <th>Other Charges</th>
-                <th>Offer Price with charges</th>
-                <th>Offer Value with Charges</th>
-                <th>Material Margin</th>
-                <th>Margin</th>
-                <th>Weight in KGs</th>
-            </thead>
-            {% for margin in qo.custom_margin_calculation%}
+    {% for name in pervious_qo %} <br>
+    {% set qo = frappe.get_doc('Quotation', name) %}
+    <h4>{{qo.name}}</h4>
+    {% if qo.custom_margin_calculation | length > 1 %}
+    <table border="1">
+        <thead>
+            <th>SAP CODE</th>
+            <th>UOM</th>
+            <th>QTY</th>
+            <th>SQ price</th>
+            <th>Buying Value</th>
+            <th>Offer Price without freight</th>
+            <th>Other Charges</th>
+            <th>Offer Price with charges</th>
+            <th>Offer Value with Charges</th>
+            <th>Material Margin</th>
+            <th>Margin</th>
+            <th>Weight in KGs</th>
+        </thead>
+        {% for margin in qo.custom_margin_calculation%}
         <tbody>
             <tr>
                 <td>{{ margin.sap_code }} </td>
@@ -39,21 +40,69 @@
                 <td></td>
             </tr>
         </tbody>
-        {% endfor %}  
+        {% endfor %}
     </table>
-<br>
+    <br>
     <div class="row">
         <div class="col-xs-6">
             <div class="row">
                 <div class="col-xs-5">
-                    <label>Margin Total: </label>
+                    <label>Offer Material Total: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_offer_material_total or 0}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Offer Freight: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_offer_freight or 0}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Offer Packing: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_offer_packing or 0}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Offer CIP/CPT: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_offer_cipcpt or 0}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Offer Bank Charges: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_offer_bank_charges or 0}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Final Offer Value: </label>
+                </div>
+                <div class="col-xs-7">
+                    {{qo.custom_final_offer_values or 0}}
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">
+                    <label>Supplier Quotation Material Total: </label>
                 </div>
                 <div class="col-xs-7">
                     {{qo.custom_supplier_quotation_material_total or 0}}
                 </div>
-            </div> 
-        </div>
-        <div class="col-xs-6">
+            </div>
             <div class="row">
                 <div class="col-xs-5">
                     <label>Freight: </label>
@@ -61,7 +110,7 @@
                 <div class="col-xs-7">
                     {{qo.custom_freight or 0}}
                 </div>
-            </div> 
+            </div>
             <div class="row">
                 <div class="col-xs-5">
                     <label>Packing: </label>
@@ -69,7 +118,7 @@
                 <div class="col-xs-7">
                     {{qo.custom_packing or 0}}
                 </div>
-            </div> 
+            </div>
             <div class="row">
                 <div class="col-xs-5">
                     <label>CIP/CPT: </label>
@@ -77,7 +126,7 @@
                 <div class="col-xs-7">
                     {{qo.custom_cipcpt or 0}}
                 </div>
-            </div> 
+            </div>
             <div class="row">
                 <div class="col-xs-5">
                     <label>Bank Charges: </label>
@@ -85,18 +134,18 @@
                 <div class="col-xs-7">
                     {{qo.custom_bank_charges or 0}}
                 </div>
-            </div> 
+            </div>
             <div class="row">
                 <div class="col-xs-5">
-                    <label>Final Values: </label>
+                    <label>Final Buying Value: </label>
                 </div>
                 <div class="col-xs-7">
                     {{qo.custom_final_values or 0}}
                 </div>
-            </div> 
+            </div>
         </div>
     </div>
-<br>
+    <br>
     <div class="row">
         <div class="col-xs-6">
             <div class="row">
@@ -106,7 +155,7 @@
                 <div class="col-xs-7">
                     {{qo.custom_final_margin or 0}}
                 </div>
-            </div> 
+            </div>
         </div>
         <div class="col-xs-6">
             <div class="row">
@@ -116,12 +165,14 @@
                 <div class="col-xs-7">
                     {{qo.custom_overall_margin or 0}}
                 </div>
-            </div> 
+            </div>
         </div>
     </div>
-   
+
+    {% endif %}
     {% endfor %}
     {% endif %}
+
 
 </div>
 
