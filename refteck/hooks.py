@@ -147,6 +147,7 @@ doc_events = {
                     "refteck.api.set_items_for_margin_calculaion",
                     "refteck.api.validate_admin_checklist",
                     "refteck.api.set_item_descripion_in_qn_item",
+                    "refteck.api.set_quotation_material_total",
                     "refteck.api.remove_items_from_margin_calculation"
                     ],
         "before_save":"refteck.api.qo_margin_calculations",

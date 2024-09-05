@@ -13,6 +13,23 @@ frappe.ui.form.on("Quotation", {
     },    
 })
 
+frappe.ui.form.on("Margin Calculation RT", {
+    offer_price_without_freight:function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn]
+        if(row.sap_code){
+            frm.doc.items.forEach((item) => {
+                if (item.item_code === row.sap_code) {
+                    let old_rate = item.rate
+                    frappe.model.set_value(item.doctype, item.name, "rate", row.offer_price_without_freight);
+                    frappe.show_alert({
+                        message:__('Row {0}: In Item table, Rate {1} changed to {2}', [item.idx, old_rate, item.rate]),
+                        indicator:'green'
+                    }, 5);
+                }
+            });
+        }
+    }
+})
 
 function draw_html(frm) {
     if (

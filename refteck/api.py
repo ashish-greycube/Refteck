@@ -71,7 +71,7 @@ def share_appraisal_to_employee_from_appraisal(self,method):
 
 def set_items_for_margin_calculaion(self, method):
 	if self.opportunity:
-		supplier_quotation_list = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity}, fields=["name"])
+		supplier_quotation_list = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity, "docstatus":1}, fields=["name"])
 		if len(supplier_quotation_list) > 0:
 			for sq in supplier_quotation_list:
 				sq_items = frappe.db.get_all("Supplier Quotation Item", 
@@ -181,10 +181,41 @@ def set_previous_quotation_data(self,method):
 			self.set_onload("custom_html_data", html) 
 
 
+def set_quotation_material_total(self, method):
+	total_offer_freight = 0
+	total_offer_packing = 0
+	total_offer_cip_cpt = 0
+	total_offer_bank_charges = 0
+	if len(self.taxes) > 0 and len(self.custom_margin_calculation) > 0:
+		for tax in self.taxes:
+			desc = tax.description
+			# print(item.description, '--item.description')
+			freight = desc.find("Freight")
+			packing = desc.find("Packing")
+			cip = desc.find("CIP")
+			cpt = desc.find("CPT")
+			bank = desc.find("Bank")
+			# print(freight, '----x')
+			if freight > -1:
+				total_offer_freight = total_offer_freight + tax.tax_amount
+			if packing > -1:
+				total_offer_packing = total_offer_packing + tax.tax_amount
+			if cip > -1 or cpt > -1:
+				total_offer_cip_cpt = total_offer_cip_cpt + tax.tax_amount
+			if bank > -1:
+				total_offer_bank_charges = total_offer_bank_charges + tax.tax_amount
+					
+	
+	self.custom_offer_freight = total_offer_freight
+	self.custom_offer_packing = total_offer_packing
+	self.custom_offer_cipcpt = total_offer_cip_cpt
+	self.custom_offer_bank_charges = total_offer_bank_charges
+
 def qo_margin_calculations(self, method):
 	if self.custom_margin_calculation and len(self.custom_margin_calculation)>0:
-		margin_total = 0
-		material_margin_total = 0
+		supplier_quotation_material_total = 0
+		offer_material_total = 0
+
 		for row in self.custom_margin_calculation:
 			row.buying_value = flt(((row.qty or 0) * (row.sq_price or 0)),2)
 			
@@ -193,22 +224,28 @@ def qo_margin_calculations(self, method):
 			row.offer_value_with_charges = flt(((row.qty or 0) * (row.offer_price_with_charges or 0)),2)
 
 			if row.sq_price and row.sq_price > 0:
-				row.material_margin = flt((((row.offer_price_without_freight or 0) / row.sq_price) - 1),2)
+				row.material_margin = flt(((((row.offer_price_without_freight or 0) / row.sq_price) - 1)*100), 2)
 
 			row.margin = flt(((flt(row.offer_price_without_freight or 0) - (row.sq_price or 0)) * row.qty),2)
 
-			margin_total = margin_total + (row.buying_value or 0)
-			material_margin_total = material_margin_total + (row.material_margin or 0)
+			supplier_quotation_material_total = supplier_quotation_material_total + (row.buying_value or 0)
+			offer_material_total = offer_material_total + ((row.offer_price_without_freight or 0) * (row.qty or 0))
 
-		self.custom_margin_total = margin_total
-		if self.custom_margin_total:
-			self.custom_final_values = flt(((self.custom_margin_total or 0) 
+		self.custom_supplier_quotation_material_total = supplier_quotation_material_total
+		self.custom_offer_material_total = offer_material_total
+		if self.custom_supplier_quotation_material_total:
+			self.custom_final_values = flt(((self.custom_supplier_quotation_material_total or 0) 
 									+ (self.custom_freight or 0) + (self.custom_packing or 0) 
 									+ (self.custom_cipcpt or 0) + (self.custom_bank_charges or 0)),2)
-			self.custom_final_margin = material_margin_total - self.custom_final_values
-			if  self.custom_final_values and  self.custom_final_values>0:
-				self.custom_overall_margin = flt(((material_margin_total / self.custom_final_values) - 1),2)
-			# print(self.custom_overall_margin, '----self')
+		
+		if self.custom_offer_material_total:
+			self.custom_final_offer_values = flt(((self.custom_offer_material_total or 0)
+										 + (self.custom_offer_freight or 0) + (self.custom_offer_packing or 0)
+										 + (self.custom_offer_cipcpt or 0) + (self.custom_offer_bank_charges or 0)),2)
+		
+		self.custom_final_margin = (self.custom_final_offer_values or 0) - (self.custom_final_values or 0)
+		if  self.custom_final_values and  self.custom_final_values > 0:
+			self.custom_overall_margin = (self.custom_final_margin / self.custom_final_values) * 100
 		
 def validate_admin_checklist(self, method):
 
