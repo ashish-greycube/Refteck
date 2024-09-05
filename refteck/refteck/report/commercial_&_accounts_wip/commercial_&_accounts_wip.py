@@ -205,7 +205,7 @@ def get_columns(filters):
 
 def get_conditions(filters):
 	conditions = []
-
+	conditions.append({"docstatus":1})
 	if filters.get("from_date") and filters.get("to_date"):
 		if filters.get("to_date") >= filters.get("from_date"):
 			conditions.append(["creation","between", [filters.get("from_date"), filters.get("to_date")]])
@@ -272,7 +272,7 @@ def get_data(filters):
 							"advance_paid",
 							"rounded_total"
 							],
-							filters={"name":po_name})
+							filters={"name":po_name,"docstatus":1})
 				# print(po_list[0].name, '--------po_name')
 				
 				usd = ""
