@@ -71,7 +71,7 @@ def get_columns(filters):
 		},
 		{
 			"fieldname": "buyer",
-			"fieldtype": "Link", 
+			"fieldtype": "Data", 
 			"label": _("Buyer"),
 			"options": "Contact",
 			"width": 220
@@ -180,11 +180,11 @@ def get_data(filters):
 			tso.name as so,
 			tso.po_date,
 			tso.customer_name as client,
-			tso.owner as assigned_to,
+			todo.allocated_to as assigned_to,
 			tso.incoterm,
 			tpo.custom_order_code as code,
 			tso.po_no,
-			tso.contact_person as buyer,
+			tso.contact_display as buyer,
 			tpo.supplier,
 			tso.delivery_date,
 			tso.company,
@@ -212,6 +212,8 @@ def get_data(filters):
 		inner join `tabSales Order Item` tsoi 
 		on
 			tsoi.parent = tso.name
+			and tso.docstatus=1
+			and tso.custom_to_ignore_in_shipping_wip=0
 		inner join `tabPurchase Order Item` tpoi 
 		on
 			tpoi.sales_order = tso.name
@@ -221,6 +223,10 @@ def get_data(filters):
 			and tpoi.sales_order_item = tsoi.name
 		left join `tabSales Invoice Item` tsii
 		on tsii.sales_order=tso.name and tsii.docstatus!=2
+		left join `tabToDo` as todo
+		on todo.reference_type='Sales Order'
+		and todo.reference_name=tso.name	
+		and todo.status!='Cancelled'	
 		where
 			tso.per_billed <100
 			and tsii.sales_order IS NULL			
