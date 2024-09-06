@@ -179,7 +179,7 @@ def get_conditions(filters):
         		frappe.db.escape(filters.get("delivery_from_date")),
         		frappe.db.escape(filters.get("delivery_to_date")))		
 		else:
-			frappe.throw(_("To Date should be greater then From Date"))
+			frappe.throw(_("Delivery : To Date should be greater then From Date"))
 	
 	if filters.order_code:
 		conditions += " and tpo.custom_order_code = '{0}'".format(filters.order_code)
