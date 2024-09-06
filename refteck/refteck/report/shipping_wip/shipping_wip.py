@@ -167,6 +167,23 @@ def get_conditions(filters):
 	if filters.client:
 		conditions += " and tso.customer = '{0}'".format(filters.client)
 
+	if filters.assigned_to:
+		conditions += " and todo.allocated_to = '{0}'".format(filters.assigned_to)
+
+	if filters.company:
+		conditions += " and tso.company = '{0}'".format(filters.company)
+
+	if filters.get("delivery_from_date") and filters.get("delivery_to_date"):
+		if filters.get("delivery_to_date") >= filters.get("delivery_from_date"):
+			conditions += " and DATE(tso.delivery_date) between {0} and {1}".format(
+        		frappe.db.escape(filters.get("delivery_from_date")),
+        		frappe.db.escape(filters.get("delivery_to_date")))		
+		else:
+			frappe.throw(_("To Date should be greater then From Date"))
+	
+	if filters.order_code:
+		conditions += " and tpo.custom_order_code = '{0}'".format(filters.order_code)
+
 	# conditions.append({"per_delivered": ['<', 100], "status": ['!=', "Closed"]})
 
 	return conditions

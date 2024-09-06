@@ -23,6 +23,38 @@ frappe.query_reports["Shipping-WIP"] = {
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
+		{
+			"fieldname": "assigned_to",
+			"label": __("Assigned to"),
+			"fieldtype": "Link",	
+			"options": "User",
+		},
+		{
+			"fieldname": "company",
+			"label":__("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+		},
+		{
+			"fieldname": "order_code",
+			"label": __("Order Code"),
+			"fieldtype": "Select",	
+			"options": ["", "OT-On Track", "HA-Hold Accounts", "AP-Acknowledgement Pending", "BS-Before Shipment"],
+		},
+		{
+			"fieldname": "delivery_from_date",
+			"label":__("Delivery From Date"),
+			"fieldtype": "Date",
+            // "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
+			// "reqd": 1
+		},
+		{
+			"fieldname": "delivery_to_date",
+			"label":__("Delivery To Date"),
+			"fieldtype": "Date",
+            // "default": frappe.datetime.nowdate(),
+			// "reqd": 1
+		},
 
 	],
 	// formatter: function (value, row, column, data, default_formatter) {
