@@ -14,19 +14,46 @@ frappe.ui.form.on("Quotation", {
 })
 
 frappe.ui.form.on("Margin Calculation RT", {
-    offer_price_without_freight:function (frm, cdt, cdn) {
+    offer_price_without_freight:function(frm, cdt, cdn){
+        let row = locals[cdt][cdn]
+        let offer_price_with_charges = (row.offer_price_without_freight || 0) + (row.other_charges || 0)
+        frappe.model.set_value(cdt, cdn, "offer_price_with_charges", offer_price_with_charges);
+    },
+    other_charges:function(frm, cdt, cdn){
+        let row = locals[cdt][cdn]
+        let offer_price_with_charges = (row.offer_price_without_freight || 0) + (row.other_charges || 0)
+        frappe.model.set_value(cdt, cdn, "offer_price_with_charges", offer_price_with_charges);
+    },
+    offer_price_with_charges:function (frm, cdt, cdn) {
+        console.log("offer_price_with_charges")
         let row = locals[cdt][cdn]
         if(row.sap_code){
             frm.doc.items.forEach((item) => {
                 if (item.item_code === row.sap_code) {
                     let old_rate = item.rate
-                    frappe.model.set_value(item.doctype, item.name, "rate", row.offer_price_without_freight);
+                    frappe.model.set_value(item.doctype, item.name, "rate", row.offer_price_with_charges);
                     frappe.show_alert({
                         message:__('Row {0}: In Item table, Rate {1} changed to {2}', [item.idx, old_rate, item.rate]),
                         indicator:'green'
                     }, 5);
                 }
             });
+        }
+    }
+})
+
+frappe.ui.form.on("Other Charges Comparison", {
+    before_custom_other_charges_comparison_remove: function(frm, cdt, cdn){
+        let row = locals[cdt][cdn]
+        if (row.name) {
+            var tbl = frm.doc.taxes || [];
+            var i = tbl.length;
+            while (i--) {
+                if (tbl[i].custom_admin_checklist_other_charges_reference == row.name) {
+                    cur_frm.get_field("taxes").grid.grid_rows[i].remove();
+                }
+            }
+            cur_frm.refresh();
         }
     }
 })

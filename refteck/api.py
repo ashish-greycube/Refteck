@@ -181,35 +181,73 @@ def set_previous_quotation_data(self,method):
 			self.set_onload("custom_html_data", html) 
 
 
-def set_quotation_material_total(self, method):
-	total_offer_freight = 0
-	total_offer_packing = 0
-	total_offer_cip_cpt = 0
-	total_offer_bank_charges = 0
-	if len(self.taxes) > 0 and len(self.custom_margin_calculation) > 0:
-		for tax in self.taxes:
-			desc = tax.description
-			# print(item.description, '--item.description')
-			freight = desc.find("Freight")
-			packing = desc.find("Packing")
-			cip = desc.find("CIP")
-			cpt = desc.find("CPT")
-			bank = desc.find("Bank")
-			# print(freight, '----x')
-			if freight > -1:
-				total_offer_freight = total_offer_freight + tax.tax_amount
-			if packing > -1:
-				total_offer_packing = total_offer_packing + tax.tax_amount
-			if cip > -1 or cpt > -1:
-				total_offer_cip_cpt = total_offer_cip_cpt + tax.tax_amount
-			if bank > -1:
-				total_offer_bank_charges = total_offer_bank_charges + tax.tax_amount
+def set_taxes_from_other_charges_comparison(self,method):
+	default_income_account = frappe.db.get_value('Company', self.company, 'default_income_account')
+	# items_to_be_removed=[]
+	if len(self.custom_other_charges_comparison)>0:
+		for charges in self.custom_other_charges_comparison:
+			charges_found=False
+			for item_tax in self.taxes:
+				if item_tax.custom_admin_checklist_other_charges_reference==charges.name:
+					charges_found=True
+					item_tax.tax_amount = charges.offer_charges
+					item_tax.description = charges.charge_type		
+					print(charges.name, '---charges.name')			
+					break
+			if charges_found==False:
+				tax = self.append("taxes")
+				tax.charge_type = "Actual"
+				tax.account_head = default_income_account
+				tax.tax_amount = charges.offer_charges
+				tax.description = charges.charge_type
+				tax.custom_admin_checklist_other_charges_reference=charges.name
+				print(tax.name, '---name')
+
+
+		# for item_tax in self.taxes:
+		# 	if item_tax.custom_admin_checklist_other_charges_reference!=None or item_tax.custom_admin_checklist_other_charges_reference!='':
+		# 		item_charges_match_found=False
+		# 		for charges in self.custom_other_charges_comparison:
+		# 			if item_tax.custom_admin_checklist_other_charges_reference==charges.name:
+		# 				item_charges_match_found=True
+		# 				break
+		# 		if item_charges_match_found ==False:
+		# 			items_to_be_removed.append(item_tax)
+		# if len(items_to_be_removed)>0:
+		# 	for re in items_to_be_removed:
+		# 		self.remove(re)
+			# [self.remove(d) for d in items_to_be_removed]
+
+
+# def set_quotation_material_total(self, method):
+# 	total_offer_freight = 0
+# 	total_offer_packing = 0
+# 	total_offer_cip_cpt = 0
+# 	total_offer_bank_charges = 0
+# 	if len(self.taxes) > 0 and len(self.custom_margin_calculation) > 0:
+# 		for tax in self.taxes:
+# 			desc = tax.description
+# 			# print(item.description, '--item.description')
+# 			freight = desc.find("Freight")
+# 			packing = desc.find("Packing")
+# 			cip = desc.find("CIP")
+# 			cpt = desc.find("CPT")
+# 			bank = desc.find("Bank")
+# 			# print(freight, '----x')
+# 			if freight > -1:
+# 				total_offer_freight = total_offer_freight + tax.tax_amount
+# 			if packing > -1:
+# 				total_offer_packing = total_offer_packing + tax.tax_amount
+# 			if cip > -1 or cpt > -1:
+# 				total_offer_cip_cpt = total_offer_cip_cpt + tax.tax_amount
+# 			if bank > -1:
+# 				total_offer_bank_charges = total_offer_bank_charges + tax.tax_amount
 					
 	
-	self.custom_offer_freight = total_offer_freight
-	self.custom_offer_packing = total_offer_packing
-	self.custom_offer_cipcpt = total_offer_cip_cpt
-	self.custom_offer_bank_charges = total_offer_bank_charges
+# 	self.custom_offer_freight = total_offer_freight
+# 	self.custom_offer_packing = total_offer_packing
+# 	self.custom_offer_cipcpt = total_offer_cip_cpt
+# 	self.custom_offer_bank_charges = total_offer_bank_charges
 
 def qo_margin_calculations(self, method):
 	if self.custom_margin_calculation and len(self.custom_margin_calculation)>0:
@@ -229,19 +267,20 @@ def qo_margin_calculations(self, method):
 			row.margin = flt(((flt(row.offer_price_without_freight or 0) - (row.sq_price or 0)) * row.qty),2)
 
 			supplier_quotation_material_total = supplier_quotation_material_total + (row.buying_value or 0)
-			offer_material_total = offer_material_total + ((row.offer_price_without_freight or 0) * (row.qty or 0))
+			offer_material_total = offer_material_total + (row.offer_value_with_charges or 0)
 
 		self.custom_supplier_quotation_material_total = supplier_quotation_material_total
 		self.custom_offer_material_total = offer_material_total
-		if self.custom_supplier_quotation_material_total:
-			self.custom_final_values = flt(((self.custom_supplier_quotation_material_total or 0) 
-									+ (self.custom_freight or 0) + (self.custom_packing or 0) 
-									+ (self.custom_cipcpt or 0) + (self.custom_bank_charges or 0)),2)
+
+		final_value = 0
+		final_offer_values = 0
+		if len(self.custom_other_charges_comparison) > 0:
+			for charges in self.custom_other_charges_comparison:
+				final_value = final_value + (charges.supplier_quotation_charges or 0)
+				final_offer_values = final_offer_values + (charges.offer_charges or 0)
 		
-		if self.custom_offer_material_total:
-			self.custom_final_offer_values = flt(((self.custom_offer_material_total or 0)
-										 + (self.custom_offer_freight or 0) + (self.custom_offer_packing or 0)
-										 + (self.custom_offer_cipcpt or 0) + (self.custom_offer_bank_charges or 0)),2)
+		self.custom_final_values = final_value + (self.custom_supplier_quotation_material_total or 0)
+		self.custom_final_offer_values = final_offer_values + (self.custom_offer_material_total or 0)
 		
 		self.custom_final_margin = (self.custom_final_offer_values or 0) - (self.custom_final_values or 0)
 		if  self.custom_final_values and  self.custom_final_values > 0:

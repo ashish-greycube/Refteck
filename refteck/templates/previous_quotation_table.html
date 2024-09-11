@@ -7,7 +7,7 @@
     {% for name in pervious_qo %} <br>
     {% set qo = frappe.get_doc('Quotation', name) %}
     <h4>{{qo.name}}</h4>
-    {% if qo.custom_margin_calculation | length > 1 %}
+    {% if qo.custom_margin_calculation | length > 0 %}
     <table border="1">
         <thead>
             <th>SAP CODE</th>
@@ -45,7 +45,7 @@
     <br>
     <div class="row">
         <div class="col-xs-6">
-            <div class="row">
+            <!-- <div class="row">
                 <div class="col-xs-5">
                     <label>Offer Material Total: </label>
                 </div>
@@ -84,7 +84,7 @@
                 <div class="col-xs-7">
                     {{qo.custom_offer_bank_charges or 0}}
                 </div>
-            </div>
+            </div> -->
             <div class="row">
                 <div class="col-xs-5">
                     <label>Final Offer Value: </label>
@@ -94,7 +94,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-6">
+        <!-- <div class="col-xs-6">
             <div class="row">
                 <div class="col-xs-5">
                     <label>Supplier Quotation Material Total: </label>
@@ -134,7 +134,7 @@
                 <div class="col-xs-7">
                     {{qo.custom_bank_charges or 0}}
                 </div>
-            </div>
+            </div> -->
             <div class="row">
                 <div class="col-xs-5">
                     <label>Final Buying Value: </label>

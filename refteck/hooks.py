@@ -147,12 +147,13 @@ doc_events = {
                     "refteck.api.set_items_for_margin_calculaion",
                     "refteck.api.validate_admin_checklist",
                     "refteck.api.set_item_descripion_in_qn_item",
-                    "refteck.api.set_quotation_material_total",
-                    "refteck.api.remove_items_from_margin_calculation"
+                    # "refteck.api.set_quotation_material_total",
+                    "refteck.api.remove_items_from_margin_calculation",
                     ],
         "before_save":"refteck.api.qo_margin_calculations",
         "onload":["refteck.api.set_previous_quotation_data",
-                  "refteck.api.get_connected_sq_details"]
+                  "refteck.api.get_connected_sq_details"],
+        "before_validate": "refteck.api.set_taxes_from_other_charges_comparison"
     },
     "Purchase Invoice":{
         "before_validate": "refteck.api.validation_for_supplier"
