@@ -180,30 +180,43 @@ def set_previous_quotation_data(self,method):
 			# print(html, '---html')  
 			self.set_onload("custom_html_data", html) 
 
-
 def set_taxes_from_other_charges_comparison(self,method):
-	default_income_account = frappe.db.get_value('Company', self.company, 'default_income_account')
-	# items_to_be_removed=[]
-	if len(self.custom_other_charges_comparison)>0:
+	if len(self.custom_other_charges_comparison) > 0:
+		self.taxes = []
+		default_income_account = frappe.db.get_value('Company', self.company, 'default_income_account')
 		for charges in self.custom_other_charges_comparison:
-			charges_found=False
-			for item_tax in self.taxes:
-				if item_tax.custom_admin_checklist_other_charges_reference==charges.name:
-					charges_found=True
-					item_tax.tax_amount = charges.offer_charges
-					item_tax.description = charges.charge_type		
-					print(charges.name, '---charges.name')			
-					break
-			if charges_found==False:
+			if charges.offer_charges > 0:
 				tax = self.append("taxes")
 				tax.charge_type = "Actual"
 				tax.account_head = default_income_account
 				tax.tax_amount = charges.offer_charges
 				tax.description = charges.charge_type
-				tax.custom_admin_checklist_other_charges_reference=charges.name
-				print(tax.name, '---name')
+				# tax.custom_admin_checklist_other_charges_reference=charges.name
 
+####### code to syanc with sales & taxes table
+# def set_taxes_from_other_charges_comparison(self,method):
+# 	default_income_account = frappe.db.get_value('Company', self.company, 'default_income_account')
+# 	# items_to_be_removed=[]
+# 	if len(self.custom_other_charges_comparison)>0:
+# 		for charges in self.custom_other_charges_comparison:
+# 			charges_found=False
+# 			for item_tax in self.taxes:
+# 				if item_tax.custom_admin_checklist_other_charges_reference==charges.name:
+# 					charges_found=True
+# 					item_tax.tax_amount = charges.offer_charges
+# 					item_tax.description = charges.charge_type		
+# 					print(charges.name, '---charges.name')			
+# 					break
+# 			if charges_found==False:
+# 				tax = self.append("taxes")
+# 				tax.charge_type = "Actual"
+# 				tax.account_head = default_income_account
+# 				tax.tax_amount = charges.offer_charges
+# 				tax.description = charges.charge_type
+# 				tax.custom_admin_checklist_other_charges_reference=charges.name
+# 				print(tax.name, '---name')
 
+		####### delete
 		# for item_tax in self.taxes:
 		# 	if item_tax.custom_admin_checklist_other_charges_reference!=None or item_tax.custom_admin_checklist_other_charges_reference!='':
 		# 		item_charges_match_found=False
@@ -278,7 +291,9 @@ def qo_margin_calculations(self, method):
 			for charges in self.custom_other_charges_comparison:
 				final_value = final_value + (charges.supplier_quotation_charges or 0)
 				final_offer_values = final_offer_values + (charges.offer_charges or 0)
-		
+
+		self.custom_total_sq_other_charges = final_value
+		self.custom_total_offer_other_charges = final_offer_values
 		self.custom_final_values = final_value + (self.custom_supplier_quotation_material_total or 0)
 		self.custom_final_offer_values = final_offer_values + (self.custom_offer_material_total or 0)
 		

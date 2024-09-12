@@ -8,7 +8,7 @@
     {% set qo = frappe.get_doc('Quotation', name) %}
     <h4>{{qo.name}}</h4>
     {% if qo.custom_margin_calculation | length > 0 %}
-    <table border="1">
+    <table border="1" class="text-center">
         <thead>
             <th>SAP CODE</th>
             <th>UOM</th>
@@ -42,129 +42,54 @@
         </tbody>
         {% endfor %}
     </table>
+
+    {% if qo.custom_other_charges_comparison | length > 0 %}
     <br>
-    <div class="row">
-        <div class="col-xs-6">
-            <!-- <div class="row">
-                <div class="col-xs-5">
-                    <label>Offer Material Total: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_offer_material_total or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Offer Freight: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_offer_freight or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Offer Packing: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_offer_packing or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Offer CIP/CPT: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_offer_cipcpt or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Offer Bank Charges: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_offer_bank_charges or 0}}
-                </div>
-            </div> -->
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Final Offer Value: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_final_offer_values or 0}}
-                </div>
-            </div>
-        </div>
-        <!-- <div class="col-xs-6">
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Supplier Quotation Material Total: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_supplier_quotation_material_total or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Freight: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_freight or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Packing: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_packing or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>CIP/CPT: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_cipcpt or 0}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Bank Charges: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_bank_charges or 0}}
-                </div>
-            </div> -->
-            <div class="row">
-                <div class="col-xs-5">
-                    <label>Final Buying Value: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_final_values or 0}}
-                </div>
-            </div>
-        </div>
-    </div>
-    <br>
+    <table border="1" width=100% class="text-center">
+        <thead>
+            <th>Charge Type</th>
+            <th>Supplier Quotation Charges</th>
+            <th>Offer Charges</th>
+        </thead>
+        {% for charges in qo.custom_other_charges_comparison%}
+        <tbody>
+            <tr>
+                <td>{{ charges.charge_type }} </td>
+                <td> {{ charges.supplier_quotation_charges }}</td>
+                <td> {{ charges.offer_charges }}</td>
+            </tr>
+        </tbody>
+        {% endfor %}
+    </table>
+    {% endif %}
+<br>
     <div class="row">
         <div class="col-xs-6">
             <div class="row">
-                <div class="col-xs-5">
-                    <label>Final Margin: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_final_margin or 0}}
-                </div>
+                <div class="col-xs-5"><b>Total SQ Other  Charges</b></div>
+                <div class="col-xs-7">: {{qo.custom_total_sq_other_charges or 0}}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5"><b>Final Buying Value</b></div>
+                <div class="col-xs-7">: {{qo.custom_final_values or 0}}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5"><b>Final Margin</b></div>
+                <div class="col-xs-7">: {{qo.custom_final_margin or 0}}</div>
             </div>
         </div>
         <div class="col-xs-6">
             <div class="row">
-                <div class="col-xs-5">
-                    <label>Overall Margin: </label>
-                </div>
-                <div class="col-xs-7">
-                    {{qo.custom_overall_margin or 0}}
-                </div>
+                <div class="col-xs-5"><b>Total Offer Other Charges</b></div>
+                <div class="col-xs-7">: {{qo.custom_total_offer_other_charges or 0}}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5"><b>Final Offer Value</b></div>
+                <div class="col-xs-7">: {{qo.custom_final_offer_values or 0}}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5"><b>Overall Margin</b></div>
+                <div class="col-xs-7">: {{" %.2f " | format(qo.custom_overall_margin)}} %</div>
             </div>
         </div>
     </div>
