@@ -125,6 +125,7 @@ def get_connected_sq_details(self,method):
 	notes_list = []
 	reviewed_by_list = []
 	procurement_representative_list = []
+	total_weight_list = []
 	sq_ref_list=[]
 
 	if self.opportunity:
@@ -145,6 +146,7 @@ def get_connected_sq_details(self,method):
 						notes_list.append(sq_doc.custom_notes)
 						reviewed_by_list.append(sq_doc.custom_supplier_quotation_reviewed_by)
 						procurement_representative_list.append(sq_doc.owner)
+						total_weight_list.append(sq_doc.custom_total_weight)
 
 			if len(supplier_name_list) > 0:	
 				template_path = "templates/connected_sq_details.html"
@@ -152,7 +154,8 @@ def get_connected_sq_details(self,method):
 														supplier_name=supplier_name_list, payment_terms=payment_terms_list, 
 														currency=currency_list, actual_lead_time=actual_lead_time_list,
 														notes=notes_list, reviewed_by=reviewed_by_list,
-														procurement_representative=procurement_representative_list))  
+														procurement_representative=procurement_representative_list,
+														total_weight_list=total_weight_list))  
 				self.set_onload("custom_sq_html_data", html) 
 
 def get_connected_qo(quotation_name):

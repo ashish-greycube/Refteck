@@ -21,23 +21,23 @@
             <th>Offer Value with Charges</th>
             <th>Material Margin</th>
             <th>Margin</th>
-            <th>Weight in KGs</th>
+            <!-- <th>Total Weight (in KGs)</th> -->
         </thead>
         {% for margin in qo.custom_margin_calculation%}
         <tbody>
             <tr>
-                <td>{{ margin.sap_code }} </td>
-                <td> {{ margin.uom }}</td>
-                <td> {{ margin.qty }}</td>
-                <td> {{ margin.sq_price }}</td>
-                <td> {{ margin.buying_value }}</td>
-                <td> {{ margin.offer_price_without_freight }}</td>
-                <td> {{ margin.other_charges}}</td>
-                <td> {{ margin.offer_price_with_charges}}</td>
-                <td> {{ margin.offer_value_with_charges}}</td>
-                <td>{{ margin.material_margin}}</td>
-                <td>{{margin.margin}}</td>
-                <td></td>
+                <td>{{ margin.sap_code or '' }} </td>
+                <td> {{ margin.uom  or '' }}</td>
+                <td> {{ margin.qty or 0 }}</td>
+                <td> {{ margin.sq_price or 0 }}</td>
+                <td> {{ margin.buying_value or 0 }}</td>
+                <td> {{ margin.offer_price_without_freight or 0 }}</td>
+                <td> {{ margin.other_charges or 0 }}</td>
+                <td> {{ margin.offer_price_with_charges or 0 }}</td>
+                <td> {{ margin.offer_value_with_charges or 0 }}</td>
+                <td>{{ margin.material_margin or 0 }}</td>
+                <td>{{margin.margin or 0 }}</td>
+                <!-- <td>{{ margin.total_weight }}</td> -->
             </tr>
         </tbody>
         {% endfor %}
@@ -54,9 +54,9 @@
         {% for charges in qo.custom_other_charges_comparison%}
         <tbody>
             <tr>
-                <td>{{ charges.charge_type }} </td>
-                <td> {{ charges.supplier_quotation_charges }}</td>
-                <td> {{ charges.offer_charges }}</td>
+                <td>{{ charges.charge_type or '' }} </td>
+                <td> {{ charges.supplier_quotation_charges or 0 }}</td>
+                <td> {{ charges.offer_charges or 0 }}</td>
             </tr>
         </tbody>
         {% endfor %}
@@ -89,7 +89,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-5"><b>Overall Margin</b></div>
-                <div class="col-xs-7">: {{" %.2f " | format(qo.custom_overall_margin)}} %</div>
+                <div class="col-xs-7">: {{" %.2f " | format(qo.custom_overall_margin or 0)}} %</div>
             </div>
         </div>
     </div>

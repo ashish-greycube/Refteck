@@ -41,6 +41,14 @@
         {% endif %} 
     </tr>
     <tr>
+        <td><b>Total Weight (In KGs)</b></td>
+        {% if total_weight_list | length > 0 %}
+        {% for total_weight in total_weight_list %} 
+        <td>{{total_weight}}</td>
+        {% endfor %} 
+        {% endif %} 
+    </tr>
+    <tr>
         <td><b>Notes</b></td>
         {% if notes | length > 0 %}
         {% for nt in notes %} 
