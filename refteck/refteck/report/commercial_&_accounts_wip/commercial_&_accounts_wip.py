@@ -284,7 +284,8 @@ def get_data(filters):
 							"advance_paid",
 							"rounded_total",
 							"order_confirmation_no",
-							"order_confirmation_date"
+							"order_confirmation_date",
+							"custom_accounts_wip"
 							],
 							filters={"name":po_name,"docstatus":1})
 				# print(po_list[0].name, '--------po_name')
@@ -378,7 +379,7 @@ def get_data(filters):
 						"invoice_amount":supplier_invoice_amount,
 						"ld_applicable": so.custom_ld_applicable,
 						"bank_details": po.custom_bank_details,
-						"accounts_wip_status": po.custom_po_acknowledgement_status,
+						"accounts_wip_status": po.custom_accounts_wip,
 						"company": so.company,
 						"usd": usd,
 						"gbp": gbp,
