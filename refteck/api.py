@@ -71,34 +71,40 @@ def share_appraisal_to_employee_from_appraisal(self,method):
 
 def set_items_for_margin_calculaion(self, method):
 	if self.opportunity:
-		supplier_quotation_list = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity, "docstatus":1}, fields=["name"])
+
+		# supplier quotation
+		supplier_quotation_list = frappe.db.get_all("Supplier Quotation", filters={"opportunity": self.opportunity, "docstatus":1, "status":"Submitted"}, fields=["name"])
 		if len(supplier_quotation_list) > 0:
+
+			# supplier quotation item
 			for sq in supplier_quotation_list:
-				sq_items = frappe.db.get_all("Supplier Quotation Item", 
-								 parent_doctype="Supplier Quotation",filters={"parent": sq.name}, 
-								 fields=["item_code", "uom", "qty", "rate", "parent", "name"])
+				sq_items = frappe.db.get_all("Supplier Quotation Item",parent_doctype="Supplier Quotation",filters={"parent": sq.name},fields=["item_code", "uom", "qty", "rate", "parent", "name"])
 				if len(sq_items) > 0:
 					for qo_item in self.items:
 						qo_item_found=False
+
 						for sq_item in sq_items:
-							if qo_item.item_code == sq_item.item_code:
+							if qo_item.item_code == sq_item.item_code and qo_item.qty == sq_item.qty:
 								qo_item_found=True
 								match_found_in_margin_calculation = False
+
 								for row in self.custom_margin_calculation:
-									if row.item_ref == sq_item.name :
+									if row.qo_item_ref == qo_item.name:
 										if not row.supplier_quotation:
-											row.supplier_quotation=sq_item.parent
-										match_found_in_margin_calculation=True
+											row.supplier_quotation = sq_item.parent
+										match_found_in_margin_calculation = True
 										break
-								if match_found_in_margin_calculation==False:
+								
+								if match_found_in_margin_calculation == False:
 									row=self.append("custom_margin_calculation",{})
 									row.sap_code=sq_item.item_code
 									row.uom=sq_item.uom
 									row.qty=sq_item.qty
 									row.sq_price=sq_item.rate
 									row.supplier_quotation=sq_item.parent
-									row.item_ref=sq_item.name
-
+									row.sq_item_ref=sq_item.name
+									row.qo_item_ref=qo_item.name
+							
 							if qo_item_found == True:
 								break
 
@@ -106,15 +112,18 @@ def remove_items_from_margin_calculation(self, method):
 	to_remove = []
 	item_list=[]
 	for item in self.items:
-		item_list.append(item.item_code)
+		item_list.append(item.name)
 
 	for row in self.custom_margin_calculation:
-		if row.sap_code not in item_list:
+		if row.qo_item_ref not in item_list:
 			to_remove.append(row)
 		elif row.supplier_quotation==None or row.supplier_quotation=='':
 			to_remove.append(row)
 	
 	[self.custom_margin_calculation.remove(d) for d in to_remove]
+
+	for index,margin in enumerate(self.custom_margin_calculation):
+		margin.idx=index+1
 
 def get_connected_sq_details(self,method):
 	connected_sq_list = []

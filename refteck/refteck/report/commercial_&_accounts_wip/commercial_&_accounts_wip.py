@@ -80,6 +80,18 @@ def get_columns(filters):
 			"width": 150
 		},
 		{
+			"fieldname": "order_confirmation_no",
+			"fieldtype": "Data",
+			"label": _("Order Confirmation No"),
+			"width": 150
+		},
+		{
+			"fieldname": "order_confirmation_date",
+			"fieldtype": "Date",
+			"label": _("Order Confirmation Date"),
+			"width": 110
+		},
+		{
 			"fieldname": "date_invoice_received",
 			"fieldtype": "Date",
 			"label": _("Date Invoice Received"),
@@ -270,7 +282,9 @@ def get_data(filters):
 							"status",
 							"custom_finance_remarks",
 							"advance_paid",
-							"rounded_total"
+							"rounded_total",
+							"order_confirmation_no",
+							"order_confirmation_date"
 							],
 							filters={"name":po_name,"docstatus":1})
 				# print(po_list[0].name, '--------po_name')
@@ -356,6 +370,8 @@ def get_data(filters):
 						"supplier_po_issue_date": po.modified,
 						"supplier": po.supplier,
 						"po_acknowledgement_status": po.custom_po_acknowledgement_status,
+						"order_confirmation_no":po.order_confirmation_no,
+						"order_confirmation_date":po.order_confirmation_date,
 						"date_invoice_received": po.custom_date_invoice_received,
 						"supplier_invoice_number": supplier_invoice_number,
 						"supplier_invoice_date": supplier_invoice_date,

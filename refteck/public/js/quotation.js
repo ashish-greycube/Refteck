@@ -29,7 +29,7 @@ frappe.ui.form.on("Margin Calculation RT", {
         let row = locals[cdt][cdn]
         if(row.sap_code){
             frm.doc.items.forEach((item) => {
-                if (item.item_code === row.sap_code) {
+                if (item.item_code === row.sap_code && item.name === row.qo_item_ref) {
                     let old_rate = item.rate
                     frappe.model.set_value(item.doctype, item.name, "rate", row.offer_price_with_charges);
                     frappe.show_alert({
