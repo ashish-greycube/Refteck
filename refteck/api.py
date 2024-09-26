@@ -119,6 +119,12 @@ def remove_items_from_margin_calculation(self, method):
 			to_remove.append(row)
 		elif row.supplier_quotation==None or row.supplier_quotation=='':
 			to_remove.append(row)
+		elif frappe.db.exists('Supplier Quotation', row.supplier_quotation)==None:
+			to_remove.append(row)
+		elif frappe.db.exists('Supplier Quotation', row.supplier_quotation):
+			sq_opp = frappe.db.get_value('Supplier Quotation', row.supplier_quotation, 'opportunity')
+			if self.opportunity != sq_opp:
+				to_remove.append(row)
 	
 	[self.custom_margin_calculation.remove(d) for d in to_remove]
 
@@ -145,19 +151,21 @@ def get_connected_sq_details(self,method):
 						sq_ref_list.append(sq_ref.supplier_quotation)
 			if len(sq_ref_list) > 0:
 				for sq	in sq_ref_list:
-					sq_doc = frappe.get_doc('Supplier Quotation', sq)
-					if sq_doc:
-						supplier_name_list.append(sq_doc.supplier)
-						connected_sq_list.append(sq_doc.name)
-						payment_terms_list.append(sq_doc.custom_payment_terms)
-						currency_list.append(sq_doc.currency)
-						actual_lead_time_list.append(sq_doc.custom_actual_lead_time)
-						notes_list.append(sq_doc.custom_notes)
-						reviewed_by_list.append(sq_doc.custom_supplier_quotation_reviewed_by)
-						procurement_representative_list.append(sq_doc.owner)
-						total_weight_list.append(sq_doc.custom_total_weight)
+					sq_doc_exist = frappe.db.exists('Supplier Quotation', sq)
+					if sq_doc_exist:
+						sq_doc = frappe.get_doc('Supplier Quotation', sq)
+						if sq_doc.opportunity == self.opportunity:
+							supplier_name_list.append(sq_doc.supplier)
+							connected_sq_list.append(sq_doc.name)
+							payment_terms_list.append(sq_doc.custom_payment_terms)
+							currency_list.append(sq_doc.currency)
+							actual_lead_time_list.append(sq_doc.custom_actual_lead_time)
+							notes_list.append(sq_doc.custom_notes)
+							reviewed_by_list.append(sq_doc.custom_supplier_quotation_reviewed_by)
+							procurement_representative_list.append(sq_doc.owner)
+							total_weight_list.append(sq_doc.custom_total_weight)
 
-			if len(supplier_name_list) > 0:	
+			if len(connected_sq_list) > 0:	
 				template_path = "templates/connected_sq_details.html"
 				html = frappe.render_template(template_path,  dict(connected_sq=connected_sq_list, 
 														supplier_name=supplier_name_list, payment_terms=payment_terms_list, 
