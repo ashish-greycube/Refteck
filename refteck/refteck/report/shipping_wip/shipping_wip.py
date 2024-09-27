@@ -13,7 +13,7 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	data = get_data(filters)
-	msg="Shipping WIP report returns data only if there are SO without SI"
+	msg="Shipping WIP report returns data only if there are SO linked with PO and such SO are without SI"
 	if not data:
 		# msgprint(_("No records found"))
 		return columns, data, msg, None
@@ -238,18 +238,18 @@ def get_data(filters):
 		on
 			tpo.name = tpoi.parent
 			and tpoi.sales_order_item = tsoi.name
-		left join `tabSales Invoice Item` tsii
-		on tsii.sales_order=tso.name and tsii.docstatus!=2
 		left join `tabToDo` as todo
 		on todo.reference_type='Sales Order'
 		and todo.reference_name=tso.name	
 		and todo.status!='Cancelled'	
 		where
 			tso.per_billed <100
-			and tsii.sales_order IS NULL			
+			and NOT EXISTS ( select 1 from `tabSales Invoice Item` tsii where tsii.so_detail=tsoi.name and tsii.sales_order=tso.name and tsii.docstatus!=2)			
 			{0}
 		group by
 			tpo.name
+		order by
+			tso.name
 		""".format(conditions),filters,as_dict=1,debug=1
 	)
 
