@@ -337,6 +337,22 @@ def validate_admin_checklist(self, method):
 	self.custom_vendor_code = vendor_code
 	# print(vendor_code, '------vendor_code')
 
+def set_offer_price_without_freight_and_other_charges_in_qo(self, method):
+	if self.amended_from and self.is_new():
+		if len(self.custom_margin_calculation) > 0:
+			for margin in self.custom_margin_calculation:
+				sq_doc = frappe.get_doc("Supplier Quotation", margin.supplier_quotation)
+				prev_qo = frappe.get_doc("Quotation", self.amended_from)
+				for row in prev_qo.custom_margin_calculation:
+					if sq_doc.amended_from and row.supplier_quotation == sq_doc.amended_from:
+						margin.offer_price_without_freight = row.offer_price_without_freight
+						margin.other_charges = row.other_charges
+						break
+					elif row.supplier_quotation == sq_doc.name:
+						margin.offer_price_without_freight = row.offer_price_without_freight
+						margin.other_charges = row.other_charges
+						break			
+
 def set_item_descripion_in_qn_item(self, method):
 	if self.custom_fetch_sq_details_in_qn == 1:
 		opportunity_name = self.opportunity

@@ -146,6 +146,7 @@ doc_events = {
                            "refteck.api.set_taxes_from_other_charges_comparison"],
         "validate":[
                     "refteck.api.set_items_for_margin_calculaion",
+                    "refteck.api.set_offer_price_without_freight_and_other_charges_in_qo",
                     "refteck.api.validate_admin_checklist",
                     "refteck.api.set_item_descripion_in_qn_item",
                     # "refteck.api.set_quotation_material_total",
