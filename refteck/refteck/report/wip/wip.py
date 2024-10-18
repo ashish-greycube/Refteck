@@ -4,7 +4,8 @@
 import frappe
 from frappe import msgprint, _
 from datetime import datetime
-from frappe.utils import getdate
+from frappe.utils import getdate, date_diff, nowdate
+from operator import itemgetter
 
 def execute(filters=None):
 	columns, data = [], []
@@ -51,6 +52,18 @@ def get_columns(filters):
 			"fieldname": "due_date",
 			"fieldtype": "Date",
 			"label": _("Due Date"),
+			"width": 110
+		},
+		{
+			"fieldname": "revised_due_date",
+			"fieldtype": "Date",
+			"label": _("Revised Due Date"),
+			"width": 110
+		},
+		{
+			"fieldname": "excess_days",
+			"fieldtype": "Data",
+			"label": _("Excess Days"),
 			"width": 110
 		},
 		{
@@ -118,8 +131,8 @@ def get_conditions(filters):
 	if filters.territory:
 		conditions.append({"territory":filters.territory})
 
-	if filters.status:
-		conditions.append({"status":filters.status})
+	# if filters.status:
+	# 	conditions.append({"status":filters.status})
 
 	if filters.client:
 		conditions.append({"party_name":filters.client})
@@ -133,6 +146,9 @@ def get_child_conditions(filters, op_parent):
 
 	if filters.sourcing_person:
 		conditions.append({"custom_sourcing_person":filters.sourcing_person})
+
+	if filters.status:
+		conditions.append({"custom_item_status":filters.status})
 
 	return conditions
 
@@ -152,62 +168,74 @@ def get_data(filters):
 						"name",
 						"territory",
 						"status", 
-						"party_name"],
+						"party_name",
+						"custom_revised_due_date"],
 						filters=conditions,					
 	)
 	  
 	for op in opportunity_list:
 
 		op_parent = op.name 
+		days = date_diff(op.custom_revised_due_date, getdate(nowdate()))
+		customer_name = frappe.db.get_value('Customer', op.party_name, 'customer_name')
+		# print(days, '---days')
 		child_conditions = get_child_conditions(filters,op_parent)
 		
 		items = frappe.db.get_list(
 			"Opportunity Item", 
 			parent_doctype='Opportunity',
-			fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand"], 
-			filters=child_conditions
+			fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand", "custom_item_status"], 
+			filters=child_conditions,
+			group_by="custom_sourcing_person, brand",
 		) 
 
-		# get unique sourcing persons
-		unique_sourcing_persons = []
 		for item in items:
-			if item.custom_sourcing_person not in unique_sourcing_persons:
-				unique_sourcing_persons.append(item.custom_sourcing_person)	
+			if item.custom_item_status != "Closed":
+			
+			# print(item.custom_refteck_item_comment, item.parent, '---custom_refteck_item_comment')
+
+		# get unique sourcing persons
+		# unique_sourcing_persons = []
+		# for item in items:
+		# 	if item.custom_sourcing_person not in unique_sourcing_persons:
+		# 		unique_sourcing_persons.append(item.custom_sourcing_person)	
 		
 		# loop unique sourcing persons list for brand & comments 
-		for sourcing_person in unique_sourcing_persons:
+		# for sourcing_person in unique_sourcing_persons:
 
-			customer_name = frappe.db.get_value('Customer', op.party_name, 'customer_name')
+		# 	customer_name = frappe.db.get_value('Customer', op.party_name, 'customer_name')
 
-			unique_brands = []
-			comments = []
-			for values in items:
-				if sourcing_person == values.custom_sourcing_person and values.brand not in unique_brands:
-					unique_brands.append(values.brand)
+		# 	unique_brands = []
+		# 	comments = []
+		# 	for values in items:
+		# 		if sourcing_person == values.custom_sourcing_person and values.brand not in unique_brands:
+		# 			unique_brands.append(values.brand)
 
-				if sourcing_person == values.custom_sourcing_person and values.custom_refteck_item_comment:
-					comments.append(values.custom_refteck_item_comment)
+		# 		if sourcing_person == values.custom_sourcing_person and values.custom_refteck_item_comment:
+		# 			comments.append(values.custom_refteck_item_comment)
 			
-			if(len(unique_brands) > 0):
-				brands = ", ".join((ele if ele!=None else '') for ele in unique_brands)
+		# 	if(len(unique_brands) > 0):
+		# 		brands = ", ".join((ele if ele!=None else '') for ele in unique_brands)
 			
-			if(len(comments) > 0):
-				comments = ", ".join((ele if ele!=None else '') for ele in comments)
+		# 	if(len(comments) > 0):
+		# 		comments = ", ".join((ele if ele!=None else '') for ele in comments)
 
-			row = {
-					"name": sourcing_person,
-					"rfq_no": op.custom_customer_opportunity_reference ,
-					"buyer": op.contact_display,
-					"recpt_dt": op.transaction_date,
-					"due_date": op.expected_closing,
-					"refteck_ref_no": op.custom_refteck_opportunity_reference,
-					"erp_ref_no": op.name,
-					"territory":op.territory,
-					"status": op.status,
-					"client_name": customer_name,
-					"oems": brands,
-					"comments": "".join(comments)
-			}
-			data.append(row)
-		
-	return data
+				row = {
+						"name": item.custom_sourcing_person,
+						"rfq_no": op.custom_customer_opportunity_reference ,
+						"buyer": op.contact_display,
+						"recpt_dt": op.transaction_date,
+						"due_date": op.expected_closing,
+						"revised_due_date": op.custom_revised_due_date,
+						"excess_days":days,
+						"refteck_ref_no": op.custom_refteck_opportunity_reference,
+						"erp_ref_no": op.name,
+						"territory":op.territory,
+						"status": item.custom_item_status,
+						"client_name": customer_name,
+						"oems": item.brand,
+						"comments": item.custom_refteck_item_comment
+				}
+				data.append(row)
+		sorted_data = sorted(data, key=itemgetter('name'))
+	return sorted_data

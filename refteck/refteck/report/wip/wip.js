@@ -37,16 +37,8 @@ frappe.query_reports["WIP"] = {
 		{
 			"fieldname": "status",
 			"label":__("Status"),
-			"fieldtype": "Select",
-			"options": [
-				'',
-				'Open',
-				'Quotation',
-				'Converted',
-				'Lost',
-				'Replied',
-				'Closed'
-			],
+			"fieldtype": "Link",
+			"options": "Opportunity Item Status"
 		},
 		{
 			"fieldname": "client",
@@ -54,5 +46,18 @@ frappe.query_reports["WIP"] = {
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
-	]
+	],
+	formatter: function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (column.fieldname.includes(__("excess_days"))) {
+			if(value >= 0){
+				value = `<span style="color:green">` + value + `</span>`;
+			}
+			else{
+				value = `<span style="color:red">` + value + `</span>`;
+			}
+			
+		}
+        return value;
+    }
 };

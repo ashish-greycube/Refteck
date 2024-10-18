@@ -33,7 +33,8 @@ doctype_js = {"Purchase Order":"public/js/purchase_order.js",
              "Request for Quotation":"public/js/request_for_quotation.js",
              "Purchase Invoice":"public/js/purchase_invoice.js",
              "Purchase Receipt":"public/js/purchase_receipt.js",
-             "Quotation":"public/js/quotation.js"
+             "Quotation":"public/js/quotation.js",
+             "Opportunity":"public/js/opportunity.js",
              }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -156,6 +157,9 @@ doc_events = {
         "onload":["refteck.api.set_previous_quotation_data",
                   "refteck.api.get_connected_sq_details"],
     },
+    # "Opportunity":{
+    #     "onload": "refteck.api.set_status_for_same_brand_in_op_items"
+    # },
     "Purchase Invoice":{
         "before_validate": "refteck.api.validation_for_supplier"
     },

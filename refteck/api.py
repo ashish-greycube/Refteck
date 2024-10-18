@@ -379,3 +379,20 @@ def set_po_tracking_status_in_po_item(self,method):
 		for row in self.items:
 			row.custom_po_line_item_tracking_status = self.custom_po_tracking_status
 		frappe.msgprint(_("PO tracking status is set to {0} in {1} PO items").format(self.custom_po_tracking_status,len(self.items)),alert=1)
+
+def set_status_for_same_brand_in_op_items(self, method):
+
+    items = frappe.db.get_list(
+            "Opportunity Item", 
+            parent_doctype='Opportunity',
+            fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand", "custom_item_status"], 
+            filters={"parent":self.name},
+            group_by="custom_sourcing_person, brand",
+            # order_by="idx asc"
+        ) 
+    print(items, '---items')
+    for item in items:
+        print(item.custom_item_status, '---custom_item_status')
+        for row in self.items:
+            if row.custom_sourcing_person == item.custom_sourcing_person and row.brand == item.brand:
+                row.custom_item_status = item.custom_item_status
