@@ -187,6 +187,7 @@ def get_data(filters):
 			fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand", "custom_item_status"], 
 			filters=child_conditions,
 			group_by="custom_sourcing_person, brand",
+			order_by="idx"
 		) 
 
 		for item in items:
