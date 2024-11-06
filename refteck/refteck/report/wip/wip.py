@@ -187,12 +187,24 @@ def get_data(filters):
 			fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand", "custom_item_status"], 
 			filters=child_conditions,
 			group_by="custom_sourcing_person, brand",
-			order_by="idx"
 		) 
 
 		for item in items:
 			if item.custom_item_status != "Closed":
-			
+
+				cmt = frappe.db.sql(
+					"""select custom_refteck_item_comment
+					from `tabOpportunity Item` as oi
+					where oi.parent = %s
+					and oi.custom_sourcing_person = %s
+					and oi.brand = %s
+					order by idx ASC limit 1""",
+					(item.parent, item.custom_sourcing_person, item.brand), debug=1, as_dict=1)
+
+				item_comment = ""
+				if len(cmt) > 0:
+					item_comment = cmt[0].custom_refteck_item_comment
+
 			# print(item.custom_refteck_item_comment, item.parent, '---custom_refteck_item_comment')
 
 		# get unique sourcing persons
@@ -235,7 +247,7 @@ def get_data(filters):
 						"status": item.custom_item_status,
 						"client_name": customer_name,
 						"oems": item.brand,
-						"comments": item.custom_refteck_item_comment
+						"comments": item_comment
 				}
 				data.append(row)
 		sorted_data = sorted(data, key=itemgetter('name'))
