@@ -121,7 +121,7 @@ def get_conditions(filters):
 
 	if filters.get("from_date") and filters.get("to_date"):
 		if filters.get("to_date") >= filters.get("from_date"):
-			conditions.append(["creation","between", [filters.get("from_date"), filters.get("to_date")]])
+			conditions.append(["transaction_date","between", [filters.get("from_date"), filters.get("to_date")]])
 		else:
 			frappe.throw(_("To Date should be greater then From Date"))
 		
