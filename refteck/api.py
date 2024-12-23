@@ -11,6 +11,28 @@ def set_warehouse_in_child_table(self,method):
 			row.warehouse = self.set_warehouse_cf
 		frappe.msgprint(_("Item Warehouse {0} is set in all rows of item table").format(self.set_warehouse_cf), alert=True)
 
+def get_admin_checklist_qo_in_sq(self, method):
+	qo_margin_list = frappe.db.get_all("Margin Calculation RT", parent_doctype="Quotation", 
+									filters={"supplier_quotation":self.amended_from, "docstatus":0}, 
+									fields=["parent","supplier_quotation", "name", "sap_code"])
+	
+	if len(qo_margin_list) > 0:
+		for sq in qo_margin_list:
+			for item in self.items:
+				if sq.sap_code == item.item_code:
+					frappe.db.set_value("Margin Calculation RT", sq.name, "supplier_quotation", self.name)
+					frappe.db.set_value("Margin Calculation RT", sq.name, "qty", item.qty)
+					frappe.db.set_value("Margin Calculation RT", sq.name, "sq_price", item.rate)
+					frappe.db.set_value("Margin Calculation RT", sq.name, "sq_item_ref", item.name)
+				
+					print(sq.supplier_quotation, "=====supplier_quotation")
+					print(sq.parent, "========parent")
+
+					qo_doc = frappe.get_doc("Quotation", sq.parent)
+					print(qo_doc.name, "====qo_doc")
+					qo_doc.save(ignore_permissions=True)
+					frappe.msgprint(_("In Quotation {0} set {1} Supplier Quotation").format(qo_doc.name, self.name), alert=1)
+
 def fetch_rate_from_supplier_quotation(self,method):
 	if self.custom_supplier_quotation:
 		sq_name = self.custom_supplier_quotation
@@ -339,20 +361,22 @@ def validate_admin_checklist(self, method):
 
 def set_offer_price_without_freight_and_other_charges_in_qo(self, method):
 	if self.amended_from and self.is_new():
-		if len(self.custom_margin_calculation) > 0:
+		prev_qo = frappe.get_doc("Quotation", self.amended_from)
+		if len(self.custom_margin_calculation) > 0 and len(prev_qo.custom_margin_calculation) > 0:
+
 			for margin in self.custom_margin_calculation:
 				if margin.supplier_quotation:
-					sq_doc = frappe.get_doc("Supplier Quotation", margin.supplier_quotation)
-					prev_qo = frappe.get_doc("Quotation", self.amended_from)
+					# sq_doc = frappe.get_doc("Supplier Quotation", margin.supplier_quotation)
 					for row in prev_qo.custom_margin_calculation:
-						if sq_doc.amended_from and row.supplier_quotation == sq_doc.amended_from:
+						# if sq_doc.amended_from and row.supplier_quotation == sq_doc.amended_from:
+						if row.sap_code == margin.sap_code and row.supplier_quotation == margin.supplier_quotation:
 							margin.offer_price_without_freight = row.offer_price_without_freight
 							margin.other_charges = row.other_charges
 							break
-						elif row.supplier_quotation == sq_doc.name:
-							margin.offer_price_without_freight = row.offer_price_without_freight
-							margin.other_charges = row.other_charges
-							break			
+						# elif row.supplier_quotation == sq_doc.name:
+						# 	margin.offer_price_without_freight = row.offer_price_without_freight
+						# 	margin.other_charges = row.other_charges
+						# 	break			
 
 def set_item_descripion_in_qn_item(self, method):
 	if self.custom_fetch_sq_details_in_qn == 1:

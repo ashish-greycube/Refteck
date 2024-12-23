@@ -135,7 +135,8 @@ doc_events = {
 		"before_validate":"refteck.api.set_warehouse_in_child_table"
 	},
     "Supplier Quotation":{
-        "before_validate":"refteck.api.set_warehouse_in_child_table"
+        "before_validate":"refteck.api.set_warehouse_in_child_table",
+        # "on_submit": "refteck.api.get_admin_checklist_qo_in_sq"
     },
     "Purchase Order":{
         "before_validate":["refteck.api.fetch_rate_from_supplier_quotation",
