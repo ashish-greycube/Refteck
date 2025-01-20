@@ -33,6 +33,53 @@ def get_admin_checklist_qo_in_sq(self, method):
 					qo_doc.save(ignore_permissions=True)
 					frappe.msgprint(_("In Quotation {0} set {1} Supplier Quotation").format(qo_doc.name, self.name), alert=1)
 
+def calculate_procurement_values_in_sq(self,method):
+	self.custom_total_quote_value_l2 = ((self.custom_quote_value_l2 or 0)  + (self.custom_freight_l2 or 0) 
+									 + (self.custom_packing_l2 or 0) + (self.custom_other_charges_l2 or 0) - (self.custom_discount_l2 or 0))
+	
+	self.custom_total_quote_value_l3 = ((self.custom_quote_value_l3 or 0)  + (self.custom_freight_l3 or 0) 
+									 + (self.custom__packing_l3 or 0) + (self.custom_other_charges_l3 or 0) - (self.custom_discount_l3 or 0))
+	
+	self.custom_total_quote_value_l4 = ((self.custom_quote_value_l4 or 0)  + (self.custom_freight_l4 or 0)
+									 + (self.custom__packing_l4 or 0) + (self.custom_other_charges_l4 or 0) - (self.custom_discount_l4 or 0))	
+	
+	self.custom_total_quote_value_l5 = ((self.custom_quote_value_l5 or 0)  + (self.custom_freight_l5 or 0) 
+									 + (self.custom__packing_5 or 0) + (self.custom_other_charges_l5 or 0) - (self.custom_discount_l5 or 0))
+	
+	if self.custom_currency_l2 and self.custom_currency_l2 != 'USD' and self.custom_total_quote_value_l2 > 0:
+		self.custom_vbc_l2 = self.custom_total_quote_value_l2 * currency_exchange_rate_to_usd(self.custom_currency_l2, self.transaction_date)
+
+	if self.custom_currency_l3 and self.custom_currency_l3 != 'USD' and self.custom_total_quote_value_l3 > 0:
+		self.custom_vbc_l3 = self.custom_total_quote_value_l3 * currency_exchange_rate_to_usd(self.custom_currency_l3, self.transaction_date)
+
+	if self.custom_currency_l4 and self.custom_currency_l4 != 'USD' and self.custom_total_quote_value_l4 > 0:	
+		self.custom_vbc_l4 = self.custom_total_quote_value_l4 * currency_exchange_rate_to_usd(self.custom_currency_l4, self.transaction_date)
+
+	if self.custom_currency_l5 and self.custom_currency_l5 != 'USD' and self.custom_total_quote_value_l5 > 0:
+		self.custom_vbc_l5 = self.custom_total_quote_value_l5 * currency_exchange_rate_to_usd(self.custom_currency_l5, self.transaction_date)
+	
+
+def currency_exchange_rate_to_usd(from_currency, transaction_date):
+	usd_exchange_rate = frappe.db.sql("""
+		select x.date , x.exchange_rate
+		from `tabCustom Currency Exchange` x
+		where x.from_currency = %(from_currency)s and x.to_currency = 'USD' 
+			and x.date <= %(transaction_date)s
+			ORDER BY x.date DESC 
+			LIMIT 1""",
+					{
+						"from_currency": from_currency,
+						"transaction_date": transaction_date,
+					}, as_dict=1)
+	
+	if len(usd_exchange_rate) > 0:
+		print(usd_exchange_rate, '--------------------------exchange_rate')
+		return usd_exchange_rate[0].exchange_rate
+	else:
+		frappe.msgprint(_("No exchange rate found for {0} currency").format(from_currency), alert=1)
+		return 0
+
+
 def fetch_rate_from_supplier_quotation(self,method):
 	if self.custom_supplier_quotation:
 		sq_name = self.custom_supplier_quotation
@@ -199,9 +246,7 @@ def get_connected_sq_details(self,method):
 
 def get_connected_qo(quotation_name):
 	def get_connected(quotation_name):
-		# print(quotation_name, '--quotation_name')
 		amended_from = frappe.db.get_value('Quotation',quotation_name, 'amended_from')
-		# print(amended_from, '------amended_from')
 		if amended_from !=None:
 			connected_qo_list.append(amended_from)  
 			get_connected(amended_from)     
@@ -235,74 +280,6 @@ def set_taxes_from_other_charges_comparison(self,method):
 				tax.description = charges.charge_type
 				# tax.custom_admin_checklist_other_charges_reference=charges.name
 
-####### code to syanc with sales & taxes table
-# def set_taxes_from_other_charges_comparison(self,method):
-# 	default_income_account = frappe.db.get_value('Company', self.company, 'default_income_account')
-# 	# items_to_be_removed=[]
-# 	if len(self.custom_other_charges_comparison)>0:
-# 		for charges in self.custom_other_charges_comparison:
-# 			charges_found=False
-# 			for item_tax in self.taxes:
-# 				if item_tax.custom_admin_checklist_other_charges_reference==charges.name:
-# 					charges_found=True
-# 					item_tax.tax_amount = charges.offer_charges
-# 					item_tax.description = charges.charge_type		
-# 					print(charges.name, '---charges.name')			
-# 					break
-# 			if charges_found==False:
-# 				tax = self.append("taxes")
-# 				tax.charge_type = "Actual"
-# 				tax.account_head = default_income_account
-# 				tax.tax_amount = charges.offer_charges
-# 				tax.description = charges.charge_type
-# 				tax.custom_admin_checklist_other_charges_reference=charges.name
-# 				print(tax.name, '---name')
-
-		####### delete
-		# for item_tax in self.taxes:
-		# 	if item_tax.custom_admin_checklist_other_charges_reference!=None or item_tax.custom_admin_checklist_other_charges_reference!='':
-		# 		item_charges_match_found=False
-		# 		for charges in self.custom_other_charges_comparison:
-		# 			if item_tax.custom_admin_checklist_other_charges_reference==charges.name:
-		# 				item_charges_match_found=True
-		# 				break
-		# 		if item_charges_match_found ==False:
-		# 			items_to_be_removed.append(item_tax)
-		# if len(items_to_be_removed)>0:
-		# 	for re in items_to_be_removed:
-		# 		self.remove(re)
-			# [self.remove(d) for d in items_to_be_removed]
-
-
-# def set_quotation_material_total(self, method):
-# 	total_offer_freight = 0
-# 	total_offer_packing = 0
-# 	total_offer_cip_cpt = 0
-# 	total_offer_bank_charges = 0
-# 	if len(self.taxes) > 0 and len(self.custom_margin_calculation) > 0:
-# 		for tax in self.taxes:
-# 			desc = tax.description
-# 			# print(item.description, '--item.description')
-# 			freight = desc.find("Freight")
-# 			packing = desc.find("Packing")
-# 			cip = desc.find("CIP")
-# 			cpt = desc.find("CPT")
-# 			bank = desc.find("Bank")
-# 			# print(freight, '----x')
-# 			if freight > -1:
-# 				total_offer_freight = total_offer_freight + tax.tax_amount
-# 			if packing > -1:
-# 				total_offer_packing = total_offer_packing + tax.tax_amount
-# 			if cip > -1 or cpt > -1:
-# 				total_offer_cip_cpt = total_offer_cip_cpt + tax.tax_amount
-# 			if bank > -1:
-# 				total_offer_bank_charges = total_offer_bank_charges + tax.tax_amount
-					
-	
-# 	self.custom_offer_freight = total_offer_freight
-# 	self.custom_offer_packing = total_offer_packing
-# 	self.custom_offer_cipcpt = total_offer_cip_cpt
-# 	self.custom_offer_bank_charges = total_offer_bank_charges
 
 def qo_margin_calculations(self, method):
 	if self.custom_margin_calculation and len(self.custom_margin_calculation)>0:
@@ -352,8 +329,6 @@ def validate_admin_checklist(self, method):
 	self.custom_qo_incoterm = self.incoterm
 	self.custom_qo_offer_lead_time = self.custom_lead_time
 	self.custom_qo_validity = self.valid_till
-	
-	# vendor_code = frappe.db.get_value('Customer', self.party_name, 'custom_vendor_code')
 
 	vendor_code = frappe.db.get_value('Customer Vendor Reference', {'parent': self.party_name, 'company': self.company}, ['vendor_code'])
 	self.custom_vendor_code = vendor_code
