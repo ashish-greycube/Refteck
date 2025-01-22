@@ -48,15 +48,23 @@ def calculate_procurement_values_in_sq(self,method):
 	
 	if self.custom_currency_l2 and self.custom_currency_l2 != 'USD' and self.custom_total_quote_value_l2 > 0:
 		self.custom_vbc_l2 = self.custom_total_quote_value_l2 * currency_exchange_rate_to_usd(self.custom_currency_l2, self.transaction_date)
+	elif self.custom_currency_l2 and self.custom_currency_l2 == 'USD' and self.custom_total_quote_value_l2 > 0:
+		self.custom_vbc_l2 = self.custom_total_quote_value_l2
 
 	if self.custom_currency_l3 and self.custom_currency_l3 != 'USD' and self.custom_total_quote_value_l3 > 0:
 		self.custom_vbc_l3 = self.custom_total_quote_value_l3 * currency_exchange_rate_to_usd(self.custom_currency_l3, self.transaction_date)
+	elif self.custom_currency_l3 and self.custom_currency_l3 == 'USD' and self.custom_total_quote_value_l3 > 0:
+		self.custom_vbc_l3 = self.custom_total_quote_value_l3
 
 	if self.custom_currency_l4 and self.custom_currency_l4 != 'USD' and self.custom_total_quote_value_l4 > 0:	
 		self.custom_vbc_l4 = self.custom_total_quote_value_l4 * currency_exchange_rate_to_usd(self.custom_currency_l4, self.transaction_date)
+	elif self.custom_currency_l4 and self.custom_currency_l4 == 'USD' and self.custom_total_quote_value_l4 > 0:
+		self.custom_vbc_l4 = self.custom_total_quote_value_l4
 
 	if self.custom_currency_l5 and self.custom_currency_l5 != 'USD' and self.custom_total_quote_value_l5 > 0:
 		self.custom_vbc_l5 = self.custom_total_quote_value_l5 * currency_exchange_rate_to_usd(self.custom_currency_l5, self.transaction_date)
+	elif self.custom_currency_l5 and self.custom_currency_l5 == 'USD' and self.custom_total_quote_value_l5 > 0:
+		self.custom_vbc_l5 = self.custom_total_quote_value_l5
 	
 
 def currency_exchange_rate_to_usd(from_currency, transaction_date):
@@ -395,3 +403,14 @@ def set_status_for_same_brand_in_op_items(self, method):
         for row in self.items:
             if row.custom_sourcing_person == item.custom_sourcing_person and row.brand == item.brand:
                 row.custom_item_status = item.custom_item_status
+
+
+def set_operation_gp_checklist_fields_value(self, method):
+	if self.po_no:
+		self.custom_sales_order_no = self.po_no
+	if self.po_date:
+		self.custom_so_received_date = self.po_date
+	if self.contact_display:
+		self.custom_buyer = self.contact_display
+	if self.total:
+		self.custom_so_basic_value = self.total

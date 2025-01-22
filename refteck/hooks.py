@@ -35,6 +35,7 @@ doctype_js = {"Purchase Order":"public/js/purchase_order.js",
              "Purchase Receipt":"public/js/purchase_receipt.js",
              "Quotation":"public/js/quotation.js",
              "Opportunity":"public/js/opportunity.js",
+            #  "Sales Order":"public/js/sales_order.js",
              }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -170,7 +171,10 @@ doc_events = {
     },
     "Appraisal":{
         "after_insert": "refteck.api.share_appraisal_to_employee_from_appraisal"
-    }
+    },
+    # "Sales Order":{
+    #     "validate": "refteck.api.set_operation_gp_checklist_fields_value"
+    # }
 }
 # Scheduled Tasks
 # ---------------

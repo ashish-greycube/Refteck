@@ -103,6 +103,9 @@ let calculate_total_quote_value_for_l2 = function (frm) {
 }
 
 let calculate_value_in_usd_for_l2 = function (frm) {
+    if(frm.doc.custom_currency_l2 == 'USD'){
+        frm.set_value('custom_vbc_l2', frm.doc.custom_total_quote_value_l2)
+    }
     if(frm.doc.custom_currency_l2){
         frappe.db.get_list('Custom Currency Exchange', {
             fields: ['exchange_rate'],
@@ -137,6 +140,9 @@ let calculate_total_quote_value_for_l3 = function (frm) {
 }
 
 let calculate_value_in_usd_for_l3 = function (frm) {
+    if(frm.doc.custom_currency_l3 == 'USD'){
+        frm.set_value('custom_vbc_l3', frm.doc.custom_total_quote_value_l3)
+    }
     if(frm.doc.custom_currency_l3){
         frappe.db.get_list('Custom Currency Exchange', {
             fields: ['exchange_rate'],
@@ -171,6 +177,9 @@ let calculate_total_quote_value_for_l4 = function (frm) {
 }
 
 let calculate_value_in_usd_for_l4 = function (frm) {
+    if(frm.doc.custom_currency_l4 == 'USD'){
+        frm.set_value('custom_vbc_l4', frm.doc.custom_total_quote_value_l4)
+    }
     if(frm.doc.custom_currency_l4){
         frappe.db.get_list('Custom Currency Exchange', {
             fields: ['exchange_rate'],
@@ -205,6 +214,9 @@ let calculate_total_quote_value_for_l5 = function (frm) {
 }
 
 let calculate_value_in_usd_for_l5 = function (frm) {
+    if(frm.doc.custom_currency_l5 == 'USD'){
+        frm.set_value('custom_vbc_l5', frm.doc.custom_total_quote_value_l5)
+    }
     if(frm.doc.custom_currency_l5){
         frappe.db.get_list('Custom Currency Exchange', {
             fields: ['exchange_rate'],
