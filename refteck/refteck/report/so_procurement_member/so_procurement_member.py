@@ -80,12 +80,10 @@ def get_data(filters):
 	conditions = get_conditions(filters)
 
 	data = frappe.db.sql(
-		"""SELECT
+		""" SELECT
 		COUNT(DISTINCT so.name) as no_of_so,
 		tso.custom_procurement_member as procurement_member,
-		SUM(tso.amount * coalesce(fn.exchange_rate, 1)) as total_value_in_usd,
-		COUNT(DISTINCT CASE WHEN so.custom_grade = 'NEW' THEN 1 END) as new,
-		COUNT(DISTINCT CASE WHEN so.custom_grade = 'OLD'THEN 1 END) as old
+		SUM(tso.amount * coalesce(fn.exchange_rate, 1)) as total_value_in_usd
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name
@@ -100,7 +98,41 @@ def get_data(filters):
 		    						LIMIT 1)
 		where {0} and so.docstatus = 1
 			GROUP BY tso.custom_procurement_member
-			""".format(conditions),filters, as_dict=1, debug=1
+			""".format(conditions),filters, as_dict=1
 	)
+
+	grade_new_count = frappe.db.sql(
+		""" SELECT 
+		tso.custom_procurement_member as procurement_member,
+		COUNT(DISTINCT(so.name)) as new 
+		From `tabSales Order` as so
+		inner join `tabSales Order Item` as tso
+		on tso.parent = so.name
+		where {0} and so.docstatus = 1 and so.custom_grade = 'NEW'	
+			GROUP BY tso.custom_procurement_member
+		""".format(conditions),filters, as_dict=1
+		)
+	
+	grade_old_count = frappe.db.sql(
+		""" SELECT 
+		tso.custom_procurement_member as procurement_member,
+		COUNT(DISTINCT(so.name)) as old 
+		From `tabSales Order` as so
+		inner join `tabSales Order Item` as tso
+		on tso.parent = so.name
+		where {0} and so.docstatus = 1 and so.custom_grade = 'OLD'		
+			GROUP BY tso.custom_procurement_member
+		""".format(conditions),filters, as_dict=1)
+	
+
+	for d in data:
+		for new in grade_new_count:
+			if d.procurement_member == new.procurement_member:
+				d.new = new.new
+		for old in grade_old_count:
+			if d.procurement_member == old.procurement_member:
+				d.old = old.old
+
+	print(data, "----data---")
 
 	return data
