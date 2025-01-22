@@ -32,23 +32,17 @@ def get_columns(filters):
 			"options": "User",
 		},
 		# {
-		# 	"fieldname": "grand_total",
+		# 	"fieldname": "currency",
+		# 	"label":_("Currency"),
+		# 	"fieldtype": "Link",
+		# 	"options": "Currency",
+		# },
+		# {
+		# 	"fieldname": "exchange_currency",
 		# 	"fieldtype": "Data",
-		# 	"label": _("Grand Total"), 
+		# 	"label": _("Exchange CUrrency"), 
 		# 	"width": 100
 		# },
-		{
-			"fieldname": "currency",
-			"label":_("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-		},
-		{
-			"fieldname": "exchange_currency",
-			"fieldtype": "Data",
-			"label": _("Exchange CUrrency"), 
-			"width": 100
-		},
 		{
 			"fieldname": "total_value_in_usd",
 			"fieldtype": "Data",
@@ -87,13 +81,11 @@ def get_data(filters):
 
 	data = frappe.db.sql(
 		"""SELECT
-		COUNT(so.name) as no_of_so,
+		COUNT(DISTINCT so.name) as no_of_so,
 		tso.custom_procurement_member as procurement_member,
-		so.currency as currency,
-		fn.exchange_rate as exchange_currency,
-		(SUM(tso.amount * fn.exchange_rate)) as total_value_in_usd,
-		COUNT(CASE WHEN so.custom_grade = 'NEW' THEN 1 END) as new,
-		COUNT(CASE WHEN so.custom_grade = 'OLD'THEN 1 END) as old
+		SUM(tso.amount * coalesce(fn.exchange_rate, 1)) as total_value_in_usd,
+		COUNT(DISTINCT CASE WHEN so.custom_grade = 'NEW' THEN 1 END) as new,
+		COUNT(DISTINCT CASE WHEN so.custom_grade = 'OLD'THEN 1 END) as old
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name

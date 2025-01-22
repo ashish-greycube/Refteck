@@ -31,7 +31,7 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"label": _("Customer Name"),
 			"options": "Customer",
-			"width": 110
+			"width": 170
 		},
 		{
 			"fieldname": "date",
@@ -44,7 +44,7 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"label": _("Contact Person"),
 			"options": "Contact",
-			"width": 110
+			"width": 200
 		},
 		{
 			"fieldname": "grade",
@@ -57,32 +57,26 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"label": _("Industry Vertical"),
 			"options": "Industry Vertical",
-			"width": 110
-		},
-		{
-			"fieldname": "industry_vertical",
-			"fieldtype": "Link",
-			"label": _("Customer's Purchase Order"),
-			"options": "Industry Vertical",
-			"width": 110
+			"width": 180
 		},
 		{
 			"fieldname": "po_no",
 			"fieldtype": "Data",
-			"label": _("PO No."),
-			"width": 140
+			"label": _("Customer's Purchase Order"),
+			"width": 150
 		},
 		{
 			"fieldname": "procurement_member",
 			"label":_("User(Procurement Member)"),
 			"fieldtype": "Link",
 			"options": "User",
+			"width": 170
 		},
 		{
 			"fieldname": "grand_total",
 			"fieldtype": "Data",
 			"label": _("Grand Total"), 
-			"width": 100
+			"width": 120
 		},
 		{
 			"fieldname": "currency",
@@ -91,10 +85,10 @@ def get_columns(filters):
 			"options": "Currency",
 		},
 		{
-			"fieldname": "owner", # pending
+			"fieldname": "owner",
 			"fieldtype": "Data",
 			"label": _("Owner"),
-			"width": 110
+			"width": 130
 		},
 	]
 	return columns
@@ -128,13 +122,14 @@ def get_data(filters):
 		so.po_no as po_no,
 		tso.custom_procurement_member as procurement_member,
 		SUM(tso.amount) as grand_total,
-		so.currency as currency
+		so.currency as currency,
+		so.owner as owner
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on
 			tso.parent = so.name
 		where {0} and so.docstatus = 1
-			group by tso.custom_procurement_member
+			group by tso.custom_procurement_member, so.name
 		""".format(conditions),filters, as_dict=1, debug=1
 	)
 

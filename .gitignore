@@ -6,3 +6,5 @@ tags
 node_modules
 __pycache__
 report_dialog_data.html
+so_checklist_rt
+so_other_charges_comparison_rt
