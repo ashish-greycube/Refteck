@@ -172,12 +172,12 @@ doc_events = {
     "Appraisal":{
         "after_insert": "refteck.api.share_appraisal_to_employee_from_appraisal"
     },
-    "Sales Order":{
-        "validate": ["refteck.api.set_operation_gp_checklist_fields_value",
-                     "refteck.api.set_item_for_operation_checklist_in_so",
-                     "refteck.api.set_other_charges_in_so_from_qo",
-                     "refteck.api.calculate_operating_gp_value_and_charges"]
-    }
+    # "Sales Order":{
+    #     "validate": ["refteck.api.set_operation_gp_checklist_fields_value",
+    #                  "refteck.api.set_item_for_operation_checklist_in_so",
+    #                  "refteck.api.set_other_charges_in_so_from_qo",
+    #                  "refteck.api.calculate_operating_gp_value_and_charges"]
+    # }
 }
 # Scheduled Tasks
 # ---------------

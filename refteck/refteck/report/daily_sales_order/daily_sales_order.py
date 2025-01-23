@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt, cstr
 
 def execute(filters=None):
 	columns, data = [], []
@@ -73,10 +74,34 @@ def get_columns(filters):
 			"width": 170
 		},
 		{
-			"fieldname": "grand_total",
+			"fieldname": "gbp",
 			"fieldtype": "Data",
-			"label": _("Grand Total"), 
-			"width": 120
+			"label": _("GBP"), 
+			"width": 100
+		},
+		{
+			"fieldname": "euro",
+			"fieldtype": "Data",
+			"label": _("EURO"), 
+			"width": 100
+		},
+		{
+			"fieldname": "usd",
+			"fieldtype": "Data",
+			"label": _("USD"), 
+			"width": 100
+		},
+		{
+			"fieldname": "inr",
+			"fieldtype": "Data",
+			"label": _("INR"), 
+			"width": 100
+		},
+		{
+			"fieldname": "others",
+			"fieldtype": "Data",
+			"label": _("OTHERS"), 
+			"width": 100
 		},
 		{
 			"fieldname": "currency",
@@ -96,8 +121,13 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions =""
 
-	if filters.get("date"):
-		conditions += "DATE(so.creation) = '{0}'".format(filters.date)	
+	if filters.get("from_date") and filters.get("to_date"):
+		if filters.get("to_date") >= filters.get("from_date"):
+			conditions += "DATE(so.creation) between {0} and {1}".format(
+        		frappe.db.escape(filters.get("from_date")),
+        		frappe.db.escape(filters.get("to_date")))		
+		else:
+			frappe.throw(_("To Date should be greater then From Date"))	
 
 	if filters.procurement_member:
 		conditions += " and tso.custom_procurement_member = '{0}'".format(filters.procurement_member)
@@ -121,7 +151,19 @@ def get_data(filters):
 		so.custom_industry_vertical as industry_vertical,
 		so.po_no as po_no,
 		tso.custom_procurement_member as procurement_member,
-		SUM(tso.amount) as grand_total,
+		IF(so.currency = 'GBP',
+			CONCAT('£ ',ROUND(sum(tso.amount),2)),
+			'-') as gbp,
+			IF(so.currency = 'EUR',
+			CONCAT('€ ',ROUND(sum(tso.amount),2)),
+			'-') as euro,
+			IF(so.currency = 'USD',
+			CONCAT('$ ',ROUND(sum(tso.amount),2)),
+			'-') as usd,
+			IF(so.currency = 'INR',
+			CONCAT('₹ ',ROUND(sum(tso.amount),2)),
+			'-') as inr,
+			IF(so.currency NOT IN ('GBP', 'EUR', 'USD', 'INR'), ROUND(sum(tso.amount),2), '-') as others,
 		so.currency as currency,
 		so.owner as owner
 		From `tabSales Order` as so
@@ -132,5 +174,25 @@ def get_data(filters):
 			group by tso.custom_procurement_member, so.name
 		""".format(conditions),filters, as_dict=1, debug=1
 	)
+
+	gbp_total = 0
+	euro_total = 0
+	usd_total = 0
+	inr_total = 0
+	other_total = 0
+	for row in data:
+		gbp_total =  gbp_total + (flt((row.gbp[1:]), 2) or 0)
+		usd_total =  usd_total + (flt((row.usd[1:]), 2) or 0)
+		euro_total =  euro_total + (flt((row.euro[1:]), 2) or 0)
+		inr_total =  inr_total + (flt((row.inr[1:]), 2) or 0)
+		other_total =  other_total + (flt((row.others), 2) or 0)
+
+
+	data.append({"po_no":"<b>Total</b>", 
+			  "gbp": "<b>" + "£ " + cstr(gbp_total) + "</b>",
+			  "euro": "<b>" + "€ " + cstr(euro_total) + "</b>",
+			  "usd": "<b>" + "$ " + cstr(usd_total) + "</b>",
+			  "inr": "<b>" + "₹ " + cstr(inr_total) + "</b>",
+			  "others": "<b>" + cstr(other_total) + "</b>"})
 
 	return data

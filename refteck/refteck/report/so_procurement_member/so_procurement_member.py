@@ -67,8 +67,13 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions =""
 
-	if filters.get("date"):
-		conditions += "DATE(so.creation) = '{0}'".format(filters.date)	
+	if filters.get("from_date") and filters.get("to_date"):
+		if filters.get("to_date") >= filters.get("from_date"):
+			conditions += "DATE(so.creation) between {0} and {1}".format(
+        		frappe.db.escape(filters.get("from_date")),
+        		frappe.db.escape(filters.get("to_date")))		
+		else:
+			frappe.throw(_("To Date should be greater then From Date"))	
 
 	if filters.procurement_member:
 		conditions += " and tso.custom_procurement_member = '{0}'".format(filters.procurement_member)
@@ -83,7 +88,7 @@ def get_data(filters):
 		""" SELECT
 		COUNT(DISTINCT so.name) as no_of_so,
 		tso.custom_procurement_member as procurement_member,
-		SUM(tso.amount * coalesce(fn.exchange_rate, 1)) as total_value_in_usd
+		ROUND(SUM(tso.amount * coalesce(fn.exchange_rate, 1)),2) as total_value_in_usd
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name
@@ -98,6 +103,7 @@ def get_data(filters):
 		    						LIMIT 1)
 		where {0} and so.docstatus = 1
 			GROUP BY tso.custom_procurement_member
+			ORDER BY total_value_in_usd DESC
 			""".format(conditions),filters, as_dict=1
 	)
 
