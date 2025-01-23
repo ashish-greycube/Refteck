@@ -414,3 +414,102 @@ def set_operation_gp_checklist_fields_value(self, method):
 		self.custom_buyer = self.contact_display
 	if self.total:
 		self.custom_so_basic_value = self.total
+	if self.custom_ld_applicable:
+		self.custom_ld = self.custom_ld_applicable
+
+
+
+def set_item_for_operation_checklist_in_so(self, method):
+	for item in self.items:
+		if item.prevdoc_docname:
+			qo_doc = frappe.get_doc("Quotation", item.prevdoc_docname)
+			if len(qo_doc.custom_margin_calculation) > 0:
+				for margin in qo_doc.custom_margin_calculation:
+
+					match_found_in_operation_checklist = False
+					if margin.sap_code == item.item_code:
+
+						if len(self.custom_operating_gp_calculation) > 0:
+							for row in self.custom_operating_gp_calculation:
+								if row.qo_margin_item_ref == item.name:
+									row.offered_amount = row.qty * row.offered_rate
+									row.vendor_amount = row.qty * row.vendor_rate
+									match_found_in_operation_checklist = True
+									break
+
+						if match_found_in_operation_checklist == False:
+							row=self.append("custom_operating_gp_calculation",{})
+							row.sap_code = item.item_code
+							row.description = item.item_name
+							row.qty = item.qty
+							row.so_rate = item.rate
+							row.so_amount = row.qty * row.so_rate
+							row.offered_rate = margin.offer_price_with_charges
+							row.offered_amount = row.qty * row.offered_rate
+							row.vendor_rate = margin.sq_price
+							row.vendor_amount = row.qty * row.vendor_rate
+							row.qo_margin_item_ref = item.name
+
+def set_other_charges_in_so_from_qo(self, method):
+	unique_qo = []
+
+	for item in self.items:
+		if item.prevdoc_docname:
+			if item.prevdoc_docname not in unique_qo:
+				unique_qo.append(item.prevdoc_docname)
+
+	if len(unique_qo) > 0:
+		for qo in unique_qo:
+			qo_doc = frappe.get_doc("Quotation", qo)
+
+			if len(qo_doc.custom_other_charges_comparison) > 0:
+				match_found_in_qo = False
+
+				for charges in qo_doc.custom_other_charges_comparison:
+
+					if len(self.custom_other_charges_comparison) > 0:
+						for row in self.custom_other_charges_comparison:
+							if row.qo_other_charges_ref == charges.name:
+								match_found_in_qo = True
+								break
+
+					if match_found_in_qo == False:
+						row = self.append("custom_other_charges_comparison",{})
+						row.charge_type = charges.charge_type
+						row.offer_charges = charges.offer_charges
+						row.supplier_quotation_charges = charges.supplier_quotation_charges
+						row.qo_other_charges_ref = charges.name
+
+def calculate_operating_gp_value_and_charges(self, method):
+
+	total_charges = 0
+	total_sq_charges = 0
+
+	if len(self.custom_other_charges_comparison) > 0:
+		for charges in self.custom_other_charges_comparison:
+			total_charges = total_charges + (charges.offer_charges or 0)
+			total_sq_charges = total_sq_charges + (charges.supplier_quotation_charges or 0)
+
+	total_vendor_amt = 0
+	if len(self.custom_operating_gp_calculation) > 0:
+		for row in self.custom_operating_gp_calculation:
+			total_vendor_amt = total_vendor_amt + (row.vendor_amount or 0)
+			
+
+	self.custom_total_charges = total_charges
+	self.custom_total_sales_value = (self.custom_so_basic_value or 0) + total_charges
+	self.custom_total_purchase_value = total_vendor_amt + total_sq_charges
+	self.custom_po_total = self.custom_total_purchase_value
+	self.custom_po_margin = self.custom_total_sales_value - self.custom_po_total
+
+	if self.custom_po_total > 0:
+		self.custom_po_margin_ = self.custom_po_margin / self.custom_po_total
+
+	self.custom_material_total = total_vendor_amt
+	self.custom_material_margin = (self.custom_so_basic_value or 0) - self.custom_material_total
+
+	if self.custom_material_total > 0:
+		self.custom_material_margin_ = self.custom_material_margin / self.custom_material_total
+
+	if self.custom_total_sales_value > 0:
+		self.custom_accounts_checklist_gross_profit_ = self.custom_po_margin / self.custom_total_sales_value

@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-21 12:18:57.585744",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "charge_type",
+  "supplier_quotation_charges",
+  "offer_charges",
+  "oem",
+  "qo_other_charges_ref"
+ ],
+ "fields": [
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "charge_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Charge Type",
+   "options": "Refteck Charge Type",
+   "width": "3"
+  },
+  {
+   "fieldname": "supplier_quotation_charges",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Supplier Quotation Charges",
+   "width": "4"
+  },
+  {
+   "default": "0",
+   "fieldname": "offer_charges",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Offer Charges",
+   "width": "3"
+  },
+  {
+   "fieldname": "oem",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "OEM",
+   "options": "Brand"
+  },
+  {
+   "fieldname": "qo_other_charges_ref",
+   "fieldtype": "Data",
+   "label": "QO Other Charges Ref"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-01-22 10:26:12.004394",
+ "modified_by": "Administrator",
+ "module": "Refteck",
+ "name": "SO Other Charges Comparison RT",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

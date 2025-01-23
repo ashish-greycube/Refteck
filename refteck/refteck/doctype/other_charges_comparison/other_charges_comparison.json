@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-10 08:44:58.735134",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "charge_type",
+  "supplier_quotation_charges",
+  "offer_charges"
+ ],
+ "fields": [
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "charge_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Charge Type",
+   "options": "Refteck Charge Type",
+   "width": "3"
+  },
+  {
+   "fieldname": "supplier_quotation_charges",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Supplier Quotation Charges",
+   "width": "4"
+  },
+  {
+   "default": "0",
+   "fieldname": "offer_charges",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Offer Charges",
+   "width": "3"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-01-22 05:00:58.139501",
+ "modified_by": "Administrator",
+ "module": "Refteck",
+ "name": "Other Charges Comparison",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

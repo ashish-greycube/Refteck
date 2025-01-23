@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-21 12:07:06.717874",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sap_code",
+  "description",
+  "qty",
+  "so_rate",
+  "so_amount",
+  "offered_rate",
+  "offered_amount",
+  "vendor_rate",
+  "vendor_amount",
+  "oem",
+  "qo_margin_item_ref"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "sap_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SAP Code",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "so_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "SO Rate(Unit Value)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "so_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "SO Amount(Extended Value)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "offered_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Offered Rate(Unit Value)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "offered_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Offered Amount(Extended Value)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "vendor_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Vendor Rate(Unit Value)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "vendor_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Vendor Amount(Extended Value)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "oem",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "OEM",
+   "options": "Brand"
+  },
+  {
+   "fieldname": "qo_margin_item_ref",
+   "fieldtype": "Data",
+   "label": "QO Margin Item Ref",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-01-22 07:04:02.071846",
+ "modified_by": "Administrator",
+ "module": "Refteck",
+ "name": "SO Checklist RT",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
