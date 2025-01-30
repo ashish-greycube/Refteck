@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt, cstr
 
 def execute(filters=None):
 	columns, data = [], []
@@ -20,7 +21,7 @@ def get_columns(filters):
 	columns = [
 		{
 			"fieldname": "no_of_so",
-			"fieldtype": "Int",
+			"fieldtype": "Data",
 			"label": _("No Of SO"),
 			# "hidden":1,
 			"width": 100
@@ -88,7 +89,7 @@ def get_data(filters):
 		""" SELECT
 		COUNT(DISTINCT so.name) as no_of_so,
 		tso.custom_procurement_member as procurement_member,
-		ROUND(SUM(tso.amount * coalesce(fn.exchange_rate, 1)),2) as total_value_in_usd
+		CONCAT('$ ',ROUND(SUM(tso.amount * coalesce(fn.exchange_rate, 1)),2)) as total_value_in_usd
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name
@@ -103,7 +104,7 @@ def get_data(filters):
 		    						LIMIT 1)
 		where {0} and so.docstatus = 1
 			GROUP BY tso.custom_procurement_member
-			ORDER BY total_value_in_usd DESC
+			ORDER BY ROUND(SUM(tso.amount * coalesce(fn.exchange_rate, 1)),2) DESC
 			""".format(conditions),filters, as_dict=1
 	)
 
@@ -130,14 +131,31 @@ def get_data(filters):
 			GROUP BY tso.custom_procurement_member
 		""".format(conditions),filters, as_dict=1)
 	
-
+	total_so = 0
+	usd_total = 0
+	new_total = 0
+	old_total = 0
 	for d in data:
+		print(d.no_of_so, "=======d.no_of_so---------")
+		total_so = flt((total_so + d.no_of_so),2)
+		usd_total =  flt(usd_total + flt((d.total_value_in_usd[1:])  or 0),2)
+		
 		for new in grade_new_count:
 			if d.procurement_member == new.procurement_member:
 				d.new = new.new
+				new_total = flt((new_total + flt(d.new or 0)), 2)
 		for old in grade_old_count:
 			if d.procurement_member == old.procurement_member:
 				d.old = old.old
+				old_total = flt((old_total + flt(d.old or 0)), 2)
+	print(total_so, "-----total_so")
+
+	data.append({
+		"no_of_so": "<b>" + cstr(total_so) + "</b>",
+		"total_value_in_usd": "<b>" + "$ " + cstr(usd_total) + "</b>",
+		"new": "<b>" + cstr(new_total) + "</b>",
+		"old": "<b>" + cstr(old_total) + "</b>",
+	})
 
 	print(data, "----data---")
 

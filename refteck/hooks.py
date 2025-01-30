@@ -176,7 +176,9 @@ doc_events = {
         "validate": ["refteck.api.set_operation_gp_checklist_fields_value",
                      "refteck.api.set_item_for_operation_checklist_in_so",
                      "refteck.api.set_other_charges_in_so_from_qo",
-                     "refteck.api.calculate_operating_gp_value_and_charges"]
+                     "refteck.api.calculate_operating_gp_value_and_charges"],
+        "on_update_after_submit": ["refteck.api.set_operation_gp_checklist_fields_value",
+                                   "refteck.api.calculate_operating_gp_value_and_charges"]
     }
 }
 # Scheduled Tasks

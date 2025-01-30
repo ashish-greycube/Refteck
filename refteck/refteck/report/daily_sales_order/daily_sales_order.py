@@ -181,11 +181,11 @@ def get_data(filters):
 	inr_total = 0
 	other_total = 0
 	for row in data:
-		gbp_total =  gbp_total + (flt((row.gbp[1:]), 2) or 0)
-		usd_total =  usd_total + (flt((row.usd[1:]), 2) or 0)
-		euro_total =  euro_total + (flt((row.euro[1:]), 2) or 0)
-		inr_total =  inr_total + (flt((row.inr[1:]), 2) or 0)
-		other_total =  other_total + (flt((row.others), 2) or 0)
+		gbp_total =  flt((gbp_total + (flt((row.gbp[1:]), 2) or 0)), 2)
+		usd_total =  flt((usd_total + (flt((row.usd[1:]), 2) or 0)), 2)
+		euro_total =  flt((euro_total + (flt((row.euro[1:]), 2) or 0)),2)
+		inr_total =  flt((inr_total + (flt((row.inr[1:]), 2) or 0)), 2)
+		other_total =  flt((other_total + (flt((row.others), 2) or 0)), 2)
 
 
 	data.append({"po_no":"<b>Total</b>", 
