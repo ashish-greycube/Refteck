@@ -170,7 +170,10 @@ def get_data(filters):
 		inner join `tabSales Order Item` as tso
 		on
 			tso.parent = so.name
-		where {0} and so.docstatus = 1
+		inner join `tabCustomer` as cs
+		on 
+			cs.name = so.customer 
+		where {0} and so.docstatus = 1 and cs.custom_is_refteck_customer = 0
 			group by tso.custom_procurement_member, so.name
 		""".format(conditions),filters, as_dict=1, debug=1
 	)

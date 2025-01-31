@@ -409,7 +409,7 @@ def set_operation_gp_checklist_fields_value(self, method):
 	if self.po_no:
 		self.custom_sales_order_no = self.po_no
 	if self.po_date:
-		self.custom_so_received_date = self.po_date
+		self.custom_so_received_date = self.transaction_date
 	if self.contact_display:
 		self.custom_buyer = self.contact_display
 	if self.total:
@@ -513,3 +513,8 @@ def calculate_operating_gp_value_and_charges(self, method):
 
 	if self.custom_total_sales_value > 0:
 		self.custom_accounts_checklist_gross_profit_ = flt(((self.custom_po_margin * 100) / self.custom_total_sales_value), 2)
+
+	if len(self.custom_operating_gp_calculation) > 0:
+		for row in self.custom_operating_gp_calculation:
+			row.offered_amount = flt((row.qty * row.offered_rate), 2)
+			row.vendor_amount = flt((row.qty * row.vendor_rate), 2)

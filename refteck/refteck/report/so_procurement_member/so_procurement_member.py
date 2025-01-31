@@ -93,6 +93,8 @@ def get_data(filters):
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name
+		inner join `tabCustomer` as cs
+		on cs.name = so.customer
 		left outer join `tabCustom Currency Exchange` fn on fn.from_currency = so.currency
     	and fn.to_currency = 'USD'
     	and fn.`date` = (
@@ -102,10 +104,10 @@ def get_data(filters):
 		    						and x.`date` <= so.transaction_date 
 									ORDER BY x.date DESC 
 		    						LIMIT 1)
-		where {0} and so.docstatus = 1
+		where {0} and so.docstatus = 1 and cs.custom_is_refteck_customer = 0
 			GROUP BY tso.custom_procurement_member
 			ORDER BY ROUND(SUM(tso.amount * coalesce(fn.exchange_rate, 1)),2) DESC
-			""".format(conditions),filters, as_dict=1
+			""".format(conditions),filters, as_dict=1, debug=1
 	)
 
 	grade_new_count = frappe.db.sql(
@@ -115,9 +117,11 @@ def get_data(filters):
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name
-		where {0} and so.docstatus = 1 and so.custom_grade = 'NEW'	
+		inner join `tabCustomer` as cs
+		on cs.name = so.customer
+		where {0} and so.docstatus = 1 and so.custom_grade = 'NEW' and cs.custom_is_refteck_customer = 0
 			GROUP BY tso.custom_procurement_member
-		""".format(conditions),filters, as_dict=1
+		""".format(conditions),filters, as_dict=1, debug=1
 		)
 	
 	grade_old_count = frappe.db.sql(
@@ -127,9 +131,11 @@ def get_data(filters):
 		From `tabSales Order` as so
 		inner join `tabSales Order Item` as tso
 		on tso.parent = so.name
-		where {0} and so.docstatus = 1 and so.custom_grade = 'OLD'		
+		inner join `tabCustomer` as cs
+		on cs.name = so.customer
+		where {0} and so.docstatus = 1 and so.custom_grade = 'OLD' and cs.custom_is_refteck_customer = 0	
 			GROUP BY tso.custom_procurement_member
-		""".format(conditions),filters, as_dict=1)
+		""".format(conditions),filters, as_dict=1, debug=1)
 	
 	total_so = 0
 	usd_total = 0
@@ -137,17 +143,17 @@ def get_data(filters):
 	old_total = 0
 	for d in data:
 		print(d.no_of_so, "=======d.no_of_so---------")
-		total_so = flt((total_so + d.no_of_so),2)
+		total_so = (total_so + d.no_of_so)
 		usd_total =  flt(usd_total + flt((d.total_value_in_usd[1:])  or 0),2)
 		
 		for new in grade_new_count:
 			if d.procurement_member == new.procurement_member:
 				d.new = new.new
-				new_total = flt((new_total + flt(d.new or 0)), 2)
+				new_total = (new_total + (d.new or 0))
 		for old in grade_old_count:
 			if d.procurement_member == old.procurement_member:
 				d.old = old.old
-				old_total = flt((old_total + flt(d.old or 0)), 2)
+				old_total = (old_total + (d.old or 0))
 	print(total_so, "-----total_so")
 
 	data.append({
