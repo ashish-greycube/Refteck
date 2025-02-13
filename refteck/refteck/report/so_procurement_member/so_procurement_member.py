@@ -104,7 +104,7 @@ def get_data(filters):
 		    						and x.`date` <= so.transaction_date 
 									ORDER BY x.date DESC 
 		    						LIMIT 1)
-		where {0} and so.docstatus = 1 and cs.custom_is_refteck_customer = 0
+		where {0} and so.docstatus != 2 and cs.custom_is_refteck_customer = 0
 			GROUP BY tso.custom_procurement_member
 			ORDER BY ROUND(SUM(tso.amount * coalesce(fn.exchange_rate, 1)),2) DESC
 			""".format(conditions),filters, as_dict=1, debug=1
@@ -119,7 +119,7 @@ def get_data(filters):
 		on tso.parent = so.name
 		inner join `tabCustomer` as cs
 		on cs.name = so.customer
-		where {0} and so.docstatus = 1 and so.custom_grade = 'NEW' and cs.custom_is_refteck_customer = 0
+		where {0} and so.docstatus != 2 and so.custom_grade = 'NEW' and cs.custom_is_refteck_customer = 0
 			GROUP BY tso.custom_procurement_member
 		""".format(conditions),filters, as_dict=1, debug=1
 		)
@@ -133,7 +133,7 @@ def get_data(filters):
 		on tso.parent = so.name
 		inner join `tabCustomer` as cs
 		on cs.name = so.customer
-		where {0} and so.docstatus = 1 and so.custom_grade = 'OLD' and cs.custom_is_refteck_customer = 0	
+		where {0} and so.docstatus != 2 and so.custom_grade = 'OLD' and cs.custom_is_refteck_customer = 0	
 			GROUP BY tso.custom_procurement_member
 		""".format(conditions),filters, as_dict=1, debug=1)
 	
