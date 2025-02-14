@@ -1,8 +1,8 @@
 frappe.ui.form.on("Sales Order", {
-    onload_post_render: function(frm){
-        console.log("Sales Order Refreshed")
-        set_operation_gp_checklist_fields_value(frm)
-    },
+    // onload_post_render: function(frm){
+    //     console.log("Sales Order Refreshed")
+    //     set_operation_gp_checklist_fields_value(frm)
+    // },
     po_no: function(frm){
         frm.set_value('custom_sales_order_no', frm.doc.po_no)
     },
