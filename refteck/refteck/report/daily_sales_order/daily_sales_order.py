@@ -123,7 +123,7 @@ def get_conditions(filters):
 
 	if filters.get("from_date") and filters.get("to_date"):
 		if filters.get("to_date") >= filters.get("from_date"):
-			conditions += "DATE(so.creation) between {0} and {1}".format(
+			conditions += "DATE(so.transaction_date) between {0} and {1}".format(
         		frappe.db.escape(filters.get("from_date")),
         		frappe.db.escape(filters.get("to_date")))		
 		else:
