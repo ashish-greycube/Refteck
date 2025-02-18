@@ -493,11 +493,16 @@ def calculate_operating_gp_value_and_charges(self, method):
 	total_vendor_amt = 0
 	if len(self.custom_operating_gp_calculation) > 0:
 		for row in self.custom_operating_gp_calculation:
+			row.so_amount = flt((row.qty * row.so_rate), 2)
+			row.offered_amount = flt((row.qty * row.offered_rate), 2)
+			row.vendor_amount = flt((row.qty * row.vendor_rate), 2)
+			print(row.vendor_amount, "====row.vendor_amount")
 			total_vendor_amt = flt((total_vendor_amt + (row.vendor_amount or 0)), 2)
 			
 
 	self.custom_total_charges = flt((total_charges), 2)
 	self.custom_total_sales_value = flt(((self.custom_so_basic_value or 0) + total_charges), 2)
+	print(total_vendor_amt, "====total_vendor_amt", total_sq_charges, "======total_sq_charges")
 	self.custom_total_purchase_value = flt((total_vendor_amt + total_sq_charges), 2)
 	self.custom_po_total = self.custom_total_purchase_value
 	self.custom_po_margin = flt((self.custom_total_sales_value - self.custom_po_total), 2)
