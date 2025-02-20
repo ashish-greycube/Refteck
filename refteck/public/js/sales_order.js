@@ -6,8 +6,8 @@ frappe.ui.form.on("Sales Order", {
     po_no: function(frm){
         frm.set_value('custom_sales_order_no', frm.doc.po_no)
     },
-    po_date: function(frm){
-        frm.set_value('custom_so_received_date', frm.doc.po_date)
+    transaction_date: function(frm){
+        frm.set_value('custom_so_received_date', frm.doc.transaction_date)
     },
     contact_display: function(frm){
         frm.set_value('custom_buyer', frm.doc.contact_display)
@@ -27,7 +27,7 @@ let set_operation_gp_checklist_fields_value = function(frm){
         frm.set_value('custom_sales_order_no', frm.doc.po_no)
     }
     if(frm.doc.po_date){
-        frm.set_value('custom_so_received_date', frm.doc.po_date)
+        frm.set_value('custom_so_received_date', frm.doc.transaction_date)
     }
     if(frm.doc.contact_display){
         frm.set_value('custom_sales_order_no', frm.doc.po_no)

@@ -408,8 +408,8 @@ def set_status_for_same_brand_in_op_items(self, method):
 def set_operation_gp_checklist_fields_value(self, method):
 	if self.po_no:
 		self.custom_sales_order_no = self.po_no
-	if self.po_date:
-		self.custom_so_received_date = self.po_date
+	if self.transaction_date:
+		self.custom_so_received_date = self.transaction_date
 	if self.contact_display:
 		self.custom_buyer = self.contact_display
 	if self.total:
