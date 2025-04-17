@@ -119,6 +119,22 @@ after_migrate = "refteck.migrate.after_migrate"
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
+# permission_query_conditions = {
+#     "Salary Slip": "refteck.api.has_permission_for_salary_slip_in_list_view",
+#     "Salary Structure Assignment" : "refteck.api.has_permission_for_salary_structure_assignment_in_list_view",
+#     "Additional Salary" : "refteck.api.has_permission_for_additional_salary_in_list_view"
+# }
+
+# has_permission = {
+# 	"Salary Slip": "refteck.api.has_permission_to_open_salary_related_documents",
+#     "Salary Structure Assignment" : "refteck.api.has_permission_to_open_salary_related_documents",
+#     "Additional Salary" : "refteck.api.has_permission_to_open_salary_related_documents"	
+# }
+
+# user_allowed_for_salary_related_documents=["karan@kpkothari.com","nshah@refteck.com"]
+
+# report_restricted_for_salary_slip=["Salary Register"]
+
 # DocType Class
 # ---------------
 # Override standard doctype classes
@@ -126,7 +142,10 @@ after_migrate = "refteck.migrate.after_migrate"
 # override_doctype_class = {
 # 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
-
+# https://github.com/frappe/frappe/pull/11527
+# override_doctype_class = {
+# 	"Report": "refteck.api.CustomReport"
+# }
 # Document Events
 # ---------------
 # Hook on document methods and events

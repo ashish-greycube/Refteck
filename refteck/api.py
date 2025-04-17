@@ -2,8 +2,9 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
-from frappe.utils import flt
+from frappe.utils import flt,now_datetime
 from frappe.share import add
+# from frappe.core.doctype.report.report import Report
 
 def set_warehouse_in_child_table(self,method):
 	if self.set_warehouse_cf and len(self.get('items'))>0:
@@ -523,3 +524,52 @@ def calculate_operating_gp_value_and_charges(self, method):
 		for row in self.custom_operating_gp_calculation:
 			row.offered_amount = flt((row.qty * row.offered_rate), 2)
 			row.vendor_amount = flt((row.qty * row.vendor_rate), 2)
+
+# class CustomReport(Report):
+# 	def execute_script_report(self, filters):
+# 		if restricted_report_list := frappe.get_hooks("report_restricted_for_salary_slip"):
+# 			if self.name in restricted_report_list:
+# 				current_user = frappe.session.user			
+# 				if allowed_user_list :=frappe.get_hooks("user_allowed_for_salary_related_documents"):
+# 					if current_user in allowed_user_list:
+# 						return super().execute_script_report(filters)
+# 					else:
+# 						frappe.throw(_("You donot have access to this resource"))			
+
+# def has_permission_to_open_salary_related_documents(doc, user, ptype):
+# 	if not user:
+# 		user = frappe.session.user
+# 	if user == "Administrator":
+# 		return frappe.throw(_("You donot have access to this resource"))
+# 	if allowed_user_list :=frappe.get_hooks("user_allowed_for_salary_related_documents"):
+# 		if user in allowed_user_list:
+# 			return True
+# 		else:
+# 			return False
+
+# def has_permission_for_salary_slip_in_list_view(user):
+# 	if not user:
+# 		user = frappe.session.user
+# 	if allowed_user_list :=frappe.get_hooks("user_allowed_for_salary_related_documents"):
+# 		if user in allowed_user_list:
+# 			return "(`tabSalary Slip`.creation <= '{create_date}')".format(create_date=now_datetime())
+# 		else:
+# 			return "(`tabSalary Slip`.creation > '{create_date}')".format(create_date=now_datetime())			
+		
+# def has_permission_for_salary_structure_assignment_in_list_view(user):
+# 	if not user:
+# 		user = frappe.session.user
+# 	if allowed_user_list :=frappe.get_hooks("user_allowed_for_salary_related_documents"):
+# 		if user in allowed_user_list:
+# 			return "(`tabSalary Structure Assignment`.creation <= '{create_date}')".format(create_date=now_datetime())
+# 		else:
+# 			return "(`tabSalary Structure Assignment`.creation > '{create_date}')".format(create_date=now_datetime())
+		
+# def has_permission_for_additional_salary_in_list_view(user):
+# 	if not user:
+# 		user = frappe.session.user
+# 	if allowed_user_list :=frappe.get_hooks("user_allowed_for_salary_related_documents"):
+# 		if user in allowed_user_list:
+# 			return "(`tabAdditional Salary`.creation <= '{create_date}')".format(create_date=now_datetime())
+# 		else:
+# 			return "(`tabAdditional Salary`.creation > '{create_date}')".format(create_date=now_datetime())		
