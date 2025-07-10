@@ -527,6 +527,29 @@ def calculate_operating_gp_value_and_charges(self, method):
 			row.offered_amount = flt((row.qty * row.offered_rate), 2)
 			row.vendor_amount = flt((row.qty * row.vendor_rate), 2)
 
+def set_brand_in_item_master_from_opportunity(self, method):
+	if len(self.items) > 0:
+		brand_change_list = []
+		for item in self.items:
+			old_item_brand = frappe.db.get_value("Item", item.item_code, "brand")
+			if old_item_brand != item.brand:
+				frappe.db.set_value("Item", item.item_code, "brand", item.brand)
+				brand_change_list.append(item.item_code)
+		
+		if len(brand_change_list) > 0:
+			brand_change_list_str = ", ".join(brand_change_list)
+			frappe.msgprint(_("Brand is changed for item code: {0}").format(brand_change_list_str), alert=1)
+
+def set_procurement_member_in_qo_from_opportunity(self, method):
+	if self.is_new() and self.opportunity:
+		op = frappe.get_doc("Opportunity", self.opportunity)
+		if len(op.items) > 0 and len(self.items) > 0:
+			for item in self.items:
+				for i in op.items:
+					if i.item_code == item.item_code:
+						# print(i.item_code, "=============item_code")
+						item.custom_procurement_member = i.custom_sourcing_person
+
 # class CustomReport(Report):
 # 	def execute_script_report(self, filters):
 # 		if restricted_report_list := frappe.get_hooks("report_restricted_for_salary_slip"):

@@ -5,6 +5,12 @@ frappe.ui.form.on("Quotation", {
     },
     refresh(frm) {
         draw_html(frm)
+        if(frm.is_new()){
+            setTimeout(() => {
+            // console.log("==============timeout=======")
+            set_procurement_member_from_opportunity(frm)
+        }, 500);
+        }
 
     },
     setup(frm) {
@@ -82,4 +88,21 @@ function draw_html(frm) {
         frm.set_df_property('custom_sq_details', 'options', '<div><div>')
         frm.refresh_field('custom_sq_details')
     }   
+}
+
+let set_procurement_member_from_opportunity = function (frm) {
+    if (frm.doc.opportunity && frm.doc.items.length > 0) {
+        frappe.db.get_doc('Opportunity', frm.doc.opportunity)
+            .then(op => {
+                frm.doc.items.forEach(item => {
+                    op.items.forEach(e => {
+                        if (e.item_code === item.item_code) {
+                            // console.log(e.item_code, "===================")
+                            frappe.model.set_value(item.doctype, item.name, "custom_procurement_member", e.custom_sourcing_person)
+                        }
+                    });
+
+                });
+            })
+    }
 }

@@ -8,43 +8,55 @@
  "field_order": [
   "charge_type",
   "supplier_quotation_charges",
-  "offer_charges"
+  "offer_charges",
+  "brand"
  ],
  "fields": [
   {
    "allow_in_quick_entry": 1,
+   "columns": 2,
    "fieldname": "charge_type",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Charge Type",
-   "options": "Refteck Charge Type",
-   "width": "3"
+   "options": "Refteck Charge Type"
   },
   {
+   "columns": 2,
    "fieldname": "supplier_quotation_charges",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Supplier Quotation Charges",
-   "width": "4"
+   "label": "Supplier Quotation Charges"
   },
   {
+   "columns": 2,
    "default": "0",
    "fieldname": "offer_charges",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Offer Charges",
-   "width": "3"
+   "label": "Offer Charges"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 2,
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Brand",
+   "options": "Brand"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-01-22 05:00:58.139501",
+ "modified": "2025-07-10 07:12:20.426363",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "Other Charges Comparison",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

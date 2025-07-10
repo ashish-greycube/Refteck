@@ -168,6 +168,7 @@ doc_events = {
         "before_validate":["refteck.api.set_common_brands",
                            "refteck.api.set_taxes_from_other_charges_comparison"],
         "validate":[
+                    "refteck.api.set_procurement_member_in_qo_from_opportunity",
                     "refteck.api.set_items_for_margin_calculaion",
                     "refteck.api.set_offer_price_without_freight_and_other_charges_in_qo",
                     "refteck.api.validate_admin_checklist",
@@ -182,6 +183,11 @@ doc_events = {
     # "Opportunity":{
     #     "onload": "refteck.api.set_status_for_same_brand_in_op_items"
     # },
+    "Opportunity": {
+        "validate": [
+            "refteck.api.set_brand_in_item_master_from_opportunity"
+        ]
+    },
     "Purchase Invoice":{
         "before_validate": "refteck.api.validation_for_supplier"
     },
