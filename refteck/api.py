@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
-from frappe.utils import flt,now_datetime
+from frappe.utils import flt,now_datetime, get_link_to_form
 from frappe.share import add
 # from frappe.core.doctype.report.report import Report
 
@@ -531,9 +531,10 @@ def set_brand_in_item_master_from_opportunity(self, method):
 	if len(self.items) > 0:
 		brand_change_list = []
 		for item in self.items:
-			old_item_brand = frappe.db.get_value("Item", item.item_code, "brand")
-			if old_item_brand != item.brand:
+			item_doc = frappe.get_doc("Item", item.item_code)
+			if item_doc.brand != item.brand:
 				frappe.db.set_value("Item", item.item_code, "brand", item.brand)
+				item_doc.add_comment("Edit", "<br>From Opportunity <b>{0}</b>: Brand is changed from <b>{1}</b> to <b>{2}</b>".format(get_link_to_form("Opportunity", self.name),item_doc.brand, item.brand))
 				brand_change_list.append(item.item_code)
 		
 		if len(brand_change_list) > 0:
