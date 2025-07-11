@@ -1,6 +1,6 @@
 frappe.ui.form.on("Opportunity", {
     before_save: async function(frm) {
-        if (frm.is_new()){
+        if (frm.is_new() && frm.doc.items.length > 0){
             await select_brand_wise_sourcing_person(frm)
         }
     },
@@ -67,7 +67,7 @@ let select_brand_wise_sourcing_person = async function (frm) {
         dialog = new frappe.ui.Dialog({
         title: __("Set Brand Wise Sourcing Person"),
         fields: dialog_fields,
-        primary_action_label: 'Set Sourcind Person',
+        primary_action_label: 'Set Sourcing Person',
         primary_action: function (values) {
             // console.log("------values", values)
             let brand_data = values.brand_wise_sourcing_person
