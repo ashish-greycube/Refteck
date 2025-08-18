@@ -99,7 +99,7 @@ def get_data(filters):
 		GROUP_CONCAT(DISTINCT qo.name SEPARATOR ',') AS qo_list
 		FROM `tabQuotation` AS qo 
 		INNER JOIN `tabQuotation Item` AS tqi ON tqi.parent = qo.name 
-		WHERE {0} and qo.docstatus != 2 and tqi.custom_procurement_member != ""
+		WHERE {0} and qo.docstatus NOT IN (2, 0) and tqi.custom_procurement_member != ""
 		GROUP BY tqi.custom_procurement_member
 		""".format(conditions),filters, as_dict=1, debug=1
 	)

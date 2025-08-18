@@ -147,7 +147,7 @@ def get_data(filters):
 										and x.`date` <= qo.transaction_date 
 										ORDER BY x.date DESC 
 										LIMIT 1)
-			WHERE {0} AND qo.docstatus != 2
+			WHERE {0} AND qo.docstatus NOT IN (2, 0)
 			GROUP BY tqi.custom_procurement_member, qo.name 
 			ORDER BY qo.transaction_date DESC, qo.name""".format(conditions),filters, as_dict=1)
 	
