@@ -147,7 +147,7 @@ def get_data(filters):
 		so.customer	as customer_name,
 		so.transaction_date as date,
 		so.contact_person as contact_person,
-		so.custom_grade as grade,
+		GROUP_CONCAT(DISTINCT tso.custom_grade SEPARATOR ',') as grade,
 		so.custom_industry_vertical as industry_vertical,
 		so.po_no as po_no,
 		tso.custom_procurement_member as procurement_member,
