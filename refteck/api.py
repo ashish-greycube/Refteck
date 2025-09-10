@@ -551,6 +551,29 @@ def set_procurement_member_in_qo_from_opportunity(self, method):
 						# print(i.item_code, "=============item_code")
 						item.custom_procurement_member = i.custom_sourcing_person
 
+def check_item_price_from_so_in_qo(self, method):
+	if self.custom_price_approval_required == 0 and not self.custom_price_approval_remarks:
+		if len(self.items) > 0:
+			for item in self.items:
+				# get latest sales order for item
+				latest_so = frappe.db.sql("""
+					select so.name, soi.item_code, soi.rate
+					from `tabSales Order` so, `tabSales Order Item` soi
+					where so.name = soi.parent and soi.item_code = %(item_code)s and so.docstatus = 1
+					order by so.transaction_date desc, so.creation desc
+					limit 1
+				""", {"item_code": item.item_code}, as_dict=1)
+
+				if len(latest_so) > 0:
+					latest_rate = latest_so[0].rate
+					if item.rate < latest_rate:
+						frappe.msgprint(_("Row {0}: Offer rate <b>{1}</b> is less than latest sales order <b>{2}</b> rate <b>{3}</b> for item <b>{4}</b>. Price approval is required.").format(item.idx, item.rate, latest_so[0].name, latest_rate, item.item_code))
+						self.custom_price_approval_required = 1
+
+def validate_price_approval_required_in_qo(self, method):
+	if self.custom_price_approval_required == 1:
+		frappe.throw(_("Price approval is Requied to submit this Quoation."))
+
 # class CustomReport(Report):
 # 	def execute_script_report(self, filters):
 # 		if restricted_report_list := frappe.get_hooks("report_restricted_for_salary_slip"):
