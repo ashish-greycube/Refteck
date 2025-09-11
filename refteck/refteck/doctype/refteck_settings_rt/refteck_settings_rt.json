@@ -34,7 +34,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-09 10:50:40.348279",
+ "modified": "2025-09-11 10:22:00.424433",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "Refteck Settings RT",
@@ -49,6 +49,13 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "All",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",
