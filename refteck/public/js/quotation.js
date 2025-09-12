@@ -12,7 +12,7 @@ frappe.ui.form.on("Quotation", {
         }, 500);
         }
 
-        set_price_approval_field_read_only_except_approver_role(frm)
+        // set_price_approval_field_read_only_except_approver_role(frm)    // price approval feature
 
     },
     setup(frm) {
