@@ -12,7 +12,7 @@ frappe.ui.form.on("Quotation", {
         }, 500);
         }
 
-        // set_price_approval_field_read_only_except_approver_role(frm)    // price approval feature
+        set_price_approval_field_read_only_except_approver_role(frm)    // price approval feature
 
     },
     setup(frm) {
@@ -112,14 +112,14 @@ let set_procurement_member_from_opportunity = function (frm) {
 let set_price_approval_field_read_only_except_approver_role = function (frm) {
     frappe.db.get_single_value('Refteck Settings RT', 'quotation_price_approver_role')
         .then(price_approver => {
-            console.log(frappe.user.has_role(price_approver), "=========frappe.user.has_role(price_approver==============")
+            // console.log(frappe.user.has_role(price_approver), "=========frappe.user.has_role(price_approver==============")
             if (price_approver && frappe.user.has_role(price_approver)){
                 frm.set_df_property("custom_price_approval_required", "read_only", 0)
-                frm.set_df_property("custom_price_approval_remarks", "read_only", 0)
+                // frm.set_df_property("custom_price_approval_remarks", "read_only", 0)
             }
             else{
                 frm.set_df_property("custom_price_approval_required", "read_only", 1)
-                frm.set_df_property("custom_price_approval_remarks", "read_only", 1)
+                // frm.set_df_property("custom_price_approval_remarks", "read_only", 1)
             }
         })
 }

@@ -175,12 +175,12 @@ doc_events = {
                     "refteck.api.set_item_descripion_in_qn_item",
                     # "refteck.api.set_quotation_material_total",
                     "refteck.api.remove_items_from_margin_calculation",
-                    # "refteck.api.check_item_price_from_so_in_qo"      # price approval feature
+                    "refteck.api.check_item_price_from_so_in_qo"      # price approval feature
                     ],
         "before_save":"refteck.api.qo_margin_calculations",
         "onload":["refteck.api.set_previous_quotation_data",
                   "refteck.api.get_connected_sq_details"],
-        # "on_submit": "refteck.api.validate_price_approval_required_in_qo"   # price approval feature
+        "on_submit": "refteck.api.validate_price_approval_required_in_qo"   # price approval feature
     },
     # "Opportunity":{
     #     "onload": "refteck.api.set_status_for_same_brand_in_op_items"

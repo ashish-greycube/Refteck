@@ -4,6 +4,7 @@ import frappe.defaults
 from frappe import msgprint, _
 from frappe.utils import flt,now_datetime, get_link_to_form
 from frappe.share import add
+from erpnext.setup.utils import get_exchange_rate
 # from frappe.core.doctype.report.report import Report
 
 def set_warehouse_in_child_table(self,method):
@@ -392,20 +393,20 @@ def set_po_tracking_status_in_po_item(self,method):
 
 def set_status_for_same_brand_in_op_items(self, method):
 
-    items = frappe.db.get_list(
-            "Opportunity Item", 
-            parent_doctype='Opportunity',
-            fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand", "custom_item_status"], 
-            filters={"parent":self.name},
-            group_by="custom_sourcing_person, brand",
-            # order_by="idx asc"
-        ) 
-    print(items, '---items')
-    for item in items:
-        print(item.custom_item_status, '---custom_item_status')
-        for row in self.items:
-            if row.custom_sourcing_person == item.custom_sourcing_person and row.brand == item.brand:
-                row.custom_item_status = item.custom_item_status
+	items = frappe.db.get_list(
+			"Opportunity Item", 
+			parent_doctype='Opportunity',
+			fields=["custom_sourcing_person", "parent","custom_refteck_item_comment", "brand", "custom_item_status"], 
+			filters={"parent":self.name},
+			group_by="custom_sourcing_person, brand",
+			# order_by="idx asc"
+		) 
+	# print(items, '---items')
+	for item in items:
+		# print(item.custom_item_status, '---custom_item_status')
+		for row in self.items:
+			if row.custom_sourcing_person == item.custom_sourcing_person and row.brand == item.brand:
+				row.custom_item_status = item.custom_item_status
 
 
 def set_operation_gp_checklist_fields_value(self, method):
@@ -553,22 +554,49 @@ def set_procurement_member_in_qo_from_opportunity(self, method):
 
 def check_item_price_from_so_in_qo(self, method):
 	if self.custom_price_approval_required == 0 and not self.custom_price_approval_remarks:
-		if len(self.items) > 0:
-			for item in self.items:
+		if len(self.custom_margin_calculation) > 0:
+			for margin in self.custom_margin_calculation:
 				# get latest sales order for item
 				latest_so = frappe.db.sql("""
-					select so.name, soi.item_code, soi.rate
+					select so.name, soi.idx, soi.item_code, soi.rate, so.currency
 					from `tabSales Order` so, `tabSales Order Item` soi
 					where so.name = soi.parent and soi.item_code = %(item_code)s and so.docstatus = 1
 					order by so.transaction_date desc, so.creation desc
 					limit 1
-				""", {"item_code": item.item_code}, as_dict=1)
+				""", {"item_code": margin.sap_code}, as_dict=1)
 
-				if len(latest_so) > 0:
-					latest_rate = latest_so[0].rate
-					if item.rate < latest_rate:
-						frappe.msgprint(_("Row {0}: Offer rate <b>{1}</b> is less than latest sales order <b>{2}</b> rate <b>{3}</b> for item <b>{4}</b>. Price approval is required.").format(item.idx, item.rate, latest_so[0].name, latest_rate, item.item_code))
-						self.custom_price_approval_required = 1
+				# print(margin.sap_code, "======sap_code========================================================")
+				# print(latest_so, "===========latest_so=============")
+
+				if len(latest_so) > 0 and margin.offer_price_with_charges and margin.offer_price_with_charges > 0:
+					latest_so_details = latest_so[0]
+					latest_rate = latest_so_details.rate
+
+					# print(latest_so_details, "====================latest_so_details===================")
+					if latest_so_details.currency == self.currency:
+						if margin.offer_price_with_charges < latest_rate:
+							self.custom_price_approval_required = 1
+
+							item_idx = frappe.db.get_value("Quotation Item", margin.qo_item_ref, "idx")
+
+							frappe.msgprint(_("In Item Table, Row {0}: For Item Code <b>{1}</b> Rate <b>{2} {3}</b> is less than <br>" \
+							"Latest SO: <b>{4}</b>,  Row {5} - Rate <b>{6} {7}</b>").format(item_idx, margin.sap_code, margin.offer_price_with_charges, self.currency, latest_so_details.name, latest_so_details.idx, latest_so_details.rate, latest_so_details.currency))
+
+					elif latest_so_details.currency != self.currency:
+						exchange_rate = get_exchange_rate(latest_so_details.currency, self.currency)
+
+						# print(exchange_rate, "=======================exchange_rate================")
+						exchange_latest_rate = flt((exchange_rate * latest_rate), 2)
+						
+						# print(exchange_latest_rate, "=============exchange_latest_rate==================")
+
+						if margin.offer_price_with_charges < exchange_latest_rate:
+							item_idx = frappe.db.get_value("Quotation Item", margin.qo_item_ref, "idx")
+
+							self.custom_price_approval_required = 1
+							frappe.msgprint(_("In Item Table, Row {0}: For Item Code <b>{1}</b> Rate <b>{2} {3}</b> is less than <br>" \
+							"Latest SO: <b>{4}</b>,  Row {5} - Rate <b>{6} {7}</b> <br>" \
+							" <b>In {3} : {2} < {8}</b>").format(item_idx, margin.sap_code, margin.offer_price_with_charges, self.currency, latest_so_details.name, latest_so_details.idx, latest_so_details.rate, latest_so_details.currency, exchange_latest_rate))
 
 def validate_price_approval_required_in_qo(self, method):
 	if self.custom_price_approval_required == 1:
