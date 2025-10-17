@@ -59,7 +59,7 @@ def get_columns(filters):
 		{
 			"fieldname": "old",
 			"fieldtype": "Data",
-			"label": _("Old"), 
+			"label": _("Existing"), 
 			"width": 100
 		},
 	]
@@ -119,7 +119,7 @@ def get_data(filters):
 		on tso.parent = so.name
 		inner join `tabCustomer` as cs
 		on cs.name = so.customer
-		where {0} and so.docstatus != 2 and so.custom_grade = 'NEW' and cs.custom_is_refteck_customer = 0
+		where {0} and so.docstatus != 2 and tso.custom_grade = 'NEW' and cs.custom_is_refteck_customer = 0
 			GROUP BY tso.custom_procurement_member
 		""".format(conditions),filters, as_dict=1, debug=1
 		)
@@ -133,7 +133,7 @@ def get_data(filters):
 		on tso.parent = so.name
 		inner join `tabCustomer` as cs
 		on cs.name = so.customer
-		where {0} and so.docstatus != 2 and so.custom_grade = 'OLD' and cs.custom_is_refteck_customer = 0	
+		where {0} and so.docstatus != 2 and tso.custom_grade = 'Existing' and cs.custom_is_refteck_customer = 0	
 			GROUP BY tso.custom_procurement_member
 		""".format(conditions),filters, as_dict=1, debug=1)
 	
