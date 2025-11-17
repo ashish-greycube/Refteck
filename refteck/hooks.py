@@ -72,6 +72,12 @@ doctype_js = {"Purchase Order":"public/js/purchase_order.js",
 # 	"filters": "refteck.utils.jinja_filters"
 # }
 
+jinja = {
+    "methods": [
+        "refteck.jinja.get_employee_promotion_designation_details"
+    ]
+}
+
 # Installation
 # ------------
 
