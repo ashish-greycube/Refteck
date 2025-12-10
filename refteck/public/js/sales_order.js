@@ -7,6 +7,11 @@ frappe.ui.form.on("Sales Order", {
         if (!frm.is_new() && frm.doc.docstatus == 0 && frm.doc.items.length > 0) {
             frm.add_custom_button(__('Allocate Grade'), () => select_brand_wise_grade(frm));
         }
+        if (frm.doc.docstatus == 1) {
+            frm.add_custom_button(__('Save to Sheets'), () => {
+                save_to_sheets(frm);
+            }, "Create")
+        }
     },
     po_no: function(frm){
         frm.set_value('custom_sales_order_no', frm.doc.po_no)
@@ -115,4 +120,43 @@ let get_unique_brands = function(frm){
         }
     });
     return unique_brands
+}
+
+function save_to_sheets(frm) {
+    let dlg = new frappe.ui.Dialog({
+        title: __("Share Permissions"),
+        fields: [
+            {
+                label: "Emails to share with",
+                fieldname: "share_with",
+                fieldtype: "Data",
+                reqd: 1,
+                default: frappe.session.user_email,
+                description: "Use ';' to separate multiple emails.",
+            },
+        ],
+        primary_action: function () {
+            frappe.call({
+                method: "refteck.spreadsheet.save_to_sheets",
+                args: {
+                    doc : frm.doc,
+                    share_with: dlg.get_value("share_with"),
+                },
+                freeze: true,
+                freeze_message: "Please wait while the sheet is created",
+                callback: (r) => {
+                    dlg.hide();
+                    frappe.msgprint(
+                        __("Created <a href='{}' target='_blank'>{}</a>, shared with {}", [
+                            r.message.spreadsheetUrl,
+                            r.message.title,
+                            dlg.get_value("share_with"),
+                        ]),
+                        __("Created Spreadsheet.")
+                    );
+                },
+            });
+        },
+    });
+    dlg.show();
 }

@@ -254,6 +254,43 @@ def get_connected_sq_details(self,method):
 														total_weight_list=total_weight_list))  
 				self.set_onload("custom_sq_html_data", html) 
 
+def get_sq_details(self,method):
+	connected_sq_list = []
+	supplier_name_list=[]
+	payment_terms_list = []
+	currency_list = []
+	actual_lead_time_list = []
+	notes_list = []
+	reviewed_by_list = []
+	procurement_representative_list = []
+	total_weight_list = []
+	sq_ref_list=[]
+
+	if self.opportunity:
+		if len(self.custom_margin_calculation) > 0:	
+			for sq_ref in self.custom_margin_calculation:
+				print(sq_ref)
+				if sq_ref.get("supplier_quotation"):
+					if sq_ref.get("supplier_quotation") not in sq_ref_list:
+						sq_ref_list.append(sq_ref.get("supplier_quotation"))
+			if len(sq_ref_list) > 0:
+				for sq	in sq_ref_list:
+					sq_doc_exist = frappe.db.exists('Supplier Quotation', sq)
+					if sq_doc_exist:
+						sq_doc = frappe.get_doc('Supplier Quotation', sq)
+						if sq_doc.opportunity == self.opportunity:
+							supplier_name_list.append(sq_doc.supplier)
+							connected_sq_list.append(sq_doc.name)
+							payment_terms_list.append(sq_doc.custom_payment_terms)
+							currency_list.append(sq_doc.currency)
+							actual_lead_time_list.append(sq_doc.custom_actual_lead_time)
+							notes_list.append(sq_doc.custom_notes)
+							reviewed_by_list.append(sq_doc.custom_supplier_quotation_reviewed_by)
+							procurement_representative_list.append(sq_doc.owner)
+							total_weight_list.append(sq_doc.custom_total_weight)
+
+	return connected_sq_list, supplier_name_list, payment_terms_list, currency_list, actual_lead_time_list, notes_list, reviewed_by_list, procurement_representative_list, total_weight_list, sq_ref_list
+	
 def get_connected_qo(quotation_name):
 	def get_connected(quotation_name):
 		amended_from = frappe.db.get_value('Quotation',quotation_name, 'amended_from')

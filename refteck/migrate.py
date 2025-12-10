@@ -47,7 +47,43 @@ def after_migrate():
 				"insert_after": "customer_name",
 				"is_custom_field":1,
 				"is_system_generated":0
+			},
+            {
+                "fieldname": "custom_gsheet_links_section_break",
+                "fieldtype": "Section Break",
+                "insert_after" : "custom_previous_quotation_details",
+                "is_custom_field":1,
+				"is_system_generated":0
+			},
+             {
+                "fieldname": "custom_generated_spreadsheet_urls",
+                "fieldtype": "Table",
+                "insert_after" : "custom_gsheet_links_section_break",
+                "label":"Generated Spreadsheet URLs",
+                "is_custom_field":1,
+				"is_system_generated":0,
+                "options" : "Generated Spreadsheet URL RT",
+                "allow_on_submit" : 1
 			}			
+		],
+        "Sales Order": [
+            {
+                "fieldname": "custom_gsheet_links_section_break",
+                "fieldtype": "Section Break",
+                "insert_after" : "custom_material_margin_",
+                "is_custom_field":1,
+				"is_system_generated":0
+			},
+             {
+                "fieldname": "custom_generated_spreadsheet_urls",
+                "fieldtype": "Table",
+                "insert_after" : "custom_gsheet_links_section_break",
+                "label":"Generated Spreadsheet URLs",
+                "is_custom_field":1,
+				"is_system_generated":0,
+                "options" : "Generated Spreadsheet URL RT",
+                "allow_on_submit" : 1
+			}
 		]
     }
 
