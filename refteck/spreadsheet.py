@@ -1,4 +1,5 @@
 import json
+import string
 import frappe
 import gspread
 from frappe.utils import cstr
@@ -6,7 +7,7 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from refteck.api import get_connected_qo, get_sq_details
 from frappe.integrations.google_oauth import GoogleOAuth
-from gspread_formatting import cellFormat, textFormat, format_cell_range, Border, Borders, Color, set_column_width
+from gspread_formatting import cellFormat, textFormat, format_cell_range, Border, Borders, Color, set_column_width,batch_updater
 
 class GoogleOAuthSpreadsheets(GoogleOAuth):
     """
@@ -347,50 +348,135 @@ def get_previous_quotation_details(name):
 
         return qo_data
     
+# def format_spreadsheet(google_spreadsheet):
+#     credentials = frappe.db.get_single_value("Google Spreadsheet Account", "credentials")
+#     credentials = json.loads(credentials)
+
+#     gc = gspread.service_account_from_dict(credentials)
+#     sh = gc.open(google_spreadsheet['title'])
+#     worksheet = sh.sheet1
+#     all_data = worksheet.get_all_values()
+
+#     # Format Column Width As Per MaxCharacters in Column
+#     for i in range(1, len(all_data[0]) + 1):
+#         new_column_length = max(len(cell) for cell in worksheet.col_values(i))
+#         new_column_letter = chr(ord('A') + i - 1)
+#         if new_column_length > 0:
+#             set_column_width(worksheet, new_column_letter, round(new_column_length*8.2))
+
+
+#     """ Bold and align left the first label column before the table """
+#     fmt = cellFormat(
+#         textFormat=textFormat(bold=True),
+#         horizontalAlignment='LEFT'
+#     )
+
+#     """ Define table rows count + Bold and align left table """
+#     border_style = Borders(
+#         top=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
+#         bottom=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
+#         left=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
+#         right=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
+#     )
+
+#     table_format = cellFormat(
+#         borders=border_style,
+#         horizontalAlignment='LEFT',
+#     )
+    
+#     for i in range(len(all_data)):
+#         length = len(worksheet.row_values(i+1))
+#         if length == 1:
+#             format_cell_range(worksheet, f'A{i+1}', fmt)        
+#         elif length == 2:
+#             format_cell_range(worksheet, f'A{i+1}', fmt)
+#         elif length > 2:
+#             last_col = chr(ord('A') + length - 1)
+#             format_cell_range(worksheet, f'A{i+1}:{last_col}{i+1}', table_format)
+
 def format_spreadsheet(google_spreadsheet):
+    """
+    Generic spreadsheet formatter:
+    - Auto-adjust column widths
+    - Format label rows (<=2 cols)
+    - Format table rows (>=3 cols with borders)
+    - Uses batch updates to avoid rate limits
+    """
     credentials = frappe.db.get_single_value("Google Spreadsheet Account", "credentials")
     credentials = json.loads(credentials)
 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open(google_spreadsheet['title'])
+    sh = gc.open_by_key(google_spreadsheet['spreadsheetId'])
     worksheet = sh.sheet1
+
+    # Fetch all spreadsheet data once
     all_data = worksheet.get_all_values()
 
+    if not all_data:
+        return
+    
     # Format Column Width As Per MaxCharacters in Column
     for i in range(1, len(all_data[0]) + 1):
         new_column_length = max(len(cell) for cell in worksheet.col_values(i))
         new_column_letter = chr(ord('A') + i - 1)
         if new_column_length > 0:
             set_column_width(worksheet, new_column_letter, round(new_column_length*8.2))
-
-
-    """ Bold and align left the first label column before the table """
-    fmt = cellFormat(
-        textFormat=textFormat(bold=True),
-        horizontalAlignment='LEFT'
-    )
-
-    """ Define table rows count + Bold and align left table """
-    border_style = Borders(
-        top=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
-        bottom=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
-        left=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
-        right=Border(style='SOLID', width=1, color=Color(0, 0, 0)),
-    )
-
-    table_format = cellFormat(
-        borders=border_style,
-        horizontalAlignment='LEFT',
-    )
     
+    label_format = {
+        "horizontalAlignment": "LEFT",
+        "textFormat": {
+            "bold": True
+        }
+    }
+
+    table_format = {
+        "horizontalAlignment": "LEFT",
+        "borders" : {
+            "top": {
+                    "style": "SOLID",
+                    "width": 1,
+                    "color": {
+                        "red": 0.0,
+                        "green": 0.0,
+                        "blue": 0.0
+                    },
+            },
+            "bottom": {
+                "style": "SOLID",
+                    "width": 1,
+                    "color": {
+                        "red": 0.0,
+                        "green": 0.0,
+                        "blue": 0.0
+                    },
+            },
+            "left": {
+                "style": "SOLID",
+                    "width": 1,
+                    "color": {
+                        "red": 0.0,
+                        "green": 0.0,
+                        "blue": 0.0
+                    },
+            },
+            "right": {
+                "style": "SOLID",
+                    "width": 1,
+                    "color": {
+                        "red": 0.0,
+                        "green": 0.0,
+                        "blue": 0.0
+                    },
+            }
+        }
+    }
+
     for i in range(len(all_data)):
         length = len(worksheet.row_values(i+1))
         if length == 1:
-            format_cell_range(worksheet, f'A{i+1}', fmt)        
+            worksheet.format(f'A{i+1}', label_format)       
         elif length == 2:
-            format_cell_range(worksheet, f'A{i+1}', fmt)
+             worksheet.format(f'A{i+1}', label_format)
         elif length > 2:
-            last_col = chr(ord('A') + length - 1)
-            format_cell_range(worksheet, f'A{i+1}:{last_col}{i+1}', table_format)
-
-    
+            last_col = string.ascii_uppercase[length - 1]  # A..Z only (extend if needed)
+            worksheet.format(f'A{i+1}:{last_col}{i+1}', table_format)
