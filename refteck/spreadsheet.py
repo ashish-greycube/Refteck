@@ -188,7 +188,7 @@ def save_to_sheets(doc, share_with):
                             row_data.append(row.get(ctfield.fieldname))
                         operating_gp_checklist_data.append(row_data)
             else:
-                d = [field.label, doc.get(field.fieldname)]
+                d = [field.label, f"{doc.get(field.fieldname)} {'(Formula: {0})'.format(field.description) if field.description else ''}"]
                 operating_gp_checklist_data.append(d)
         
         gsheet = GSpreadsheet()
@@ -267,7 +267,7 @@ def save_quotation_details_to_sheets(doc, share_with):
                         row_data.append(row.get(ctfield.fieldname))
                     admin_checklist_data.append(row_data)
             else:
-                d = [field.label, doc.get(field.fieldname)]
+                d = [field.label, f"{doc.get(field.fieldname)} {'(Formula: {0})'.format(field.description) if field.description else ''}"]
                 admin_checklist_data.append(d)
 
         gsheet = GSpreadsheet()
