@@ -14,7 +14,7 @@ frappe.ui.form.on("Quotation", {
 
         set_price_approval_field_read_only_except_approver_role(frm)    // price approval feature
 
-        if (frm.doc.docstatus == 1) {
+        if (frm.doc.docstatus != 2) {
             frm.add_custom_button(__('Save to Sheets'), () => {
                 save_to_sheets(frm);
             })

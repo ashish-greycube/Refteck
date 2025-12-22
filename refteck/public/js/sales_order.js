@@ -7,7 +7,7 @@ frappe.ui.form.on("Sales Order", {
         if (!frm.is_new() && frm.doc.docstatus == 0 && frm.doc.items.length > 0) {
             frm.add_custom_button(__('Allocate Grade'), () => select_brand_wise_grade(frm));
         }
-        if (frm.doc.docstatus == 1) {
+        if (frm.doc.docstatus != 2) {
             frm.add_custom_button(__('Save to Sheets'), () => {
                 save_to_sheets(frm);
             }, "Create")
