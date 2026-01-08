@@ -10,12 +10,12 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 	data = get_data(filters)
-	
+	msg="Refteck Customer & Cancelled Sales Order are excluded from this report"
 	if not data:
 		frappe.msgprint(_("No records found"))
-		return columns, data
+		return columns, data, msg
 		
-	return columns, data
+	return columns, data, msg
 
 def get_columns(filters):
 	columns = [
