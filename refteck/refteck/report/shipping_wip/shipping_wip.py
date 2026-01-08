@@ -97,9 +97,16 @@ def get_columns(filters):
 			"width": 240
 		},
 		{
+			"fieldname": "payment_terms_template",
+			"fieldtype": "Link",
+			"label": _("Payment Terms Template"),
+			"options": "Payment Terms Template",
+			"width": 180
+		},
+		{
 			"fieldname": "updated_payment_terms",
 			"fieldtype": "Data",
-			"label": _("Payment Terms"),
+			"label": _("Updated Payment Terms"),
 			"width": 180
 		},
 		{
@@ -205,6 +212,7 @@ def get_data(filters):
 			tpo.supplier,
 			tso.delivery_date,
 			tso.company,
+			tpo.payment_terms_template,
 			tpo.custom_updated_payment_terms as updated_payment_terms,
 			tpo.custom_current_lead_time_ship_date as current_lead_time_ship_date,
 			IF(tso.currency = 'GBP',
