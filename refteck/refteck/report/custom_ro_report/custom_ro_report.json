@@ -2,22 +2,22 @@
  "add_total_row": 0,
  "add_translate_data": 0,
  "columns": [],
- "creation": "2025-01-16 05:42:16.456050",
+ "creation": "2026-02-16 08:31:53.787976",
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 10,
+ "idx": 0,
  "is_standard": "Yes",
  "letter_head": null,
- "modified": "2026-02-03 09:30:20.203665",
+ "modified": "2026-02-16 08:31:58.883184",
  "modified_by": "Administrator",
  "module": "Refteck",
- "name": "SO Procurement Member",
+ "name": "Custom RO Report",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Sales Order",
- "report_name": "SO Procurement Member",
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Custom RO Report",
  "report_type": "Script Report",
  "roles": [
   {
@@ -40,6 +40,9 @@
   },
   {
    "role": "Onsite Sales Team"
+  },
+  {
+   "role": "PO checklist user"
   }
  ],
  "timeout": 0

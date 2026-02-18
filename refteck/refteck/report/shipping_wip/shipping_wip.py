@@ -4,7 +4,7 @@
 import frappe
 from frappe import msgprint, _
 from datetime import datetime
-from frappe.utils import fmt_money,add_days
+from frappe.utils import fmt_money,add_days, flt, cstr
 from frappe.desk.form.assign_to import get
 
 
@@ -15,7 +15,7 @@ def execute(filters=None):
 	data = get_data(filters)
 	msg="Shipping WIP report returns data only if there are SO linked with PO and such SO are without SI"
 	if not data:
-		# msgprint(_("No records found"))
+		msgprint(_("No records found"))
 		return columns, data, msg, None
 		
 	return columns, data, msg, None
@@ -119,38 +119,50 @@ def get_columns(filters):
 			"fieldname": "gbp",
 			"fieldtype": "Data",
 			"label": _("GBP"), 
-			"width": 100
+			"width": 150
 		},
 		{
 			"fieldname": "euro",
 			"fieldtype": "Data",
 			"label": _("EURO"), 
-			"width": 100
+			"width": 150
 		},
 		{
 			"fieldname": "usd",
 			"fieldtype": "Data",
 			"label": _("USD"), 
-			"width": 100
+			"width": 150
 		},
 		{
 			"fieldname": "inr",
 			"fieldtype": "Data",
 			"label": _("INR"), 
-			"width": 100
+			"width": 150
 		},
 		{
 			"fieldname": "others",
 			"fieldtype": "Data",
 			"label": _("OTHERS"), 
-			"width": 100
+			"width": 150
 		},
  		{
             "fieldname": "order_total",
             "fieldtype": "Data",
             "label": _("Order Total"),
-            "width": 100
-        },		
+            "width": 150
+        },	
+		{
+			"fieldname": "order_total_in_usd",
+			"fieldtype": "Data",
+			"label": _("Order Total In USD"), 
+			"width": 150
+		},	
+		{
+			"fieldname": "payment_status",
+			"fieldtype": "Data",
+			"label": _("Payment Status"),
+			"width": 130
+		},
 		{
 			"fieldname": "comments",
 			"fieldtype": "Data",
@@ -206,6 +218,9 @@ def get_data(filters):
 			tso.customer_name as client,
 			todo.allocated_to as assigned_to,
 			tso.incoterm,
+			tpo.name as purchase_order,
+			tpo.advance_paid,
+			tpo.rounded_total,
 			tpo.custom_order_code as code,
 			tso.po_no,
 			tso.contact_display as buyer,
@@ -229,6 +244,7 @@ def get_data(filters):
 			'-') as inr,
 			IF(tso.currency NOT IN ('GBP', 'EUR', 'USD', 'INR'), ROUND(sum(tsoi.net_amount),2), '-') as OTHERS,
 			tso.grand_total as order_total,
+			CONCAT('$ ',ROUND(SUM(tso.grand_total * coalesce(fn.exchange_rate, 1)),2)) as order_total_in_usd,
 			tpo.custom_shipping_remarks as comments,
 			tso.currency,
 			tso.creation
@@ -247,12 +263,25 @@ def get_data(filters):
 			tpo.name = tpoi.parent
 			and tpoi.sales_order_item = tsoi.name
 		left join `tabToDo` as todo
-		on todo.reference_type='Sales Order'
-		and todo.reference_name=tso.name	
-		and todo.status!='Cancelled'	
+			on todo.reference_type='Sales Order'
+			and todo.reference_name=tso.name	
+			and todo.status!='Cancelled'
+		inner join `tabCustomer` as cs
+		on 
+			cs.name = tso.customer 
+		left outer join `tabCustom Currency Exchange` fn on fn.from_currency = tso.currency
+    	and fn.to_currency = 'USD'
+    	and fn.`date` = (
+			    				select `date` 
+	    						from `tabCustom Currency Exchange` x
+	    						where x.from_currency = tso.currency and x.to_currency = 'USD' 
+		    						and x.`date` <= tso.transaction_date 
+									ORDER BY x.date DESC 
+		    						LIMIT 1)	
 		where
 			tso.per_billed <100
-			and NOT EXISTS ( select 1 from `tabSales Invoice Item` tsii where tsii.so_detail=tsoi.name and tsii.sales_order=tso.name and tsii.docstatus!=2)			
+			and NOT EXISTS ( select 1 from `tabSales Invoice Item` tsii where tsii.so_detail=tsoi.name and tsii.sales_order=tso.name and tsii.docstatus!=2)	
+			and cs.custom_is_refteck_customer = 0		
 			{0}
 		group by
 			tpo.name
@@ -261,13 +290,70 @@ def get_data(filters):
 		""".format(conditions),filters,as_dict=1,debug=1
 	)
 
+	gbp_total = 0
+	euro_total = 0
+	usd_total = 0
+	inr_total = 0
+	other_total = 0
+	in_usd_total = 0
 	for d in data:
 		d['order_total']=fmt_money(d['order_total'], currency=d['currency'])
+
+		gbp_total =  flt((gbp_total + (flt((d.gbp[1:]), 2) or 0)), 2)
+		usd_total =  flt((usd_total + (flt((d.usd[1:]), 2) or 0)), 2)
+		euro_total =  flt((euro_total + (flt((d.euro[1:]), 2) or 0)),2)
+		inr_total =  flt((inr_total + (flt((d.inr[1:]), 2) or 0)), 2)
+		other_total =  flt((other_total + (flt((d.others), 2) or 0)), 2)
+		in_usd_total = flt((in_usd_total + (flt((d.order_total_in_usd[2:]), 2) or 0)), 2)
+
+		# purchase invoice
+		pi_items = frappe.db.get_list(
+			"Purchase Invoice Item", 
+			parent_doctype='Purchase Invoice',fields=["parent"],filters={"purchase_order": d.purchase_order})
+		
+		payment_status = ""
+
+		if (len(pi_items) > 0):			
+			pi_list = frappe.db.get_list("Purchase Invoice", 
+								fields=["name","bill_no","bill_date", "currency","docstatus", "total_advance", "rounded_total", "due_date"],
+								filters={"name":pi_items[0].parent})
+			
+		if(len(pi_items) > 0 and pi_list[0].p == 1):
+			if pi_list[0].total_advance == 0:
+				payment_status = "Unpaid"
+			
+			if pi_list[0].rounded_total != pi_list[0].total_advance and pi_list[0].total_advance != 0:
+				payment_status = "Partly Paid"
+			
+			if pi_list[0].rounded_total == pi_list[0].total_advance and pi_list[0].total_advance != 0:
+				payment_status = "Paid"
+		
+		else:
+			if d.advance_paid == 0:
+				payment_status = "Unpaid"
+			
+			if d.rounded_total != d.advance_paid and d.advance_paid != 0:
+				payment_status = "Partly Paid"
+			
+			if d.rounded_total == d.advance_paid and d.advance_paid != 0:
+				payment_status = "Paid"
+
+		d['payment_status'] = payment_status
+
+
+	data.append({"so":"<b>Total</b>", 
+			  "gbp": "<b>" + "£ " + cstr(gbp_total) + "</b>",
+			  "euro": "<b>" + "€ " + cstr(euro_total) + "</b>",
+			  "usd": "<b>" + "$ " + cstr(usd_total) + "</b>",
+			  "inr": "<b>" + "₹ " + cstr(inr_total) + "</b>",
+			  "others": "<b>" + cstr(other_total) + "</b>",
+			  "order_total_in_usd": "<b>" + "$ " + cstr(in_usd_total) + "</b>"})
+
 	return data
 
 @frappe.whitelist()
 def create_dialog_data(sales_order):
-	print(sales_order, '----------------sales_order')
+	# print(sales_order, '----------------sales_order')
 	template_path = "templates/report_dialog_data.html"
 	# frappe.render_template(template_path,  dict(sales_order=sales_order))  
 	return frappe.render_template(template_path,  dict(sales_order=sales_order)) 
