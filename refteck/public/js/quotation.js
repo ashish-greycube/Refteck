@@ -153,14 +153,14 @@ function save_to_sheets(frm) {
                 freeze_message: "Please wait while the sheet is created",
                 callback: (r) => {
                     dlg.hide();
-                    frappe.msgprint(
-                        __("Created <a href='{}' target='_blank'>{}</a>, shared with {}", [
-                            r.message.spreadsheetUrl,
-                            r.message.title,
-                            dlg.get_value("share_with"),
-                        ]),
-                        __("Created Spreadsheet.")
-                    );
+                    // frappe.msgprint(
+                    //     __("Created <a href='{}' target='_blank'>{}</a>, shared with {}", [
+                    //         r.message.spreadsheetUrl,
+                    //         r.message.title,
+                    //         dlg.get_value("share_with"),
+                    //     ]),
+                    //     __("Created Spreadsheet.")
+                    // );
                 },
             });
         },

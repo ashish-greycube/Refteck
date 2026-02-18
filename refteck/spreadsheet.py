@@ -1,6 +1,7 @@
 import json
 import string
 import frappe
+from frappe import _
 import gspread
 from frappe.utils import cstr
 from googleapiclient.discovery import build
@@ -230,7 +231,11 @@ def save_to_sheets(doc, share_with):
     try:
         format_spreadsheet(google_spreadsheet)
     except Exception as ex:
-        frappe.throw("SpreadSheet formatting failed. {0}".format(ex))
+        frappe.log_error(
+            title="SpreadSheet Formation Failed",
+            message=ex
+        )
+        frappe.throw("Per Minute Read/Write Requests Limit Exceeded! Please Try Again After Few Minutes.")
     return google_spreadsheet
 
 @frappe.whitelist()
@@ -329,6 +334,7 @@ def save_quotation_details_to_sheets(doc, share_with):
         frappe.throw("SpreadSheet can not be saved to sheets. {}".format(ex))
     try:
         format_spreadsheet(google_spreadsheet)
+        frappe.msgprint("Created <span><a href='{0}' target='_blank'>{1}</a></span>, shared with {2}".format(google_spreadsheet['spreadsheetUrl'], google_spreadsheet['title'], share_with))
     except Exception as ex:
         frappe.throw("SpreadSheet formatting failed. {0}".format(ex))
     return google_spreadsheet
@@ -336,15 +342,50 @@ def save_quotation_details_to_sheets(doc, share_with):
 def get_connnected_supplier_quotation_details(doc, admin_checklist_data):
     connected_sq_list, supplier_name_list, payment_terms_list, currency_list, actual_lead_time_list, notes_list, reviewed_by_list, procurement_representative_list, total_weight_list, sq_ref_list = get_sq_details(doc, method=None)
     admin_checklist_data.append(["Connected Supplier Quotation"])
-    admin_checklist_data.append(["Supplier Quotation", connected_sq_list[0] if len(connected_sq_list) > 0 else ""])
-    admin_checklist_data.append(["Supplier", supplier_name_list[0] if len(supplier_name_list) > 0 else ""])
-    admin_checklist_data.append(["Payment Terms", payment_terms_list[0] if len(payment_terms_list) > 0 else ""])
-    admin_checklist_data.append(["Currency", currency_list[0] if len(currency_list) > 0 else ""])
-    admin_checklist_data.append(["Actual Lead Time", actual_lead_time_list[0] if len(actual_lead_time_list) > 0 else ""])
-    admin_checklist_data.append(["Total Weight", total_weight_list[0] if len(total_weight_list) > 0 else ""])
-    admin_checklist_data.append(["Notes", notes_list[0] if len(notes_list) > 0 else ""])
-    admin_checklist_data.append(["Supplier Quotation Reviewed By", reviewed_by_list[0] if len(reviewed_by_list) > 0 else ""])
-    admin_checklist_data.append(["Procurement Representative", procurement_representative_list[0] if len(procurement_representative_list) > 0 else ""])
+    cs = ["Supplier Quotation"]
+    for connnected_sq in connected_sq_list:
+        cs.append(connnected_sq)
+    admin_checklist_data.append(cs)
+
+    sn = ["Supplier"]
+    for supplier_name in supplier_name_list:
+        sn.append(supplier_name)
+    admin_checklist_data.append(sn)
+
+    pt = ["Payment Terms"]
+    for payment_term in payment_terms_list:
+        pt.append(payment_term)
+    admin_checklist_data.append(pt)
+
+    cr = ["Currency"]
+    for currency in currency_list:
+        cr.append(currency)
+    admin_checklist_data.append(cr)
+
+    al = ["Actual Lead Time"]
+    for actual_lead in actual_lead_time_list:
+        al.append(actual_lead)
+    admin_checklist_data.append(al)
+
+    tw = ["Total Weight"]
+    for weight in total_weight_list:
+        tw.append(weight)
+    admin_checklist_data.append(tw)
+
+    n = ["Notes"]
+    for note in notes_list:
+        n.append(note)
+    admin_checklist_data.append(n)
+
+    sq = ["Supplier Quotation Reviewed By"]
+    for review in reviewed_by_list:
+        sq.append(review)
+    admin_checklist_data.append(sq)
+
+    pr = ["Procurement Representative"]
+    for procurement in procurement_representative_list:
+        pr.append(procurement)
+    admin_checklist_data.append(pr)
 
 def get_previous_quotation_details(name):
     connected_qo_details = get_connected_qo(name)
@@ -512,12 +553,17 @@ def format_spreadsheet(google_spreadsheet):
         }
     }
 
+    count = 0    
     for i in range(len(all_data)):
         length = len(worksheet.row_values(i+1))
         if length == 1:
-            worksheet.format(f'A{i+1}', label_format)       
+            worksheet.format(f'A{i+1}', label_format)   
+            count += 1     
         elif length == 2:
              worksheet.format(f'A{i+1}', label_format)
+             count += 1
         elif length > 2:
             last_col = string.ascii_uppercase[length - 1]  # A..Z only (extend if needed)
             worksheet.format(f'A{i+1}:{last_col}{i+1}', table_format)
+            count += 1
+        frappe.publish_progress(count / len(all_data) * 100, title=_("Spreadsheet Creation Is In Progress..."))
