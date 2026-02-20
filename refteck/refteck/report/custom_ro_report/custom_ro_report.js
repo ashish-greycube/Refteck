@@ -36,6 +36,16 @@ frappe.query_reports["Custom RO Report"] = {
                         "Unpaid",
                         "Partly Paid"
                     ]
+        },
+        {
+            "fieldname" : "is_ro_set",
+            "label" : __("Is RO Set"),
+            "fieldtype" : "Select",
+            "options": [
+                        "",
+                        "Set",
+                        "Not Set"
+                    ]
         }
     ]
 };

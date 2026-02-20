@@ -244,7 +244,7 @@ def get_data(filters):
 			'-') as inr,
 			IF(tso.currency NOT IN ('GBP', 'EUR', 'USD', 'INR'), ROUND(sum(tsoi.net_amount),2), '-') as OTHERS,
 			tso.grand_total as order_total,
-			CONCAT('$ ',ROUND(SUM(tso.grand_total * coalesce(fn.exchange_rate, 1)),2)) as order_total_in_usd,
+			CONCAT('$ ',ROUND((tso.grand_total * coalesce(fn.exchange_rate, 1)),2)) as order_total_in_usd,
 			tpo.custom_shipping_remarks as comments,
 			tso.currency,
 			tso.creation
@@ -266,22 +266,18 @@ def get_data(filters):
 			on todo.reference_type='Sales Order'
 			and todo.reference_name=tso.name	
 			and todo.status!='Cancelled'
-		inner join `tabCustomer` as cs
-		on 
-			cs.name = tso.customer 
 		left outer join `tabCustom Currency Exchange` fn on fn.from_currency = tso.currency
     	and fn.to_currency = 'USD'
     	and fn.`date` = (
-			    				select `date` 
-	    						from `tabCustom Currency Exchange` x
-	    						where x.from_currency = tso.currency and x.to_currency = 'USD' 
-		    						and x.`date` <= tso.transaction_date 
-									ORDER BY x.date DESC 
-		    						LIMIT 1)	
+							select `date` 
+							from `tabCustom Currency Exchange` x
+							where x.from_currency = tso.currency and x.to_currency = 'USD' 
+								and x.`date` <= tso.transaction_date 
+								ORDER BY x.date DESC 
+								LIMIT 1)	
 		where
 			tso.per_billed <100
-			and NOT EXISTS ( select 1 from `tabSales Invoice Item` tsii where tsii.so_detail=tsoi.name and tsii.sales_order=tso.name and tsii.docstatus!=2)	
-			and cs.custom_is_refteck_customer = 0		
+			and NOT EXISTS ( select 1 from `tabSales Invoice Item` tsii where tsii.so_detail=tsoi.name and tsii.sales_order=tso.name and tsii.docstatus!=2)		
 			{0}
 		group by
 			tpo.name

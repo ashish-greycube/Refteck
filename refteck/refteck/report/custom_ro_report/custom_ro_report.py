@@ -158,5 +158,11 @@ def get_conditions(filters):
     
     if filters.get("status"):
         conditions += " AND status ='{0}'".format(filters["status"])
+    
+    if filters.get("is_ro_set"):
+        if filters.get("is_ro_set") == "Set":
+            conditions += " AND (custom_ro OR custom_ro != '')"
+        elif filters.get("is_ro_set") == "Not Set":
+            conditions += " AND (custom_ro IS NULL OR custom_ro = '')"
         
     return conditions
