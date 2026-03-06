@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, cstr
 
 def execute(filters=None):
 	if not filters : filters = {}
@@ -166,9 +166,9 @@ def get_data(filters):
 		base_grand_total += flt((row["base_grand_total"]),2)
 		total += flt((row["value_in_usd"]),2)
 
-		row["grand_total"] = f"{symbol} {row["grand_total"]}"
-		row["base_grand_total"] = f"{symbol} {row["base_grand_total"]}"
-		row["value_in_usd"] = f"$ {row["value_in_usd"]}"
+		row["grand_total"] = cstr(symbol) + cstr(row["grand_total"])
+		row["base_grand_total"] = cstr(symbol) + cstr(row["base_grand_total"])
+		row["value_in_usd"] = "$" + cstr(row["value_in_usd"])
 		
 	data.append({"name":"Total", "grand_total": flt(grand_total, 2), "base_grand_total": flt(base_grand_total, 2),"value_in_usd":flt(total,2)})
 	
