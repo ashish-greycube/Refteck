@@ -87,7 +87,7 @@ def get_columns():
 		},
 		{
 			"fieldname" :"value_in_usd",
-			"fieldtype" :"Currency",
+			"fieldtype" :"Data",
 			"label" :_("Total Value in USD"),
 			"width" :130
 		},
@@ -166,11 +166,11 @@ def get_data(filters):
 		base_grand_total += flt((row["base_grand_total"]),2)
 		total += flt((row["value_in_usd"]),2)
 
-		row["grand_total"] = cstr(symbol) + cstr(row["grand_total"])
-		row["base_grand_total"] = cstr(symbol) + cstr(row["base_grand_total"])
-		row["value_in_usd"] = "$" + cstr(row["value_in_usd"])
+		row["grand_total"] = cstr(symbol) + " " + cstr(row["grand_total"])
+		row["base_grand_total"] = cstr(symbol) + " " + cstr(row["base_grand_total"])
+		row["value_in_usd"] = "$ " + cstr(row["value_in_usd"])
 		
-	data.append({"name":"Total", "grand_total": flt(grand_total, 2), "base_grand_total": flt(base_grand_total, 2),"value_in_usd":flt(total,2)})
+	data.append({"name":"Total", "grand_total": flt(grand_total, 2), "base_grand_total": flt(base_grand_total, 2),"value_in_usd":"$ " + cstr(flt(total,2)) })
 	
 	return data
 
