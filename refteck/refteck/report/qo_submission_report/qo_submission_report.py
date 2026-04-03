@@ -182,6 +182,12 @@ def get_conditions(filters):
 
 	if filters.get("customer"):
 		conditions += " AND qo.party_name ='{0}'".format(filters["customer"])
+
+	if filters.get("from_date") and filters.get("to_date"):
+		if filters.get("to_date") >= filters.get("from_date"):
+			conditions += " AND qo.transaction_date between '{0}' and '{1}'".format(filters["from_date"], filters["to_date"])
+		else:
+			frappe.throw(_("To Date must be greater than or equal to From Date"))
 		
 	if filters.get("date"):
 		conditions += " AND qo.transaction_date ='{0}'".format(filters["date"])

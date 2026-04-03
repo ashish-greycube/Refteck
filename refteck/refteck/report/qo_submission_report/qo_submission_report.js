@@ -16,7 +16,13 @@ frappe.query_reports["QO Submission Report"] = {
 			"options":"Customer"
 		},
 		{
-			"fieldname":"date",
+			"fieldname":"from_date",
+			"fieldtype":"Date",
+			"label":__("Date"),
+			"default":frappe.datetime.add_days(frappe.datetime.get_today(), -1)
+		},
+		{
+			"fieldname":"to_date",
 			"fieldtype":"Date",
 			"label":__("Date"),
 			"default":frappe.datetime.add_days(frappe.datetime.get_today(), -1)
