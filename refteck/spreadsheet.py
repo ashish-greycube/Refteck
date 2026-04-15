@@ -191,7 +191,14 @@ def save_to_sheets(doc, share_with):
                     for row in doc.get(field.fieldname):
                         row_data = []
                         for ctfield in frappe.get_meta(field.options).fields:
-                            row_data.append(row.get(ctfield.fieldname))
+                            if field.fieldname == "custom_operating_gp_calculation" and ctfield.fieldname == "so_amount":
+                                row_data.append(f"=ROUND(D{operating_table_start_row + row.get("idx") - 1}*C{operating_table_start_row + row.get("idx") - 1} ,2)")
+                            elif field.fieldname == "custom_operating_gp_calculation" and ctfield.fieldname == "offered_amount":
+                                row_data.append(f"=ROUND(F{operating_table_start_row + row.get("idx") - 1}*C{operating_table_start_row + row.get("idx") - 1} ,2)")
+                            elif field.fieldname == "custom_operating_gp_calculation" and ctfield.fieldname == "vendor_amount":
+                                row_data.append(f"=ROUND(H{operating_table_start_row + row.get("idx") - 1}*C{operating_table_start_row + row.get("idx") - 1} ,2)")
+                            else:
+                                row_data.append(row.get(ctfield.fieldname))
                         operating_gp_checklist_data.append(row_data)
             else:
                 if field.fieldname == "custom_po_total":
@@ -282,6 +289,7 @@ def save_quotation_details_to_sheets(doc, share_with):
                             admin_checklist_data.append(qo)
 
             elif field.fieldtype == "Table":
+                admin_checklist_data.append([])
                 if field.fieldname == "custom_generated_spreadsheet_urls":
                     continue
 
@@ -293,7 +301,18 @@ def save_quotation_details_to_sheets(doc, share_with):
                 for row in doc.get(field.fieldname):
                     row_data = []
                     for ctfield in frappe.get_meta(field.options).fields:
-                        row_data.append(row.get(ctfield.fieldname))
+                        if field.fieldname == "custom_margin_calculation" and ctfield.fieldname == "buying_value":
+                            row_data.append(f"=(D{margin_table_start_row+row.get('idx')-1})*(C{margin_table_start_row+row.get('idx')-1})")
+                        elif field.fieldname == "custom_margin_calculation" and ctfield.fieldname == "offer_price_with_charges":
+                            row_data.append(f"=F{margin_table_start_row+row.get('idx')-1}+G{margin_table_start_row+row.get('idx')-1}")
+                        elif field.fieldname == "custom_margin_calculation" and ctfield.fieldname == "offer_value_with_charges":
+                            row_data.append(f"=(H{margin_table_start_row+row.get('idx')-1})*(C{margin_table_start_row+row.get('idx')-1})")
+                        elif field.fieldname == "custom_margin_calculation" and ctfield.fieldname == "material_margin":
+                            row_data.append(f"=ROUND(((F{margin_table_start_row+row.get('idx')-1}/D{margin_table_start_row+row.get('idx')-1})-1)*100, 2)")
+                        elif field.fieldname == "custom_margin_calculation" and ctfield.fieldname == "margin":
+                            row_data.append(f"=(F{margin_table_start_row+row.get('idx')-1}-D{margin_table_start_row+row.get('idx')-1})*C{margin_table_start_row+row.get('idx')-1}")
+                        else:
+                            row_data.append(row.get(ctfield.fieldname))
                     admin_checklist_data.append(row_data)
             else:
                 if field.fieldname == "custom_supplier_quotation_material_total":
@@ -490,6 +509,7 @@ def format_spreadsheet(google_spreadsheet):
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(google_spreadsheet['spreadsheetId'])
     worksheet = sh.sheet1
+    sheet_id = worksheet.id
 
     # Fetch all spreadsheet data once
     all_data = worksheet.get_all_values()
@@ -497,73 +517,155 @@ def format_spreadsheet(google_spreadsheet):
     if not all_data:
         return
     
+    num_rows = len(all_data)
+    num_cols = len(all_data[0])
+    requests = []
+
     # Format Column Width As Per MaxCharacters in Column
-    for i in range(1, len(all_data[0]) + 1):
-        new_column_length = max(len(cell) for cell in worksheet.col_values(i))
-        new_column_letter = chr(ord('A') + i - 1)
-        if new_column_length > 0:
-            set_column_width(worksheet, new_column_letter, round(new_column_length*8.2))
+    # for i in range(1, len(all_data[0]) + 1):
+    #     new_column_length = max(len(cell) for cell in worksheet.col_values(i))
+    #     new_column_letter = chr(ord('A') + i - 1)
+    #     if new_column_length > 0:
+    #         set_column_width(worksheet, new_column_letter, round(new_column_length*8.2))
     
-    label_format = {
-        "horizontalAlignment": "LEFT",
-        "textFormat": {
-            "bold": True
-        }
-    }
+    for col_idx in range(num_cols):
+        max_len = 0
+        for row in all_data:
+            if col_idx < len(row):
+                max_len = max(max_len, len(str(row[col_idx])))
+        
+        if max_len > 0:
+            requests.append({
+                "updateDimensionProperties": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "dimension": "COLUMNS",
+                        "startIndex": col_idx,
+                        "endIndex": col_idx + 1
+                    },
+                    "properties": {"pixelSize": round(max_len * 8.2)},
+                    "fields": "pixelSize"
+                }
+            })
 
-    table_format = {
-        "horizontalAlignment": "LEFT",
-        "borders" : {
-            "top": {
-                    "style": "SOLID",
-                    "width": 1,
-                    "color": {
-                        "red": 0.0,
-                        "green": 0.0,
-                        "blue": 0.0
-                    },
-            },
-            "bottom": {
-                "style": "SOLID",
-                    "width": 1,
-                    "color": {
-                        "red": 0.0,
-                        "green": 0.0,
-                        "blue": 0.0
-                    },
-            },
-            "left": {
-                "style": "SOLID",
-                    "width": 1,
-                    "color": {
-                        "red": 0.0,
-                        "green": 0.0,
-                        "blue": 0.0
-                    },
-            },
-            "right": {
-                "style": "SOLID",
-                    "width": 1,
-                    "color": {
-                        "red": 0.0,
-                        "green": 0.0,
-                        "blue": 0.0
-                    },
-            }
-        }
-    }
+    # label_format = {
+    #     "horizontalAlignment": "LEFT",
+    #     "textFormat": {
+    #         "bold": True
+    #     }
+    # }
 
-    count = 0    
-    for i in range(len(all_data)):
-        length = len(worksheet.row_values(i+1))
-        if length == 1:
-            worksheet.format(f'A{i+1}', label_format)   
-            count += 1     
-        elif length == 2:
-             worksheet.format(f'A{i+1}', label_format)
-             count += 1
-        elif length > 2:
-            last_col = string.ascii_uppercase[length - 1]  # A..Z only (extend if needed)
-            worksheet.format(f'A{i+1}:{last_col}{i+1}', table_format)
-            count += 1
-        frappe.publish_progress(count / len(all_data) * 100, title=_("Spreadsheet Creation Is In Progress..."))
+    # table_format = {
+    #     "horizontalAlignment": "LEFT",
+    #     "borders" : {
+    #         "top": {
+    #                 "style": "SOLID",
+    #                 "width": 1,
+    #                 "color": {
+    #                     "red": 0.0,
+    #                     "green": 0.0,
+    #                     "blue": 0.0
+    #                 },
+    #         },
+    #         "bottom": {
+    #             "style": "SOLID",
+    #                 "width": 1,
+    #                 "color": {
+    #                     "red": 0.0,
+    #                     "green": 0.0,
+    #                     "blue": 0.0
+    #                 },
+    #         },
+    #         "left": {
+    #             "style": "SOLID",
+    #                 "width": 1,
+    #                 "color": {
+    #                     "red": 0.0,
+    #                     "green": 0.0,
+    #                     "blue": 0.0
+    #                 },
+    #         },
+    #         "right": {
+    #             "style": "SOLID",
+    #                 "width": 1,
+    #                 "color": {
+    #                     "red": 0.0,
+    #                     "green": 0.0,
+    #                     "blue": 0.0
+    #                 },
+    #         }
+    #     }
+    # }
+
+    # count = 0    
+    # for i in range(len(all_data)):
+    #     length = len(worksheet.row_values(i+1))
+    #     if length == 1:
+    #         worksheet.format(f'A{i+1}', label_format)   
+    #         count += 1     
+    #     elif length == 2:
+    #          worksheet.format(f'A{i+1}', label_format)
+    #          count += 1
+    #     elif length > 2:
+    #         last_col = string.ascii_uppercase[length - 1]  # A..Z only (extend if needed)
+    #         worksheet.format(f'A{i+1}:{last_col}{i+1}', table_format)
+    #         count += 1
+    #     frappe.publish_progress(count / len(all_data) * 100, title=_("Spreadsheet Creation Is In Progress..."))
+
+    # 3. Batch Format Rows
+    for i, row in enumerate(all_data):
+        row_content_len = len([cell for cell in row if cell.strip()]) # Actual data length
+        
+        # Define the range for this row
+        row_range = {
+            "sheetId": sheet_id,
+            "startRowIndex": i,
+            "endRowIndex": i + 1,
+            "startColumnIndex": 0,
+            "endColumnIndex": len(row)
+        }
+
+        if 1 <= row_content_len <= 2:
+            # Label Format (Bold)
+            row_range.update({"endColumnIndex": 1})
+            requests.append({
+                "repeatCell": {
+                    "range": row_range,
+                    "cell": {
+                        "userEnteredFormat": {
+                            "horizontalAlignment": "LEFT",
+                            "textFormat": {"bold": True}
+                        }
+                    },
+                    "fields": "userEnteredFormat(horizontalAlignment,textFormat)"
+                }
+            })
+        elif row_content_len > 2:
+            count = 0
+            for val in row:
+                if val != '': count = count + 1
+            
+            row_range.update({"endColumnIndex": count})
+            # Table Format (Borders)
+            border_style = {"style": "SOLID", "width": 1, "color": {"red": 0, "green": 0, "blue": 0}}
+            requests.append({
+                "updateBorders": {
+                    "range": row_range,
+                    "top": border_style,
+                    "bottom": border_style,
+                    "left": border_style,
+                    "right": border_style,
+                    "innerHorizontal": border_style,
+                    "innerVertical": border_style
+                }
+            })
+            
+        # Update progress every 10 rows to avoid overhead
+        # if i % 10 == 0:
+        frappe.publish_progress((i+1) / num_rows * 100, title=_("Processing Formatting..."))
+
+    # 4. Execute all formatting in ONE single API call
+    if requests:
+        sh.batch_update({'requests': requests})
+    
+    frappe.publish_progress(100, title=_("Formatting Complete"))
