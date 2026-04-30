@@ -192,11 +192,11 @@ def save_to_sheets(doc, share_with):
                         row_data = []
                         for ctfield in frappe.get_meta(field.options).fields:
                             if field.fieldname == "custom_operating_gp_calculation" and ctfield.fieldname == "so_amount":
-                                row_data.append(f"=ROUND(D{operating_table_start_row + row.get("idx") - 1}*C{operating_table_start_row + row.get("idx") - 1} ,2)")
+                                row_data.append(f"=ROUND(D{operating_table_start_row + row.get('idx') - 1}*C{operating_table_start_row + row.get('idx') - 1} ,2)")
                             elif field.fieldname == "custom_operating_gp_calculation" and ctfield.fieldname == "offered_amount":
-                                row_data.append(f"=ROUND(F{operating_table_start_row + row.get("idx") - 1}*C{operating_table_start_row + row.get("idx") - 1} ,2)")
+                                row_data.append(f"=ROUND(F{operating_table_start_row + row.get('idx') - 1}*C{operating_table_start_row + row.get('idx') - 1} ,2)")
                             elif field.fieldname == "custom_operating_gp_calculation" and ctfield.fieldname == "vendor_amount":
-                                row_data.append(f"=ROUND(H{operating_table_start_row + row.get("idx") - 1}*C{operating_table_start_row + row.get("idx") - 1} ,2)")
+                                row_data.append(f"=ROUND(H{operating_table_start_row + row.get('idx') - 1}*C{operating_table_start_row + row.get('idx') - 1} ,2)")
                             else:
                                 row_data.append(row.get(ctfield.fieldname))
                         operating_gp_checklist_data.append(row_data)
