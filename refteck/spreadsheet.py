@@ -269,7 +269,7 @@ def save_quotation_details_to_sheets(doc, share_with):
         """
         margin_table_start_row = 24
         margin_table_end_row = margin_table_start_row + len(doc.get('custom_margin_calculation')) - 1
-        charges_table_start_row = margin_table_end_row + 3
+        charges_table_start_row = margin_table_end_row + 4
         charges_table_end_row = charges_table_start_row + len(doc.get('custom_other_charges_comparison')) - 1
        
         for field in doc_fields[admin_checklist_index:]:
