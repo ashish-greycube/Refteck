@@ -3,7 +3,7 @@ import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.utils import flt,now_datetime, get_link_to_form
-from frappe.share import add
+from frappe.share import add as share_doc
 from erpnext.setup.utils import get_exchange_rate
 # from frappe.core.doctype.report.report import Report
 
@@ -140,7 +140,7 @@ def share_appraisal_to_employee_from_appraisal(self,method):
 		if user_id == "" or user_id == None:
 			frappe.msgprint(_("Appriasal is not shared with any user as there is no user id found in {0}").format(report_to_employee_id),alert=1)
 		else :
-			shared_with_user=add(self.doctype, self.name, user=user_id, read=1, write=1, submit=1)
+			shared_with_user=share_doc(self.doctype, self.name, user=user_id, read=1, write=1, submit=1)
 			if shared_with_user:
 					frappe.msgprint(
 						_("Appraisal {0} is shared with {1} user").format(self.name,user_id),
@@ -638,6 +638,48 @@ def check_item_price_from_so_in_qo(self, method):
 def validate_price_approval_required_in_qo(self, method):
 	if self.custom_price_approval_required == 1:
 		frappe.throw(_("Price approval is Requied to submit this Quoation."))
+
+def update_bis_details_in_item_from_sq(self, method):
+	if len(self.items) > 0:
+		for item in self.items:
+			if item.custom_is_bis == 0:
+				item.custom_bis_note = ""
+			frappe.db.set_value("Item", item.item_code, "custom_is_bis", item.custom_is_bis)
+			frappe.db.set_value("Item", item.item_code, "custom_bis_note", item.custom_bis_note)
+
+@frappe.whitelist()
+def share_opportunity_doc_to_assignees(doctype, docname):
+	assignees_details = get_assignees({"doctype": doctype, "name": docname})
+	# print(assignees_details, "=======assignees_list========")
+
+	if len(assignees_details) > 0:
+		for assignee in assignees_details:
+			assign_user = assignee.owner
+			share_doc_exist = frappe.db.exists("DocShare", {"share_doctype": doctype, "share_name": docname, "user": assign_user})
+			if not share_doc_exist:
+				shared_with_user=share_doc(doctype, docname, user=assign_user, read=1, write=1)
+				if shared_with_user:
+					frappe.msgprint(
+						_("Opportunity {0} is shared with {1} user").format(docname, assign_user),
+						alert=1,
+					)
+	return True
+
+def get_assignees(args=None):
+	"""get assigned to"""
+	if not args:
+		args = frappe.local.form_dict
+
+	return frappe.get_all(
+		"ToDo",
+		fields=["allocated_to as owner", "name"],
+		filters={
+			"reference_type": args.get("doctype"),
+			"reference_name": args.get("name"),
+			"status": ("not in", ("Cancelled", "Closed")),
+		},
+	)
+
 
 # class CustomReport(Report):
 # 	def execute_script_report(self, filters):

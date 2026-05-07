@@ -10,6 +10,9 @@ frappe.ui.form.on("Opportunity", {
             frm.add_custom_button(__('Allocate Brand'), () => allocate_brand(frm));
         }
     },
+    onload_post_render: function(frm){
+        share_opportunity_doc_to_assignees(frm)
+    }
 })
 
 frappe.ui.form.on("Opportunity Item", {
@@ -141,4 +144,54 @@ let allocate_brand = function(frm){
         frappe.show_alert("Please Select Items", 3);
     }
     // console.log(selected_items, "===========")  
+}
+
+let share_opportunity_doc_to_assignees = function(frm){
+    $(".add-assignment-btn").on("click", function(){
+        setTimeout(() => {
+            let dialog = frappe.ui.open_dialogs[0];
+        if (dialog){
+            dialog.set_primary_action(__('Add'), function() {
+                const values = dialog.get_values();
+                if (!values) return;
+
+                // the original assignment logic (server call)
+                frappe.call({
+                    method: 'frappe.desk.form.assign_to.add',
+                    args: {
+                        doctype: frm.doctype,
+                        name: frm.docname,
+                        assign_to: values.assign_to,
+                        description: values.description,
+                        date: values.date,
+                        priority: values.priority
+                    },
+                    callback: function(r) {
+                        dialog.hide();
+                        //CUSTOM LOGIC: After assignment, share the document with the new assignee
+                        frappe.call({
+                            method: "refteck.api.share_opportunity_doc_to_assignees",
+                            args: {
+                                doctype: frm.doc.doctype,
+                                docname: frm.doc.name
+                            },
+                            callback: function(res) {
+                                frm.reload_doc();
+                            }
+                        })
+                    }
+                });
+            })
+        }
+        }, 500);
+        
+
+        // console.log("Assignment Button Clicked")
+        //  $("div.modal-dialog div.modal-content div.modal-footer div.standard-actions button.btn-primary").on("click", function(){
+        // setTimeout(() => {
+        //     console.log("Button Clicked")
+        // }, 500);
+    // })
+    })
+   
 }

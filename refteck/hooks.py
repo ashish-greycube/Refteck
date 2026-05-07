@@ -162,8 +162,10 @@ doc_events = {
 	},
     "Supplier Quotation":{
         "before_validate":"refteck.api.set_warehouse_in_child_table",
-        "validate":"refteck.api.calculate_procurement_values_in_sq",
-        "on_submit": "refteck.api.get_admin_checklist_qo_in_sq"
+        "validate":["refteck.api.calculate_procurement_values_in_sq",
+                    "refteck.api.update_bis_details_in_item_from_sq"],
+        "on_submit": "refteck.api.get_admin_checklist_qo_in_sq",
+        "on_update_after_submit": "refteck.api.update_bis_details_in_item_from_sq"
     },
     "Purchase Order":{
         "before_validate":["refteck.api.fetch_rate_from_supplier_quotation",
@@ -311,3 +313,7 @@ doc_events = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+# website_route_rules = [
+#     {"from_route": "/refteck-dashboard", "to_route": "refteck_dashboard"},
+# ]
