@@ -655,14 +655,14 @@ def share_opportunity_doc_to_assignees(doctype, docname):
 	if len(assignees_details) > 0:
 		for assignee in assignees_details:
 			assign_user = assignee.owner
-			share_doc_exist = frappe.db.exists("DocShare", {"share_doctype": doctype, "share_name": docname, "user": assign_user})
-			if not share_doc_exist:
-				shared_with_user=share_doc(doctype, docname, user=assign_user, read=1, write=1)
-				if shared_with_user:
-					frappe.msgprint(
-						_("Opportunity {0} is shared with {1} user").format(docname, assign_user),
-						alert=1,
-					)
+			# share_doc_exist = frappe.db.exists("DocShare", {"share_doctype": doctype, "share_name": docname, "user": assign_user})
+			# if not share_doc_exist:
+			shared_with_user=share_doc(doctype, docname, user=assign_user, read=1, write=1)
+			if shared_with_user:
+				frappe.msgprint(
+					_("Opportunity {0} is shared with {1} user").format(docname, assign_user),
+					alert=1,
+				)
 	return True
 
 def get_assignees(args=None):
