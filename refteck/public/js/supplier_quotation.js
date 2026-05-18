@@ -237,3 +237,15 @@ let calculate_value_in_usd_for_l5 = function (frm) {
         })
     }
 }
+
+frappe.ui.form.on("Supplier Quotation Item", {
+    custom_is_bis: function(frm, cdt, cdn){
+        let row = locals[cdt][cdn]
+        if (row.custom_is_bis === 1){
+            frappe.model.set_value(row.doctype, row.name, "custom_bis_note", "Please ensure that the above mentioned item, to be reviewed by the CHA team; as this item attract BIS Certification during import and Refteck will not be able to supply any such certificates at the time of shipping")
+        }
+        else {
+            frappe.model.set_value(row.doctype, row.name, "custom_bis_note", "")
+        }
+    }
+})

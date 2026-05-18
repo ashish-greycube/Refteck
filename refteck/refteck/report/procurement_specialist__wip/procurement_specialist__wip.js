@@ -1,7 +1,7 @@
 // Copyright (c) 2026, GreyCube Technologies and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["WIP Sourcing Person"] = {
+frappe.query_reports["Procurement specialist- WIP"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",

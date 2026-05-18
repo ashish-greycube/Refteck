@@ -10,7 +10,7 @@ frappe.ui.form.on("Opportunity", {
             frm.add_custom_button(__('Allocate Brand'), () => allocate_brand(frm));
         };
         if (!frm.is_new()){
-            frm.add_custom_button(__('Share with Assignees'), () => share_with_assignees(frm));
+            frm.add_custom_button(__('Share with Sourcing Person'), () => share_with_assignees(frm));
         }
     },
     // onload_post_render: function (frm) {
