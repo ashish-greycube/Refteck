@@ -164,9 +164,9 @@ def save_to_sheets(doc, share_with):
         doc_fields = frappe.get_meta(doc.doctype).fields
         operating_gp_checklist_index = None
        
-        operating_table_start_row = 14
+        operating_table_start_row = 15
         operating_table_end_row = operating_table_start_row + len(doc.get("custom_operating_gp_calculation")) - 1
-        charges_table_start_row = operating_table_end_row + 3
+        charges_table_start_row = operating_table_end_row + 4
         charges_table_end_row = charges_table_start_row + len(doc.get("custom_other_charges_comparison")) - 1
 
         for field in doc_fields:
@@ -218,6 +218,8 @@ def save_to_sheets(doc, share_with):
                 else:
                     d = [field.label, doc.get(field.fieldname)]
                 operating_gp_checklist_data.append(d)
+                if field.fieldname == "custom_remarks":
+                    operating_gp_checklist_data.append(["Currency", doc.get("currency")])
         
         gsheet = GSpreadsheet()
         google_spreadsheet = gsheet.create_sheet(
