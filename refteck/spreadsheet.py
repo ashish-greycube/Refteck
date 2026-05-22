@@ -216,7 +216,7 @@ def save_to_sheets(doc, share_with):
                 elif field.fieldname == "custom_material_margin_":
                     d = [field.label, f"=ROUND(((B5-SUM(I{operating_table_start_row}:I{operating_table_end_row}))*100)/SUM(I{operating_table_start_row}:I{operating_table_end_row}), 2)"]
                 else:
-                    d = [field.label, doc.get(field.fieldname)]
+                    d = [field.label, doc.get(field.fieldname)] if field.fieldname != "custom_client" else [field.label, frappe.db.get_value("Customer", doc.get(field.fieldname), "customer_name")]
                 operating_gp_checklist_data.append(d)
                 if field.fieldname == "custom_remarks":
                     operating_gp_checklist_data.append(["Currency", doc.get("currency")])
