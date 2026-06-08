@@ -202,21 +202,55 @@ def save_to_sheets(doc, share_with):
                         operating_gp_checklist_data.append(row_data)
             else:
                 if field.fieldname == "custom_po_total":
-                    d = [field.label, f"=SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})"]
+                    if len(doc.get("custom_operating_gp_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})"]
+                    elif len(doc.get("custom_operating_gp_calculation")) > 0:
+                        d = [field.label, f"=SUM(I{operating_table_start_row}:I{operating_table_end_row})+0"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(B{charges_table_start_row}:B{charges_table_end_row})+0"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
                 elif field.fieldname == "custom_po_margin":
-                    d = [field.label, f"=B7-(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row}))"]
+                    if len(doc.get("custom_operating_gp_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=B7-(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row}))"]
+                    elif len(doc.get("custom_operating_gp_calculation")) > 0:
+                        d = [field.label, f"=B7-SUM(I{operating_table_start_row}:I{operating_table_end_row})"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=B7-SUM(B{charges_table_start_row}:B{charges_table_end_row})"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
                 elif field.fieldname == "custom_po_margin_":
-                    d = [field.label, f"=ROUND(((B7-(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100)/(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})), 2)"]
+                    if len(doc.get("custom_operating_gp_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=ROUND(((B7-(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100)/(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})), 2)"]
+                    elif len(doc.get("custom_operating_gp_calculation")) > 0:
+                        d = [field.label, f"=ROUND(((B7-SUM(I{operating_table_start_row}:I{operating_table_end_row}))*100)/SUM(I{operating_table_start_row}:I{operating_table_end_row}), 2)"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=ROUND(((B7-SUM(B{charges_table_start_row}:B{charges_table_end_row}))*100)/SUM(B{charges_table_start_row}:B{charges_table_end_row}), 2)"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
                 elif field.fieldname == "custom_accounts_checklist_gross_profit_":
-                    d = [field.label, f"=ROUND(((B7-(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100)/B7, 2)"]
-                elif field.fieldname == "custom_material_total":
+                    if len(doc.get("custom_operating_gp_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=ROUND(((B7-(SUM(I{operating_table_start_row}:I{operating_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100)/B7, 2)"]
+                    elif len(doc.get("custom_operating_gp_calculation")) > 0:
+                        d = [field.label, f"=ROUND(((B7-SUM(I{operating_table_start_row}:I{operating_table_end_row}))*100)/B7, 2)"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=ROUND(((B7-SUM(B{charges_table_start_row}:B{charges_table_end_row}))*100)/B7, 2)"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
+                elif field.fieldname == "custom_material_total" and len(doc.get("custom_operating_gp_calculation")) > 0:
                     d = [field.label, f"=SUM(I{operating_table_start_row}:I{operating_table_end_row})"]
-                elif field.fieldname == "custom_material_margin":
+
+                elif field.fieldname == "custom_material_margin" and len(doc.get("custom_operating_gp_calculation")) > 0:
                     d = [field.label, f"=B5-SUM(I{operating_table_start_row}:I{operating_table_end_row})"]
-                elif field.fieldname == "custom_material_margin_":
+                    
+                elif field.fieldname == "custom_material_margin_" and len(doc.get("custom_operating_gp_calculation")) > 0:
                     d = [field.label, f"=ROUND(((B5-SUM(I{operating_table_start_row}:I{operating_table_end_row}))*100)/SUM(I{operating_table_start_row}:I{operating_table_end_row}), 2)"]
                 else:
-                    d = [field.label, doc.get(field.fieldname)] if field.fieldname != "custom_client" else [field.label, frappe.db.get_value("Customer", doc.get(field.fieldname), "customer_name")]
+                    d = [field.label, doc.get(field.fieldname)]
                 operating_gp_checklist_data.append(d)
                 if field.fieldname == "custom_remarks":
                     operating_gp_checklist_data.append(["Currency", doc.get("currency")])
@@ -317,22 +351,57 @@ def save_quotation_details_to_sheets(doc, share_with):
                             row_data.append(row.get(ctfield.fieldname))
                     admin_checklist_data.append(row_data)
             else:
-                if field.fieldname == "custom_supplier_quotation_material_total":
+                if field.fieldname == "custom_supplier_quotation_material_total"  and len(doc.get("custom_margin_calculation")) > 0:
                     d = [field.label, f"=SUM(E{margin_table_start_row}:E{margin_table_end_row})"]
-                elif field.fieldname == "custom_total_sq_other_charges":
+
+                elif field.fieldname == "custom_total_sq_other_charges" and len(doc.get("custom_other_charges_comparison")) > 0:
                     d = [field.label, f"=SUM(B{charges_table_start_row}:B{charges_table_end_row})"]
+
                 elif field.fieldname == "custom_final_values":
-                    d = [field.label, f"=SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})"]
-                elif field.fieldname == "custom_offer_material_total":
+                    if len(doc.get("custom_margin_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})"]
+                    elif len(doc.get("custom_margin_calculation")) > 0:
+                        d = [field.label, f"=SUM(E{margin_table_start_row}:E{margin_table_end_row})+0"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(B{charges_table_start_row}:B{charges_table_end_row})+0"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
+                elif field.fieldname == "custom_offer_material_total" and len(doc.get("custom_margin_calculation")) > 0:
                     d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})"]
-                elif field.fieldname == "custom_total_offer_other_charges":
+
+                elif field.fieldname == "custom_total_offer_other_charges" and len(doc.get("custom_other_charges_comparison")) > 0:
                     d = [field.label, f"=SUM(C{charges_table_start_row}:C{charges_table_end_row})"]
+
                 elif field.fieldname == "custom_final_offer_values":
-                    d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})+SUM(C{charges_table_start_row}:C{charges_table_end_row})"]
+                    if len(doc.get("custom_margin_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})+SUM(C{charges_table_start_row}:C{charges_table_end_row})"]
+                    elif len(doc.get("custom_margin_calculation")) > 0:
+                        d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})+0"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(C{charges_table_start_row}:C{charges_table_end_row})+0"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
                 elif field.fieldname == "custom_final_margin":
-                    d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})+SUM(C{charges_table_start_row}:C{charges_table_end_row})-(SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row}))"]
+                    if len(doc.get("custom_margin_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})+SUM(C{charges_table_start_row}:C{charges_table_end_row})-(SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row}))"]
+                    elif len(doc.get("custom_margin_calculation")) > 0:
+                        d = [field.label, f"=SUM(I{margin_table_start_row}:I{margin_table_end_row})+(0)-(SUM(E{margin_table_start_row}:E{margin_table_end_row})+0)"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=SUM(C{charges_table_start_row}:C{charges_table_end_row})-(0+SUM(B{charges_table_start_row}:B{charges_table_end_row}))"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
+
                 elif field.fieldname == "custom_overall_margin":
-                    d = [field.label, f"=ROUND(((SUM(I{margin_table_start_row}:I{margin_table_end_row})+SUM(C{charges_table_start_row}:C{charges_table_end_row})-(SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))/(SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100, 2)"]
+                    if len(doc.get("custom_margin_calculation")) > 0 and len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=ROUND(((SUM(I{margin_table_start_row}:I{margin_table_end_row})+SUM(C{charges_table_start_row}:C{charges_table_end_row})-(SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))/(SUM(E{margin_table_start_row}:E{margin_table_end_row})+SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100, 2)"]
+                    elif len(doc.get("custom_margin_calculation")) > 0:
+                        d = [field.label, f"=ROUND(((SUM(I{margin_table_start_row}:I{margin_table_end_row})+0-(SUM(E{margin_table_start_row}:E{margin_table_end_row})))/(SUM(E{margin_table_start_row}:E{margin_table_end_row}) + 0))*100, 2)"]
+                    elif len(doc.get("custom_other_charges_comparison")) > 0:
+                        d = [field.label, f"=ROUND(((0+SUM(C{charges_table_start_row}:C{charges_table_end_row})-(0+SUM(B{charges_table_start_row}:B{charges_table_end_row})))/(0+ SUM(B{charges_table_start_row}:B{charges_table_end_row})))*100, 2)"]
+                    else:
+                        d = [field.label, doc.get(field.fieldname)]
                 else:
                     d = [field.label, doc.get(field.fieldname)]
                 admin_checklist_data.append(d)
