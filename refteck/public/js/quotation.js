@@ -24,6 +24,18 @@ frappe.ui.form.on("Quotation", {
         draw_html(frm)
 
     },
+    party_name(frm){
+        validate_exw_customer_condtions(frm)
+    },
+    incoterm(frm){
+        validate_exw_customer_condtions(frm)
+    },
+    named_place(frm){
+        validate_exw_customer_condtions(frm)
+    },
+    after_save(frm){
+        validate_exw_customer_condtions(frm)
+    },
 })
 
 frappe.ui.form.on("Margin Calculation RT", {
@@ -127,6 +139,30 @@ let set_price_approval_field_read_only_except_approver_role = function (frm) {
                 // frm.set_df_property("custom_price_approval_remarks", "read_only", 1)
             }
         })
+}
+
+let validate_exw_customer_condtions = function (frm) {
+    if (frm.doc.quotation_to == "Customer" && frm.doc.party_name){
+        frappe.call({
+            method: "refteck.api.is_customer_in_exw_list",
+            args: {
+                customer: frm.doc.party_name,
+            },
+            callback: (r) => {
+                if (r.message){
+                    if (frm.doc.incoterm && frm.doc.incoterm !== "EXW"){
+                        frappe.msgprint(__("For Customer {0}, Incoterm should be <b>'Ex Works'</b> ", [frm.doc.party_name]))
+                    }
+                    else{}
+
+                    let allowed_place = ["USA", "UK", "EUROPE"]
+                    if (frm.doc.incoterm && frm.doc.named_place && !allowed_place.includes(frm.doc.named_place)){
+                        frappe.msgprint(__("For Customer {0}, Named Place should be <b>'USA, UK, or EUROPE,'</b> ", [frm.doc.party_name]))
+                    } else {}
+                }
+            }
+        })
+    }
 }
 
 function save_to_sheets(frm) {

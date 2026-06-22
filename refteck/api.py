@@ -680,6 +680,13 @@ def get_assignees(args=None):
 		},
 	)
 
+@frappe.whitelist()
+def is_customer_in_exw_list(customer):
+	exw_list = frappe.db.sql_list(' SELECT customer FROM `tabEXW Customer RT` WHERE parent = "Refteck Settings RT" ')
+	if len(exw_list) > 0 and customer in exw_list:
+		return True
+	else:
+		return False
 
 # class CustomReport(Report):
 # 	def execute_script_report(self, filters):

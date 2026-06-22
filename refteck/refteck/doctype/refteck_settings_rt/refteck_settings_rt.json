@@ -7,7 +7,9 @@
  "field_order": [
   "statement_of_account_email_cc",
   "section_break_pbfr",
-  "quotation_price_approver_role"
+  "quotation_price_approver_role",
+  "column_break_oena",
+  "exw_customers"
  ],
  "fields": [
   {
@@ -28,13 +30,23 @@
    "fieldname": "section_break_pbfr",
    "fieldtype": "Section Break",
    "label": "Quotation"
+  },
+  {
+   "fieldname": "column_break_oena",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "exw_customers",
+   "fieldtype": "Table MultiSelect",
+   "label": "EXW Customers",
+   "options": "EXW Customer RT"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-11 10:22:00.424433",
+ "modified": "2026-06-19 09:50:10.709813",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "Refteck Settings RT",
