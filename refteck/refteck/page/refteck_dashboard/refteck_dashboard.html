@@ -1,0 +1,410 @@
+<div class="rt-dashboard">
+
+	<!-- Loading overlay -->
+	<div class="loading-overlay" id="rtLoadingOverlay" style="display: none;">
+		<div class="spinner"></div>
+	</div>
+
+	<!-- Chart Fullscreen Popup (unchanged) -->
+	<div class="chart-fullscreen-overlay" id="rtChartOverlay" style="display: none;"></div>
+	<div class="chart-fullscreen-popup" id="rtChartPopup" style="display: none;">
+		<div class="chart-loading-overlay" id="rtChartLoading" style="display: none;">
+			<div class="chart-loading-spinner"></div>
+			<span class="chart-loading-text">Loading...</span>
+		</div>
+		<div class="chart-fullscreen-header">
+			<h3 id="rtChartTitle">Chart</h3>
+			<div class="chart-fullscreen-actions">
+				<button class="chart-action-btn" id="rtChartFilterToggle" title="Toggle Filters">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+					<span class="chart-filter-indicator" id="rtChartFilterDot" style="display: none;"></span>
+				</button>
+				<button class="chart-action-btn" id="rtChartRefreshBtn" title="Refresh">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+				</button>
+				<button class="chart-fullscreen-close" id="rtCloseChart">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+				</button>
+			</div>
+		</div>
+		<div class="chart-filter-panel" id="rtChartFilterPanel" style="display: none;">
+			<div class="chart-filter-row">
+				<div class="chart-filter-field" id="rtCfFromDate"></div>
+				<div class="chart-filter-field" id="rtCfToDate"></div>
+				<div class="chart-filter-field" id="rtCfCompany"></div>
+				<div class="chart-filter-field" id="rtCfCurrency"></div>
+			</div>
+			<div class="chart-filter-actions">
+				<button class="btn btn-xs btn-secondary" id="rtChartClearFilters">Reset to Page Filters</button>
+				<button class="btn btn-xs btn-primary" id="rtChartApplyFilters">Apply</button>
+			</div>
+		</div>
+		<div class="chart-fullscreen-body">
+			<canvas id="rtFullscreenCanvas"></canvas>
+		</div>
+		<div class="chart-fullscreen-footer">
+			<p id="rtChartDesc">Chart data for selected period.</p>
+			<div class="chart-filter-status" id="rtChartFilterStatus" style="display: none;">
+				<span class="status-label">Using custom filters</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- PAGE HEADER ================================================ -->
+	<header>
+		<div class="header-left">
+			<div class="rt-logo">🌐</div>
+			<div>
+				<h1>Refteck Group Dashboard</h1>
+				<div class="rt-subtitle" id="rtSubtitleDate"></div>
+			</div>
+		</div>
+	</header>
+
+	<!-- ALWAYS-VISIBLE FILTER BAR ================================== -->
+	<div class="rt-filter-bar" id="rtFilterBar">
+
+		<!-- Online status pill -->
+		<div class="rt-online-badge">
+			<span class="rt-online-dot"></span>
+			<span class="rt-online-label" id="rtOnlineLabel">1 online</span>
+		</div>
+
+		<div class="rt-fb-divider"></div>
+
+		<!-- Currency toggles -->
+		<div class="rt-currency-group" id="rtCurrencyGroup">
+			<button class="rt-curr-btn active" data-currency="USD">USD</button>
+			<button class="rt-curr-btn" data-currency="EUR">EUR</button>
+			<button class="rt-curr-btn" data-currency="GBP">GBP</button>
+			<button class="rt-curr-btn" data-currency="INR">INR</button>
+		</div>
+
+		<div class="rt-fb-divider"></div>
+
+		<!-- Search order -->
+		<div class="rt-finput-wrap">
+			<svg class="rt-finput-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+			<input type="text" class="rt-finput" id="rtSearchInput" placeholder="Search order...">
+		</div>
+
+		<!-- Party name -->
+		<div class="rt-finput-wrap">
+			<svg class="rt-finput-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+			<input type="text" class="rt-finput" id="rtPartyInput" placeholder="Party name...">
+		</div>
+
+		<!-- Shipment type -->
+		<div class="rt-fselect-wrap">
+			<select class="rt-fselect" id="rtShipmentFilter">
+				<option value="">All Shipment</option>
+				<option value="Sea">Sea</option>
+				<option value="Air">Air</option>
+			</select>
+			<svg class="rt-fselect-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+		</div>
+
+		<!-- Payment type -->
+		<div class="rt-fselect-wrap">
+			<select class="rt-fselect" id="rtPaymentFilter">
+				<option value="">All Payments</option>
+				<option value="Advance">Advance</option>
+				<option value="Credit">Credit</option>
+				<option value="LC">LC</option>
+			</select>
+			<svg class="rt-fselect-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+		</div>
+
+		<!-- Date range -->
+		<div class="rt-date-range-wrap">
+			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--rt-text-muted);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+			<input type="date" class="rt-fdate" id="rtFromDate" title="From Date">
+			<span class="rt-date-sep">&#8212;</span>
+			<input type="date" class="rt-fdate" id="rtToDate" title="To Date">
+		</div>
+
+		<!-- Clear -->
+		<button class="rt-fbtn rt-fbtn-clear" id="rtClearFiltersBtn" title="Clear all filters">
+			<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+			Clear
+		</button>
+
+		<!-- How it works -->
+		<button class="rt-fbtn rt-fbtn-howto" id="rtHowItWorksBtn" title="How it works">
+			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+			How it works
+		</button>
+
+		<!-- Reset / Refresh -->
+		<button class="rt-fbtn rt-fbtn-reset" id="rtRefreshBtn" title="Reset and Refresh">
+			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+			Reset
+		</button>
+	</div>
+
+	<!-- COMPANY STRIP ============================================== -->
+	<div class="rt-company-strip" id="rtCompanyStrip">
+		<button class="rt-co-btn active" data-company="" data-currency="USD">
+			<span class="rt-co-icon">🌐</span>
+			<span class="rt-co-body">
+				<span class="rt-co-name">All Companies</span>
+				<span class="rt-co-sub">Consolidated View</span>
+			</span>
+		</button>
+		<button class="rt-co-btn" data-company="Refteck Solution (Pvt.) Ltd." data-currency="INR">
+			<span class="rt-co-icon">🇮🇳</span>
+			<span class="rt-co-body">
+				<span class="rt-co-name">Refteck Solution (Pvt.) Ltd.</span>
+				<span class="rt-co-sub">&#8377; INR &#8212; India</span>
+			</span>
+		</button>
+		<button class="rt-co-btn" data-company="Refteck Solutions Europe GmbH" data-currency="EUR">
+			<span class="rt-co-icon">🇪🇺</span>
+			<span class="rt-co-body">
+				<span class="rt-co-name">Refteck Solutions Europe GmbH</span>
+				<span class="rt-co-sub">&#8364; EUR &#8212; Germany</span>
+			</span>
+		</button>
+		<button class="rt-co-btn" data-company="Refteck Solutions Limited" data-currency="GBP">
+			<span class="rt-co-icon">🇬🇧</span>
+			<span class="rt-co-body">
+				<span class="rt-co-name">Refteck Solutions Limited</span>
+				<span class="rt-co-sub">&#163; GBP &#8212; United Kingdom</span>
+			</span>
+		</button>
+		<button class="rt-co-btn" data-company="Refteck Solutions USA Inc." data-currency="USD">
+			<span class="rt-co-icon">🇺🇸</span>
+			<span class="rt-co-body">
+				<span class="rt-co-name">Refteck Solutions USA Inc.</span>
+				<span class="rt-co-sub">$ USD &#8212; United States</span>
+			</span>
+		</button>
+	</div>
+
+	<!-- TAB NAVIGATION ============================================= -->
+	<div class="rt-tabs" id="rtTabs">
+		<button class="rt-tab active" data-tab="dashboard">&#128202; Dashboard</button>
+		<button class="rt-tab" data-tab="purchase-orders">&#128203; Purchase Orders</button>
+		<button class="rt-tab" data-tab="sales-orders">&#129534; Sales Orders</button>
+		<button class="rt-tab" data-tab="confirmed">&#9989; Confirmed</button>
+		<button class="rt-tab" data-tab="production">&#9881;&#65039; Production</button>
+		<button class="rt-tab" data-tab="shipments">&#128674; Shipments</button>
+		<button class="rt-tab" data-tab="collections">&#128176; AR Collections</button>
+		<button class="rt-tab" data-tab="finance">&#127968; AP Finance</button>
+		<button class="rt-tab" data-tab="intercompany">&#128279; Intercompany</button>
+		<button class="rt-tab" data-tab="bulk-upload">&#128228; Bulk Upload</button>
+	</div>
+
+	<!-- TAB: DASHBOARD ============================================= -->
+	<div class="rt-tab-content active" id="tab-dashboard">
+		<div class="cards" id="rt_cards_overview"></div>
+		<div class="section-title">Orders Received</div>
+		<div class="box table-box">
+			<div class="bt">Orders Received <span class="badge rt-count" id="cnt_orders">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party Name</th><th>Amount</th><th>Order Date</th><th>Payment Terms</th><th>Due Date</th><th>Status</th><th>Overdue</th></tr></thead>
+				<tbody id="tb_orders"><tr><td colspan="9" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+		<div class="section-title">Active Shipments</div>
+		<div class="grid grid-2">
+			<div class="box table-box">
+				<div class="bt">Sea Shipments <span class="badge rt-count" id="cnt_sea">0</span></div>
+				<div class="table-responsive">
+					<table><thead><tr><th>Shipment No.</th><th>Party</th><th>B/L</th><th>Value</th><th>Status</th><th>ETA</th><th>Actions</th></tr></thead>
+					<tbody id="tb_sea"><tr><td colspan="7" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+				</div>
+			</div>
+			<div class="box table-box">
+				<div class="bt">Air Shipments <span class="badge rt-count" id="cnt_air">0</span></div>
+				<div class="table-responsive">
+					<table><thead><tr><th>Shipment No.</th><th>Party</th><th>AWB</th><th>Value</th><th>Status</th><th>ETA</th><th>Actions</th></tr></thead>
+					<tbody id="tb_air"><tr><td colspan="7" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+				</div>
+			</div>
+		</div>
+		<div class="section-title">Dispatch &amp; Production</div>
+		<div class="grid grid-2">
+			<div class="box table-box">
+				<div class="bt">Ready for Dispatch <span class="badge rt-count" id="cnt_dispatch">0</span></div>
+				<div class="table-responsive">
+					<table><thead><tr><th>Order No.</th><th>Party</th><th>Value</th><th>Ready Date</th><th>Mode</th><th>Actions</th></tr></thead>
+					<tbody id="tb_dispatch"><tr><td colspan="6" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+				</div>
+			</div>
+			<div class="box table-box">
+				<div class="bt">Awaiting Freight Forwarder <span class="badge rt-count" id="cnt_ff">0</span></div>
+				<div class="table-responsive">
+					<table><thead><tr><th>Order No.</th><th>Party</th><th>Value</th><th>Packed Date</th><th>FF</th><th>Actions</th></tr></thead>
+					<tbody id="tb_ff"><tr><td colspan="6" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+				</div>
+			</div>
+		</div>
+		<div class="box table-box">
+			<div class="bt">In Production <span class="badge rt-count" id="cnt_prod">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>WO No.</th><th>Party</th><th>Value</th><th>Start</th><th>Est. Completion</th><th>Progress</th><th>Actions</th></tr></thead>
+				<tbody id="tb_prod"><tr><td colspan="7" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+		<div class="box table-box">
+			<div class="bt">Post-Shipment <span class="badge rt-count" id="cnt_post">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party</th><th>Invoice No.</th><th>Value</th><th>Invoice Date</th><th>Payment Terms</th><th>Payment Status</th><th>Collected</th><th>Actions</th></tr></thead>
+				<tbody id="tb_post"><tr><td colspan="9" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: PURCHASE ORDERS ======================================= -->
+	<div class="rt-tab-content" id="tab-purchase-orders">
+		<div class="cards" id="rt_cards_po"></div>
+		<div class="box table-box">
+			<div class="bt">Purchase Orders <span class="badge rt-count" id="cnt_po">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>PO No.</th><th>Linked SO</th><th>Company</th><th>Supplier</th><th>PO Value</th><th>Currency</th><th>Payment Type</th><th>AP Status</th><th>Ship Mode</th><th>IC</th><th>Actions</th></tr></thead>
+				<tbody id="tb_po"><tr><td colspan="11" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: SALES ORDERS ========================================== -->
+	<div class="rt-tab-content" id="tab-sales-orders">
+		<div class="cards" id="rt_cards_so"></div>
+		<div class="box table-box">
+			<div class="bt">Sales Orders <span class="badge rt-count" id="cnt_so">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>SO No.</th><th>Linked PO</th><th>Company</th><th>Customer</th><th>SO Value</th><th>Currency</th><th>Status</th><th>Ship Mode</th><th>IC</th><th>Actions</th></tr></thead>
+				<tbody id="tb_so"><tr><td colspan="10" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: CONFIRMED ============================================= -->
+	<div class="rt-tab-content" id="tab-confirmed">
+		<div class="box table-box">
+			<div class="bt">Confirmed Orders <span class="badge rt-count" id="cnt_confirmed">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party</th><th>Amount</th><th>Confirmed Date</th><th>Due Date</th><th>Ship Mode</th><th>Payment Type</th><th>Company</th><th>Actions</th></tr></thead>
+				<tbody id="tb_confirmed"><tr><td colspan="9" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: PRODUCTION ============================================ -->
+	<div class="rt-tab-content" id="tab-production">
+		<div class="box table-box">
+			<div class="bt">Work Orders in Production <span class="badge rt-count" id="cnt_prod_tab">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>WO No.</th><th>Sales Order</th><th>Party</th><th>Value</th><th>Start Date</th><th>Est. Completion</th><th>Progress</th><th>Status</th><th>Actions</th></tr></thead>
+				<tbody id="tb_prod_tab"><tr><td colspan="9" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: SHIPMENTS ============================================= -->
+	<div class="rt-tab-content" id="tab-shipments">
+		<div class="cards" id="rt_cards_ship"></div>
+		<div class="grid grid-2">
+			<div class="box" data-chart-id="ch_ship_trend">
+				<div class="bt">Monthly Shipments by Mode <span class="badge">6 Months</span></div>
+				<canvas id="ch_ship_trend"></canvas>
+			</div>
+			<div class="box" data-chart-id="ch_shipmode_tab">
+				<div class="bt">Mode Split <span class="badge">Period</span></div>
+				<canvas id="ch_shipmode_tab"></canvas>
+			</div>
+		</div>
+		<div class="box table-box">
+			<div class="bt">All Shipments <span class="badge rt-count" id="cnt_ship_all">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Shipment No.</th><th>Order No.</th><th>Party</th><th>Mode</th><th>B/L or AWB</th><th>Value</th><th>Status</th><th>ETA</th><th>Days to ETA</th><th>Actions</th></tr></thead>
+				<tbody id="tb_ship_all"><tr><td colspan="10" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: AR COLLECTIONS ======================================== -->
+	<div class="rt-tab-content" id="tab-collections">
+		<div class="cards" id="rt_cards_ar"></div>
+		<div class="grid grid-2">
+			<div class="box" data-chart-id="ch_coll_rate">
+				<div class="bt">Collection Rate Trend <span class="badge">6 Months</span></div>
+				<canvas id="ch_coll_rate"></canvas>
+			</div>
+			<div class="box" data-chart-id="ch_ar_aging">
+				<div class="bt">AR Aging Buckets <span class="badge">Pending</span></div>
+				<canvas id="ch_ar_aging"></canvas>
+			</div>
+		</div>
+		<div class="box table-box">
+			<div class="bt">Payment Collection Details <span class="badge rt-count" id="cnt_coll">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party</th><th>Invoice No.</th><th>Sale Value</th><th>Purchase Cost</th><th>Gross Margin</th><th>Margin %</th><th>Invoice Date</th><th>Status</th><th>Collected</th><th>Actions</th></tr></thead>
+				<tbody id="tb_coll"><tr><td colspan="11" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+		<div class="box table-box" style="margin-top:16px">
+			<div class="bt">Pending Collections <span class="badge rt-count" id="cnt_pending_coll">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party</th><th>Invoice No.</th><th>Sale Value</th><th>Outstanding</th><th>Invoice Date</th><th>Days Outstanding</th><th>Due Date</th><th>Urgency</th><th>Actions</th></tr></thead>
+				<tbody id="tb_pending_coll"><tr><td colspan="10" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: AP FINANCE ============================================ -->
+	<div class="rt-tab-content" id="tab-finance">
+		<div class="cards" id="rt_cards_ap"></div>
+		<div class="grid" style="grid-template-columns:1fr;">
+			<div class="box" data-chart-id="ch_ap_ar">
+				<div class="bt">AP vs AR Exposure by Company <span class="badge">Current</span></div>
+				<canvas id="ch_ap_ar"></canvas>
+			</div>
+		</div>
+		<div class="box table-box">
+			<div class="bt">Finance Clearance Queue &#8212; Pending <span class="badge rt-count" id="cnt_fin_pending">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party</th><th>Invoice No.</th><th>AP Amount</th><th>Invoice Date</th><th>Days Outstanding</th><th>Due Date</th><th>Urgency</th><th>Finance Note</th><th>Actions</th></tr></thead>
+				<tbody id="tb_fin_pending"><tr><td colspan="10" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+		<div class="box table-box" style="margin-top:16px">
+			<div class="bt">Cleared by Finance <span class="badge rt-count" id="cnt_fin_cleared">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>Order No.</th><th>Party</th><th>Invoice No.</th><th>AP Amount</th><th>Payment Date</th><th>Amount Paid</th><th>Status</th><th>Actions</th></tr></thead>
+				<tbody id="tb_fin_cleared"><tr><td colspan="8" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<!-- TAB: INTERCOMPANY ========================================== -->
+	<div class="rt-tab-content" id="tab-intercompany">
+		<div class="cards" id="rt_cards_ic"></div>
+		<div class="box table-box">
+			<div class="bt">IC Transactions <span class="badge rt-count" id="cnt_ic">0</span></div>
+			<div class="table-responsive">
+				<table><thead><tr><th>IC Ref</th><th>From (PO)</th><th>To (SO)</th><th>Linked PO</th><th>Linked SO</th><th>Value</th><th>Currency</th><th>AP Impact</th><th>AR Impact</th><th>Status</th><th>Actions</th></tr></thead>
+				<tbody id="tb_ic"><tr><td colspan="11" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
+			</div>
+		</div>
+		<div class="box table-box" style="margin-top:16px">
+			<div class="bt">Exposure Matrix</div>
+			<div id="rt_ic_matrix"><div class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading matrix...</div></div>
+		</div>
+	</div>
+
+	<!-- TAB: BULK UPLOAD =========================================== -->
+	<div class="rt-tab-content" id="tab-bulk-upload">
+		<div class="box" style="padding:48px;text-align:center;">
+			<div style="font-size:52px;margin-bottom:16px">&#128228;</div>
+			<div style="font-size:18px;font-weight:700;color:var(--rt-text);margin-bottom:8px">Bulk Upload</div>
+			<div style="color:var(--rt-text-muted);font-size:13px;max-width:420px;margin:0 auto">Import orders, shipments and documents in bulk via CSV or Excel files.</div>
+			<button class="rt-fbtn rt-fbtn-reset" style="margin-top:24px;padding:10px 24px;font-size:13px">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+				Upload File
+			</button>
+		</div>
+	</div>
+
+</div>
