@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Shipping Dashboard",
  "links": [],
- "modified": "2026-07-08 04:25:15.339310",
+ "modified": "2026-08-12 10:18:37.990737",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "Shipping Dashboard",
@@ -22,7 +22,11 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ],
  "sequence_id": 1.0,
  "shortcuts": [
   {

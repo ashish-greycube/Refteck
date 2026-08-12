@@ -4,13 +4,17 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-05-28 07:07:18.686087",
+ "modified": "2026-08-12 10:24:28.442379",
  "modified_by": "Administrator",
  "module": "Refteck",
  "name": "refteck-dashboard",
  "owner": "Administrator",
  "page_name": "refteck-dashboard",
- "roles": [],
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,
