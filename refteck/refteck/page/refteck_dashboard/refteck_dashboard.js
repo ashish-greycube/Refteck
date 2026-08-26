@@ -190,14 +190,14 @@ frappe.templates['refteck_dashboard'] = `<div class="rt-dashboard">
 		<div class="box table-box">
             <div class="bt">Sea Shipments <span class="badge rt-count" id="cnt_sea">0</span></div>
             <div class="table-responsive">
-                <table><thead><tr><th>Invoice No.</th><th>Party Name</th><th>B/L Number</th><th>Value</th><th>ETA</th></tr></thead>
+                <table><thead><tr><th>Invoice No.</th><th>Party Name</th><th>Value</th><th>ETA</th></tr></thead>
                 <tbody id="tb_sea"><tr><td colspan="5" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
             </div>
         </div>
         <div class="box table-box">
             <div class="bt">Air Shipments <span class="badge rt-count" id="cnt_air">0</span></div>
             <div class="table-responsive">
-                <table><thead><tr><th>Invoice No.</th><th>Party Name</th><th>AWB Number</th><th>Value</th><th>ETA</th></tr></thead>
+                <table><thead><tr><th>Invoice No.</th><th>Party Name</th><th>Value</th><th>ETA</th></tr></thead>
                 <tbody id="tb_air"><tr><td colspan="5" class="rt-loading-row"><div class="rt-spinner-sm"></div> Loading...</td></tr></tbody></table>
             </div>
         </div>
@@ -755,7 +755,7 @@ class RefteckDashboard {
 				this.card('⏳', 'Active Orders', (d.active_orders || 0) ?? '—'),
 				this.card('🚛', 'Open Shipment', this.fmtNative(d.open_shipment, d.currency) ?? '—'),
 				this.card('💰', 'Collected', this.fmtNative(ad.total_paid_collection || 0, d.currency) ?? '—'),
-				this.card('📈', 'Gross Margin', this.fmtNative(d.total_gross_margin, d.currency) ?? '—'),
+				// this.card('📈', 'Gross Margin', this.fmtNative(d.total_gross_margin, d.currency) ?? '—'),
 				this.card('📊', 'Shipment Ratio', this.fmtNative(d.shipment_ratio, d.currency) ?? '—'),
 				this.card('✅', 'Overdue Orders', (d.overdue_so || 0) ?? '—'),
 				this.card('🧾', 'Account Receivable', this.fmtNative(ad.total_acc_receivable, d.currency) ?? '—'),
@@ -780,9 +780,9 @@ class RefteckDashboard {
 	/* ─── Row renderers ─────────────────────────────────────────── */
 	renderOrdersRows(o) { return `<tr><td><a href="/app/sales-order/${o.order_no}" style="color:var(--rt-teal)">${o.order_no}</a></td><td>${o.party_name || '—'}</td><td class="rt-mono">${this.fmtNative(o.amount, o.currency)}</td><td>${this.fmtDate(o.order_date)}</td><td>${o.payment_terms || '—'}</td><td>${this.fmtDate(o.due_date)}</td><td>${this.statusBadge(o.status)}</td><td>${o.overdue_days > 0 ? `<span class="rt-badge rt-badge-red">${o.overdue_days}</span>` : `<span class="rt-badge rt-badge-green"> ${o.overdue_days}</span>`}</td></tr>`; }
 
-	renderSeaRows(o) { return `<tr><td><a href="/app/sales-invoice/${o.invoice_no}" style="color:var(--rt-blue)">${o.invoice_no}</a></td><td>${o.party_name || '—'}</td><td class="rt-mono">${o.airway_bill || '—'}</td><td class="rt-mono">${this.fmtNative(o.amount, o.currency)}</td><td>${this.fmtDate(o.delivery_date)}</td></tr>`; }
+	renderSeaRows(o) { return `<tr><td><a href="/app/sales-invoice/${o.invoice_no}" style="color:var(--rt-blue)">${o.invoice_no}</a></td><td>${o.party_name || '—'}</td><td class="rt-mono">${this.fmtNative(o.amount, o.currency)}</td><td>${this.fmtDate(o.delivery_date)}</td></tr>`; }
 
-	renderAirRows(o) { return `<tr><td><a href="/app/sales-invoice/${o.invoice_no}" style="color:var(--rt-blue)">${o.invoice_no}</a></td><td>${o.party_name || '—'}</td><td class="rt-mono">${o.airway_bill || '—'}</td><td class="rt-mono">${this.fmtNative(o.amount, o.currency)}</td><td>${this.fmtDate(o.delivery_date)}</td></tr>`; }
+	renderAirRows(o) { return `<tr><td><a href="/app/sales-invoice/${o.invoice_no}" style="color:var(--rt-blue)">${o.invoice_no}</a></td><td>${o.party_name || '—'}</td><td class="rt-mono">${this.fmtNative(o.amount, o.currency)}</td><td>${this.fmtDate(o.delivery_date)}</td></tr>`; }
 
 	renderDispatchRows(o) { return `<tr><td><a href="/app/purchase-order/${o.order_no}" style="color:var(--rt-green)">${o.order_no}</a></td><td>${o.supplier || '—'}</td><td class="rt-mono">${this.fmtNative(o.value, o.currency)}</td><td>${this.fmtDate(o.ready_date)}</td></tr>`; }
 
@@ -837,7 +837,7 @@ class RefteckDashboard {
 				this.card('', 'Intercompany', k.ic_count ?? '—', ''),
 				this.card('', 'Total SO Value', this.fmtNative(k.total_value || 0, k.currency), ''),
 				this.card('', 'Total Advance SO', k.total_so_advance ?? '—', ''),
-				this.card('', 'Total Advance SO Value', k.total_so_advance_value ?? '—', ''),
+				this.card('', 'Total Advance SO Value', this.fmtNative(k.total_so_advance_value || 0, k.currency), ''),
 			].join('');
 			const rows = tableR.message || [];
 			const cnt = document.getElementById('cnt_so'); if (cnt) cnt.textContent = rows.length;

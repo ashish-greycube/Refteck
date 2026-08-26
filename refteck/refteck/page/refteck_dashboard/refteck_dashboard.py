@@ -424,7 +424,7 @@ def get_purchase_order_kpis(company=None, from_date=None, to_date=None):
     po_details = frappe.db.sql("""
                     SELECT 
                         COUNT(CASE WHEN po.status != 'Completed' THEN po.name END) AS total_po,
-                        COUNT(CASE WHEN po.advance_paid > 0 THEN po.name END) AS total_po_with_advance,
+                        COUNT(CASE WHEN po.advance_paid > 0 AND po.status != 'Completed' THEN po.name END) AS total_po_with_advance,
                         SUM(po.rounded_total) AS total_amt,
                         po.currency
                     FROM 
@@ -608,7 +608,8 @@ def get_production_orders(company=None, from_date=None, to_date=None,
     Work Orders currently in production.
     """
     conditions = [
-        "po.docstatus < 2"
+        "po.docstatus < 2",
+        "po.custom_po_tracking_status = 'Under Production'"
     ]
     values = {}
 
@@ -655,13 +656,8 @@ def get_production_orders(company=None, from_date=None, to_date=None,
             po.currency
         FROM
             `tabPurchase Order` AS po
-        INNER JOIN `tabPurchase Order Item` AS poi ON
-            poi.parent = po.name
-            AND poi.custom_po_line_item_tracking_status = "Under Production"
         WHERE
             {where}
-        GROUP BY
-            poi.parent
     """.format(where=where), values, as_dict=True)
 
 
@@ -676,8 +672,10 @@ def get_awaiting_ff(company=None, from_date=None, to_date=None,
  
     conditions = [
         " docstatus < 2",
-        "si.custom_ro LIKE 'FF AWAITED'"
+        "si.custom_ro IS NOT NULL",
+        "si.custom_ro != ''"
     ]
+    # "si.custom_ro LIKE 'FF AWAITED'"
     values = {}
 
     if company and company != "all":
@@ -732,7 +730,8 @@ def get_sea_shipments(company=None, from_date=None, to_date=None,
     
     conditions = [
         "si.docstatus < 2",
-        "si.mode_of_transport = 'Ship'"
+        "si.mode_of_transport = 'Ship'",
+        "(si.custom_airway_bill IS NULL OR si.custom_airway_bill = '')"
     ]
     values = {}
 
@@ -789,7 +788,8 @@ def get_air_shipments(company=None, from_date=None, to_date=None,
 
     conditions = [
         "si.docstatus < 2",
-        "si.mode_of_transport = 'Air'"
+        "si.mode_of_transport = 'Air'",
+        "(si.custom_airway_bill IS NULL OR si.custom_airway_bill = '')"
     ]
     values = {}
 
@@ -887,7 +887,7 @@ def get_ar_collection_kpis(company=None, from_date=None, to_date=None):
             
             if row.voucher_type == "Sales Invoice":
                 # print(row.paid, "====row.paid=====")
-                total_paid_collection = total_paid_collection + (row.paid or 0)
+                
                 total_acc_receivable = total_acc_receivable + (row.outstanding or 0)
                 # print(row.paid , "===row.paid====", row.outstanding, "====row.outstanding====")
                 if row.paid and row.paid > 0:
@@ -907,6 +907,8 @@ def get_ar_collection_kpis(company=None, from_date=None, to_date=None):
                         "currency": row.account_currency,
                         "value": row.outstanding,
                     })
+            else:
+                total_paid_collection = total_paid_collection + (row.paid or 0)
 
     currency = "USD"
     if company:
