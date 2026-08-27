@@ -9,9 +9,8 @@ frappe.templates['refteck_dashboard'] = `<div class="rt-dashboard">
 	<!-- PAGE HEADER ================================================ -->
 	<header>
 		<div class="header-left">
-			<div class="rt-logo">🌐</div>
 			<div>
-				<h1>Refteck Group Dashboard</h1>
+				<img class="rt-brand-logo" src="/assets/refteck/images/Refteck Logo.png" alt="Refteck">
 				<div class="rt-subtitle" id="rtSubtitleDate"></div>
 			</div>
 		</div>
