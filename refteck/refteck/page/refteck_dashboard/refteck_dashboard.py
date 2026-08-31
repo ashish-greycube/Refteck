@@ -204,7 +204,7 @@ def get_orders_received(company=None, from_date=None, to_date=None,
     DocType: Sales Order
     """
     # print(from_date, "--from" , to_date, "--to=====================", so)
-    conditions = ["so.docstatus < 2"]
+    conditions = ["so.docstatus < 2", "so.status != 'Completed'"]
     values = {}
 
     if company and company != "all":
@@ -306,10 +306,11 @@ def get_ready_for_dispatch(company=None, from_date=None, to_date=None,
     if so:
         conditions.append("""
             EXISTS (
-                SELECT 1 
-                FROM `tabPurchase Order Item` AS poi 
-                WHERE poi.parent = po.name 
-                AND poi.sales_order = %(so)s
+                SELECT 1
+                FROM `tabPurchase Order Item` AS poi
+                INNER JOIN `tabSales Order` AS so2 ON so2.name = poi.sales_order
+                WHERE poi.parent = po.name
+                AND poi.sales_order = %(so)s AND so2.status != 'Completed'
                 ) """)
         values["so"] = so
 
@@ -336,6 +337,7 @@ def get_post_shipment(company=None, from_date=None, to_date=None,
                         so=None, party=None, po=None):
     conditions = [
         "so.docstatus < 2",
+        "so.status != 'Completed'",
         "si.status IN ('Paid', 'Unpaid', 'Partly Paid')"
     ]
     values = {}
@@ -482,11 +484,12 @@ def get_purchase_orders(company=None, from_date=None, to_date=None,  po=None, su
     if so:
         conditions.append("""
             EXISTS (
-                SELECT 1 
-                FROM `tabPurchase Order Item` AS poi 
-                WHERE poi.parent = po.name 
-                AND poi.sales_order = %(so)s
-                ) """)
+                    SELECT 1
+                    FROM `tabPurchase Order Item` AS poi
+                    INNER JOIN `tabSales Order` AS so2 ON so2.name = poi.sales_order
+                    WHERE poi.parent = po.name
+                    AND poi.sales_order = %(so)s AND so2.status != 'Completed'
+                    ) """)
         values["so"] = so
 
     where = " AND ".join(conditions)
@@ -636,11 +639,12 @@ def get_production_orders(company=None, from_date=None, to_date=None,
     if so:
         conditions.append("""
             EXISTS (
-                SELECT 1 
-                FROM `tabPurchase Order Item` AS poi 
-                WHERE poi.parent = po.name 
-                AND poi.sales_order = %(so)s
-                ) """)
+                    SELECT 1
+                    FROM `tabPurchase Order Item` AS poi
+                    INNER JOIN `tabSales Order` AS so2 ON so2.name = poi.sales_order
+                    WHERE poi.parent = po.name
+                    AND poi.sales_order = %(so)s AND so2.status != 'Completed'
+                    ) """)
         values["so"] = so
 
     where = " AND ".join(conditions)
@@ -954,7 +958,7 @@ def get_intercompany_transactions(company=None, so=None, from_date=None, to_date
     DocType: Sales Order - Is Intercompany Transaction? = Yes
 
     """
-    conditions = ["so.docstatus < 2", "so.custom_is_intercompany_transaction = 1"]
+    conditions = ["so.docstatus < 2", "so.custom_is_intercompany_transaction = 1", "so.status != 'Completed'"]
     values = {}
 
     if company and company != "all":
