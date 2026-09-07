@@ -62,12 +62,32 @@ def _build_filters(alias, company=None, from_date=None, to_date=None, **kwargs):
         values["company"] = company
 
     # 2. Date Range Filters
-    if from_date:
-        conditions.append(f"{alias}.creation >= %(from_date)s")
-        values["from_date"] = from_date
-    if to_date:
-        conditions.append(f"{alias}.creation <= %(to_date)s")
-        values["to_date"] = to_date
+    # if from_date:
+    #     if alias in ["so", "po"]:
+    #         conditions.append(f"{alias}.transaction_date >= %(from_date)s")
+    #     else:
+    #         conditions.append(f"{alias}.posting_date >= %(from_date)s")
+    #     # conditions.append(f"{alias}.creation >= %(from_date)s")
+    #     values["from_date"] = from_date
+    # if to_date:
+    #     if alias in ["so", "po"]:
+    #         conditions.append(f"{alias}.transaction_date <= %(to_date)s")
+    #     else:
+    #         conditions.append(f"{alias}.posting_date <= %(to_date)s")
+    #     # conditions.append(f"{alias}.creation <= %(to_date)s")
+    #     values["to_date"] = to_date
+
+    # 2. Date Range Filters
+    if from_date and to_date:
+        if to_date < from_date:
+            frappe.throw(_("To Date should be greater than or equal to From Date"))
+        else:
+            if alias in ["so", "po"]:
+                conditions.append(f"DATE({alias}.transaction_date) BETWEEN %(from_date)s AND %(to_date)s")
+            else:
+                conditions.append(f"DATE({alias}.posting_date) BETWEEN %(from_date)s AND %(to_date)s")
+            values["from_date"] = from_date
+            values["to_date"] = to_date
 
     # 3. Dynamic Kwargs Mapping (so, po, party, payment_term, supplier, etc.)
     # Maps internal function arguments to Frappe DocType Database Column Names
@@ -213,7 +233,7 @@ def get_orders_received(company=None, from_date=None, to_date=None,
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(so.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(so.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -289,7 +309,7 @@ def get_ready_for_dispatch(company=None, from_date=None, to_date=None,
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(po.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(po.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -348,7 +368,7 @@ def get_post_shipment(company=None, from_date=None, to_date=None,
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(so.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(so.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -415,7 +435,7 @@ def get_purchase_order_kpis(company=None, from_date=None, to_date=None):
     
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(po.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(po.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -467,7 +487,7 @@ def get_purchase_orders(company=None, from_date=None, to_date=None,  po=None, su
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(po.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(po.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -524,7 +544,7 @@ def get_sales_order_kpis(company=None, from_date=None, to_date=None):
     
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(so.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(so.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -562,7 +582,7 @@ def get_sales_orders(company=None, so=None, from_date=None, to_date=None, party=
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(so.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(so.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -622,7 +642,7 @@ def get_production_orders(company=None, from_date=None, to_date=None,
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(po.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(po.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:
@@ -860,15 +880,9 @@ def get_ar_collection_kpis(company=None, from_date=None, to_date=None):
     values = {}
 
     if company and company != "all":
-        # conditions.append("si.company = %(company)s")
         values["company"] = COMPANY_MAP.get(company, company)
-  
-    # if from_date:
-    #     conditions.append("si.posting_date >= %(from_date)s")
-    #     values["from_date"] = from_date
 
     if to_date:
-        # conditions.append("si.posting_date <= %(to_date)s")
         values["report_date"] = to_date
 
     where = " AND ".join(conditions)
@@ -967,7 +981,7 @@ def get_intercompany_transactions(company=None, so=None, from_date=None, to_date
 
     if from_date and to_date:
         if to_date >= from_date:
-            conditions.append("DATE(so.creation) between %(from_date)s AND %(to_date)s")
+            conditions.append("DATE(so.transaction_date) between %(from_date)s AND %(to_date)s")
             values["from_date"] = from_date
             values["to_date"] = to_date
         else:

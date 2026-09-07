@@ -273,12 +273,13 @@ div:has(> .rt-dashboard) {
 	box-shadow: var(--rt-shadow);
 }
 
-.rt-dashboard .card:hover { border-color: var(--rt-border); box-shadow: 0 4px 14px rgba(16,24,40,0.1); }
-
 /* Cycle through the brand accent colors across the top border of each stat card */
 .rt-dashboard .cards .card:nth-child(4n+2) { border-top-color: var(--rt-green); }
 .rt-dashboard .cards .card:nth-child(4n+3) { border-top-color: var(--rt-teal); }
 .rt-dashboard .cards .card:nth-child(4n+4) { border-top-color: var(--rt-red); }
+
+/* Matches nth-child specificity and comes after it, so hover wins for every card color */
+.rt-dashboard .cards .card:hover { border-color: var(--rt-border); box-shadow: 0 4px 14px rgba(16,24,40,0.1); }
 
 .rt-dashboard .card .t {
 	font-size: 11px;
