@@ -47,9 +47,9 @@ frappe.templates['refteck_dashboard'] = `<div class="rt-dashboard">
 		<!-- Date range -->
 		<div class="rt-date-range-wrap">
 			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--rt-text-muted);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-			<input type="date" class="rt-fdate" id="rtFromDate" title="From Date">
+			<input type="text" class="rt-fdate" id="rtFromDate" placeholder="From" title="From Date" autocomplete="off">
 			<span class="rt-date-sep">&#8212;</span>
-			<input type="date" class="rt-fdate" id="rtToDate" title="To Date">
+			<input type="text" class="rt-fdate" id="rtToDate" placeholder="To" title="To Date" autocomplete="off">
 		</div>
 
 		<!-- Clear -->
@@ -269,6 +269,7 @@ frappe.pages['refteck-dashboard'].on_page_load = function (wrapper) {
 		return new Promise((resolve, reject) => {
 			// if (src.includes('chart.js') && window.Chart) return resolve();
 			if (src.includes('datalabels') && window.ChartDataLabels) return resolve();
+			if (src.includes('flatpickr') && window.flatpickr) return resolve();
 			const script = document.createElement('script');
 			script.src = src;
 			script.onload = resolve;
@@ -276,11 +277,23 @@ frappe.pages['refteck-dashboard'].on_page_load = function (wrapper) {
 			document.head.appendChild(script);
 		});
 	};
+	const loadStyle = (href) => {
+		if (document.querySelector(`link[href="${href}"]`)) return;
+		const link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.href = href;
+		document.head.appendChild(link);
+	};
 
-	loadScript('https://cdn.jsdelivr.net/npm/chart.js@4')
-		.then(() => loadScript('https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2'))
+	loadStyle('https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
+
+	Promise.all([
+		loadScript('https://cdn.jsdelivr.net/npm/chart.js@4')
+			.then(() => loadScript('https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2')),
+		loadScript('https://cdn.jsdelivr.net/npm/flatpickr')
+	])
 		.catch(err => {
-			console.error('Failed to load Chart.js:', err);
+			console.error('Failed to load dashboard libraries:', err);
 			frappe.msgprint(__('Failed to load chart libraries. Please refresh.'));
 			throw err;
 		})
@@ -366,12 +379,41 @@ class RefteckDashboard {
 			});
 			this.modifiedElements = [];
 		}
+		if (this.fpFrom) { this.fpFrom.destroy(); this.fpFrom = null; }
+		if (this.fpTo) { this.fpTo.destroy(); this.fpTo = null; }
+	}
+
+	/* ─── Themed calendar (flatpickr) for the From/To date fields ─── */
+	initDateRangePicker() {
+		if (typeof flatpickr === 'undefined') return;   // CDN unreachable — inputs stay plain text
+		const opts = {
+			dateFormat: 'Y-m-d',
+			allowInput: true,
+			disableMobile: true,
+			appendTo: this.page.body.find('.rt-dashboard')[0] || document.body,
+		};
+		const fromEl = document.getElementById('rtFromDate');
+		const toEl = document.getElementById('rtToDate');
+		if (fromEl) this.fpFrom = flatpickr(fromEl, opts);
+		if (toEl) this.fpTo = flatpickr(toEl, opts);
+	}
+
+	/* Sets both date fields, going through flatpickr when available so its
+	   calendar stays in sync with the value shown in the input. */
+	setDateRange(fromDate, toDate) {
+		const fromEl = document.getElementById('rtFromDate');
+		const toEl = document.getElementById('rtToDate');
+		if (this.fpFrom) this.fpFrom.setDate(fromDate, false);
+		else if (fromEl) fromEl.value = fromDate;
+		if (this.fpTo) this.fpTo.setDate(toDate, false);
+		else if (toEl) toEl.value = toDate;
 	}
 
 	init() {
 		$(frappe.render_template('refteck_dashboard', {})).appendTo(this.page.body);
 
 		this.initElements();
+		this.initDateRangePicker();
 		this.initFrappeFilters();   // creates the Link controls — must run first
 		this.bindEvents();
 		const restoredTab = this.restoreFromUrl();
@@ -394,10 +436,7 @@ class RefteckDashboard {
 		// Filters are now always-visible native HTML inputs in rt-filter-bar.
 		// Set default date range (last month) on the native date inputs.
 		const { fromDate, toDate } = this.getQuickPeriodDates('last_month');
-		const fromEl = document.getElementById('rtFromDate');
-		const toEl = document.getElementById('rtToDate');
-		if (fromEl) fromEl.value = fromDate;
-		if (toEl) toEl.value = toDate;
+		this.setDateRange(fromDate, toDate);
 
 		// Update subtitle with today date
 		const subEl = document.getElementById('rtSubtitleDate');
@@ -703,8 +742,14 @@ class RefteckDashboard {
 
 		const fromEl = document.getElementById('rtFromDate');
 		const toEl = document.getElementById('rtToDate');
-		if (params.get('from_date') && fromEl) fromEl.value = params.get('from_date');
-		if (params.get('to_date') && toEl) toEl.value = params.get('to_date');
+		if (params.get('from_date')) {
+			if (this.fpFrom) this.fpFrom.setDate(params.get('from_date'), false);
+			else if (fromEl) fromEl.value = params.get('from_date');
+		}
+		if (params.get('to_date')) {
+			if (this.fpTo) this.fpTo.setDate(params.get('to_date'), false);
+			else if (toEl) toEl.value = params.get('to_date');
+		}
 
 		if (params.get('currency')) {
 			document.querySelectorAll('.rt-curr-btn').forEach(b =>
@@ -928,10 +973,7 @@ class RefteckDashboard {
 	/* ─── Filter popup helpers ──────────────────────────────────── */
 	clearFilters() {
 		const { fromDate, toDate } = this.getQuickPeriodDates('last_month');
-		const fromEl = document.getElementById('rtFromDate');
-		const toEl = document.getElementById('rtToDate');
-		if (fromEl) fromEl.value = fromDate;
-		if (toEl) toEl.value = toDate;
+		this.setDateRange(fromDate, toDate);
 		this.filterFields.so_search?.set_value('');
 		this.filterFields.party_name?.set_value('');
 		this.filterFields.po_search?.set_value('');

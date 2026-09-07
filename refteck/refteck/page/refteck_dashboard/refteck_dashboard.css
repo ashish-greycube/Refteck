@@ -1015,13 +1015,6 @@ div:has(> .rt-dashboard) {
 	outline: none;
 	cursor: pointer;
 	width: 108px;
-	/* style the calendar icon */
-	color-scheme: dark;
-}
-
-.rt-dashboard .rt-fdate::-webkit-calendar-picker-indicator {
-	cursor: pointer;
-	filter: invert(1);
 }
 
 .rt-dashboard .rt-date-sep {
@@ -1030,6 +1023,70 @@ div:has(> .rt-dashboard) {
 	line-height: 1;
 	flex-shrink: 0;
 }
+
+/* ── Flatpickr calendar popup — themed to match the dashboard ─── */
+.rt-dashboard .flatpickr-calendar {
+	background: var(--rt-card-alt);
+	border: 1px solid var(--rt-border);
+	border-radius: var(--rt-radius);
+	box-shadow: 0 10px 30px rgba(11,37,69,0.18);
+	font-family: inherit;
+}
+
+.rt-dashboard .flatpickr-calendar.arrowTop:before,
+.rt-dashboard .flatpickr-calendar.arrowTop:after { display: none; }
+
+.rt-dashboard .flatpickr-months { padding: 10px 10px 4px; }
+
+.rt-dashboard .flatpickr-month,
+.rt-dashboard .flatpickr-current-month .flatpickr-monthDropdown-months,
+.rt-dashboard .flatpickr-current-month input.cur-year {
+	color: var(--rt-navy-deep);
+	fill: var(--rt-navy-deep);
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.rt-dashboard .flatpickr-current-month .flatpickr-monthDropdown-months:hover { background: rgba(11,37,69,0.06); }
+.rt-dashboard .flatpickr-current-month .flatpickr-monthDropdown-months { margin-right: 8px; }
+
+.rt-dashboard .flatpickr-prev-month,
+.rt-dashboard .flatpickr-next-month { fill: var(--rt-navy-deep); color: var(--rt-navy-deep); }
+.rt-dashboard .flatpickr-prev-month:hover,
+.rt-dashboard .flatpickr-next-month:hover { fill: var(--rt-teal); color: var(--rt-teal); }
+
+.rt-dashboard span.flatpickr-weekday {
+	background: transparent;
+	color: var(--rt-text-muted);
+	font-weight: 700;
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.rt-dashboard .flatpickr-day {
+	color: var(--rt-text);
+	border-radius: 8px;
+	font-size: 12px;
+}
+
+.rt-dashboard .flatpickr-day.today { border-color: var(--rt-teal); }
+.rt-dashboard .flatpickr-day:hover,
+.rt-dashboard .flatpickr-day:focus {
+	background: rgba(245,130,13,0.12);
+	border-color: rgba(245,130,13,0.25);
+}
+.rt-dashboard .flatpickr-day.selected,
+.rt-dashboard .flatpickr-day.selected:hover {
+	background: var(--rt-teal);
+	border-color: var(--rt-teal);
+	color: #fff;
+}
+.rt-dashboard .flatpickr-day.flatpickr-disabled,
+.rt-dashboard .flatpickr-day.prevMonthDay,
+.rt-dashboard .flatpickr-day.nextMonthDay { color: var(--rt-text-muted); opacity: 0.5; }
+
+.rt-dashboard .numInputWrapper:hover { background: rgba(11,37,69,0.06); }
 
 /* ── Action buttons in filter bar ───────────────────────────── */
 .rt-dashboard .rt-fbtn {
