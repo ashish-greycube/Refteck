@@ -31,6 +31,12 @@ def get_columns(filters):
 			"width": 200
 		},
 		{
+			"fieldname": "tsril_trial",
+			"fieldtype": "Data",
+			"label": _("TSRIL Trial"),
+			"width": 100
+		},
+		{
 			"fieldname": "po_date",
 			"fieldtype": "Date",
 			"label": _("PO date"),
@@ -203,6 +209,9 @@ def get_conditions(filters):
 	if filters.get("order_code"):
 		conditions += " and tpo.custom_order_code = '{0}'".format(filters.get("order_code"))
 
+	if filters.get("tsril_trial"):
+		conditions += " and tso.custom_tsril_trial = '{0}'".format(filters.get("tsril_trial"))
+
 	# conditions.append({"per_delivered": ['<', 100], "status": ['!=', "Closed"]})
 
 	return conditions
@@ -214,6 +223,7 @@ def get_data(filters):
 	data = frappe.db.sql(
 		"""SELECT
 			tso.name as so,
+			tso.custom_tsril_trial as tsril_trial,
 			tso.po_date,
 			tso.customer_name as client,
 			todo.allocated_to as assigned_to,

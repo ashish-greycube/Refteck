@@ -29,6 +29,11 @@ frappe.query_reports["Sales Quotation Submission"] = {
 			"fieldtype": "Link",
 			"options": "User",
 		},
+		{
+			"fieldname": "tsril_trial",
+			"label":__("TSRIL Trial"),
+			"fieldtype": "Check"
+		}
 	],
 
 	onload: create_sales_quotation_submission_summary_btn,

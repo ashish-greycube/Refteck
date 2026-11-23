@@ -30,6 +30,12 @@ def get_columns(filters):
 			"width": 200
 		},
 		{
+			"fieldname": "tsril_trial",
+			"fieldtype": "Data",
+			"label": _("TSRIL Trial"),
+			"width": 100
+		},
+		{
 			"fieldname": "month",
 			"fieldtype": "Data",
 			"label": _("MONTH"),
@@ -230,6 +236,9 @@ def get_conditions(filters):
 	if filters.company:
 		conditions.append({"company":filters.company})
 
+	if filters.tsril_trial:
+		conditions.append({"custom_tsril_trial":filters.tsril_trial})
+
 	return conditions
 
 def get_data(filters):
@@ -246,7 +255,8 @@ def get_data(filters):
 						"rounded_total",
 						"advance_paid",
 						"custom_ld_applicable",
-						"company"
+						"company",
+						"custom_tsril_trial"
 						],
 						filters=conditions,)
 
@@ -363,6 +373,7 @@ def get_data(filters):
 
 					row = {
 						"so": so.name,
+						"tsril_trial": so.custom_tsril_trial,
 						"month": transaction_month.strftime('%b'),
 						"po_received_date": so.transaction_date,
 						"purchase_order_no": so.po_no,

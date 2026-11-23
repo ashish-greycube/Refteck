@@ -37,6 +37,11 @@ frappe.query_reports["QO Submission Report"] = {
 						"Maintenance",
 						"Shopping Cart"
 					]
+		},
+		{
+			"fieldname": "tsril_trial",
+			"label":__("TSRIL Trial"),
+			"fieldtype": "Check"
 		}
 	]
 };

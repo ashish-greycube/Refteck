@@ -29,6 +29,11 @@ frappe.query_reports["Daily Sales Order"] = {
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
+		{
+			"fieldname": "tsril_trial",
+			"label":__("TSRIL Trial"),
+			"fieldtype": "Check"
+		}
 	],
 	onload: create_procurement_member_summary_btn,
 };

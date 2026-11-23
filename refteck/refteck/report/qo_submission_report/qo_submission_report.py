@@ -29,6 +29,12 @@ def get_columns():
 			"width" :210
 		},
 		{
+			"fieldname": "tsril_trial",
+			"fieldtype": "Data",
+			"label": _("TSRIL Trial"),
+			"width": 100
+		},
+		{
 			"fieldname" :"docstatus",
 			"fieldtype" :"docstatus",
 			"label" :_("Docstatus"),
@@ -127,6 +133,7 @@ def get_data(filters):
 	data = frappe.db.sql("""
 		SELECT 
 			qo.name as name,
+			qo.custom_tsril_trial as tsril_trial,
 			qo.docstatus as docstatus,
 			qo.company as company,
 			qo.party_name as customer,
@@ -194,5 +201,8 @@ def get_conditions(filters):
 	
 	if filters.get("order_type"):
 		conditions += " AND qo.order_type ='{0}'".format(filters["order_type"])
+
+	if filters.get("tsril_trial"):
+		conditions += " AND qo.custom_tsril_trial ='{0}'".format(filters["tsril_trial"])
 		
 	return conditions

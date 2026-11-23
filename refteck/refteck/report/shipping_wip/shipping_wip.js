@@ -55,6 +55,11 @@ frappe.query_reports["Shipping-WIP"] = {
             // "default": frappe.datetime.nowdate(),
 			// "reqd": 1
 		},
+		{
+			"fieldname": "tsril_trial",
+			"label":__("TSRIL Trial"),
+			"fieldtype": "Check"
+		}
 
 	],
 	// formatter: function (value, row, column, data, default_formatter) {

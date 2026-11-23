@@ -29,6 +29,12 @@ def get_columns(filters):
 			"width": 200
 		},
 		{
+			"fieldname": "tsril_trial",
+			"fieldtype": "Data",
+			"label": _("TSRIL Trial"),
+			"width": 100
+		},
+		{
 			"fieldname": "customer_name",
 			"fieldtype": "Link",
 			"label": _("Client"),
@@ -117,6 +123,9 @@ def get_conditions(filters):
 	if filters.customer_name:
 		conditions += " and qo.party_name = '{0}'".format(filters.customer_name)
 
+	if filters.tsril_trial:
+		conditions += " and qo.custom_tsril_trial = '{0}'".format(filters.tsril_trial)
+
 	return conditions
 
 def get_data(filters):
@@ -126,6 +135,7 @@ def get_data(filters):
 	data = frappe.db.sql(
 		"""SELECT 
 			qo.name AS qo, 
+			qo.custom_tsril_trial AS tsril_trial,
 			qo.party_name AS customer_name, 
 			qo.transaction_date AS transaction_date,
 			IF(qo.currency = 'GBP', CONCAT('£ ',ROUND(sum(tqi.net_amount),2)), '-') AS gbp,

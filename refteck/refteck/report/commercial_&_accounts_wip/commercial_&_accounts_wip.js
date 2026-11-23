@@ -29,5 +29,10 @@ frappe.query_reports["Commercial & Accounts WIP"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 		},
+		{
+			"fieldname": "tsril_trial",
+			"label":__("TSRIL Trial"),
+			"fieldtype": "Check"
+		}
 	]
 };
