@@ -37,7 +37,10 @@ doctype_js = {"Purchase Order":"public/js/purchase_order.js",
              "Opportunity":"public/js/opportunity.js",
              "Sales Order":"public/js/sales_order.js",
              }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {
+                "Employee Checkin":"public/js/checkin_time_in_ist.js",
+                "Attendance":"public/js/checkin_time_in_ist.js",
+            }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -214,6 +217,9 @@ doc_events = {
                      "refteck.api.calculate_operating_gp_value_and_charges"],
         "before_update_after_submit": ["refteck.api.set_operation_gp_checklist_fields_value",
                                    "refteck.api.calculate_operating_gp_value_and_charges"]
+    },
+    "Employee Checkin":{
+        "before_validate": "refteck.employee_checkin.set_checkin_time_in_ist"
     }
 }
 # Scheduled Tasks
