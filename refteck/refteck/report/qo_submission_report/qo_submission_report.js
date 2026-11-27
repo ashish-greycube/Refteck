@@ -4,43 +4,43 @@
 frappe.query_reports["QO Submission Report"] = {
 	"filters": [
 		{
-			"fieldname":"name",
-			"fieldtype":"Link",
-			"label":__("Quotation"),
-			"options":"Quotation"
+			"fieldname": "name",
+			"fieldtype": "Link",
+			"label": __("Quotation"),
+			"options": "Quotation"
 		},
 		{
-			"fieldname":"customer",
-			"fieldtype":"Link",
-			"label":__("Party(Customer)"),
-			"options":"Customer"
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"label": __("Party(Customer)"),
+			"options": "Customer"
 		},
 		{
-			"fieldname":"from_date",
-			"fieldtype":"Date",
-			"label":__("Date"),
-			"default":frappe.datetime.add_days(frappe.datetime.get_today(), -1)
+			"fieldname": "from_date",
+			"fieldtype": "Date",
+			"label": __("Date"),
+			"default": frappe.datetime.add_days(frappe.datetime.get_today(), -1)
 		},
 		{
-			"fieldname":"to_date",
-			"fieldtype":"Date",
-			"label":__("Date"),
-			"default":frappe.datetime.add_days(frappe.datetime.get_today(), -1)
+			"fieldname": "to_date",
+			"fieldtype": "Date",
+			"label": __("Date"),
+			"default": frappe.datetime.add_days(frappe.datetime.get_today(), -1)
 		},
 		{
-			"fieldname":"order_type",
-			"fieldtype":"Select",
-			"label":__("Order Type"),
-			"options":[
-						"",
-						"Sales",
-						"Maintenance",
-						"Shopping Cart"
-					]
+			"fieldname": "order_type",
+			"fieldtype": "Select",
+			"label": __("Order Type"),
+			"options": [
+				"",
+				"Sales",
+				"Maintenance",
+				"Shopping Cart"
+			]
 		},
 		{
 			"fieldname": "tsril_trial",
-			"label":__("TSRIL Trial"),
+			"label": __("TSRIL"),
 			"fieldtype": "Check"
 		}
 	]

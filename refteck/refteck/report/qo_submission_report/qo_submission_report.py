@@ -31,7 +31,7 @@ def get_columns():
 		{
 			"fieldname": "tsril_trial",
 			"fieldtype": "Data",
-			"label": _("TSRIL Trial"),
+			"label": _("TSRIL"),
 			"width": 100
 		},
 		{

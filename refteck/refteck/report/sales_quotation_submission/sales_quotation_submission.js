@@ -5,33 +5,33 @@ frappe.query_reports["Sales Quotation Submission"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
-			"label":__("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
-            "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
+			"default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
 			"reqd": 1
 		},
 		{
 			"fieldname": "to_date",
-			"label":__("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
-            "default": frappe.datetime.nowdate(),
+			"default": frappe.datetime.nowdate(),
 			"reqd": 1
 		},
 		{
 			"fieldname": "customer_name",
-			"label":__("Customer Name"),
+			"label": __("Customer Name"),
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
 		{
 			"fieldname": "procurement_member",
-			"label":__("Procurement Member"),
+			"label": __("Procurement Member"),
 			"fieldtype": "Link",
 			"options": "User",
 		},
 		{
 			"fieldname": "tsril_trial",
-			"label":__("TSRIL Trial"),
+			"label": __("TSRIL"),
 			"fieldtype": "Check"
 		}
 	],
@@ -40,10 +40,10 @@ frappe.query_reports["Sales Quotation Submission"] = {
 };
 
 function create_sales_quotation_submission_summary_btn(report) {
-    report.page.add_inner_button(
+	report.page.add_inner_button(
 		__("Summary Report"),
-        () => go_to_sales_quotation_submission_summary(report)
-    );
+		() => go_to_sales_quotation_submission_summary(report)
+	);
 }
 
 function go_to_sales_quotation_submission_summary(report) {
@@ -52,7 +52,7 @@ function go_to_sales_quotation_submission_summary(report) {
 		from_date: report.get_values().from_date,
 		to_date: report.get_values().to_date,
 		procurement_member: report.get_values().procurement_member,
-	};                    
+	};
 	frappe.set_route("query-report", "Sales Quotation Submission Summary");
 	// console.log("go_to_procurement_member_summary")
 	// console.log(report.get_values().date, "-------report", report.get_values().procurement_member,  "-------member", report.get_values().customer_name, "-------customer")

@@ -5,33 +5,33 @@ frappe.query_reports["Commercial & Accounts WIP"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
-			"label":__("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
-            "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
+			"default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
 			"reqd": 1
 		},
 		{
 			"fieldname": "to_date",
-			"label":__("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
-            "default": frappe.datetime.nowdate(),
+			"default": frappe.datetime.nowdate(),
 			"reqd": 1
 		},
 		{
 			"fieldname": "client",
-			"label":__("Client"),
+			"label": __("Client"),
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
 		{
 			"fieldname": "company",
-			"label":__("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 		},
 		{
 			"fieldname": "tsril_trial",
-			"label":__("TSRIL Trial"),
+			"label": __("TSRIL"),
 			"fieldtype": "Check"
 		}
 	]

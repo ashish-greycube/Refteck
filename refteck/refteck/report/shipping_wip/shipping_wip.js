@@ -5,59 +5,59 @@ frappe.query_reports["Shipping-WIP"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
-			"label":__("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
-            "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
+			"default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
 			"reqd": 1
 		},
 		{
 			"fieldname": "to_date",
-			"label":__("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
-            "default": frappe.datetime.nowdate(),
+			"default": frappe.datetime.nowdate(),
 			"reqd": 1
 		},
 		{
 			"fieldname": "client",
-			"label":__("Client"),
+			"label": __("Client"),
 			"fieldtype": "Link",
 			"options": "Customer",
 		},
 		{
 			"fieldname": "assigned_to",
 			"label": __("Assigned to"),
-			"fieldtype": "Link",	
+			"fieldtype": "Link",
 			"options": "User",
 		},
 		{
 			"fieldname": "company",
-			"label":__("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 		},
 		{
 			"fieldname": "order_code",
 			"label": __("Order Code"),
-			"fieldtype": "Select",	
+			"fieldtype": "Select",
 			"options": ["", "OT-On Track", "HA-Hold Accounts", "AP-Acknowledgement Pending", "BS-Before Shipment"],
 		},
 		{
 			"fieldname": "delivery_from_date",
-			"label":__("Delivery From Date"),
+			"label": __("Delivery From Date"),
 			"fieldtype": "Date",
-            // "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
+			// "default": frappe.datetime.add_days(frappe.datetime.nowdate(), -30),
 			// "reqd": 1
 		},
 		{
 			"fieldname": "delivery_to_date",
-			"label":__("Delivery To Date"),
+			"label": __("Delivery To Date"),
 			"fieldtype": "Date",
-            // "default": frappe.datetime.nowdate(),
+			// "default": frappe.datetime.nowdate(),
 			// "reqd": 1
 		},
 		{
 			"fieldname": "tsril_trial",
-			"label":__("TSRIL Trial"),
+			"label": __("TSRIL"),
 			"fieldtype": "Check"
 		}
 
@@ -93,11 +93,11 @@ $(document).on("click", ".custom-link", function () {
 	frappe.call({
 		method: "refteck.refteck.report.shipping_wip.shipping_wip.create_dialog_data",
 		args: {
-			sales_order:so
+			sales_order: so
 		},
 		callback: function (v) {
 			console.log(v)
-			s.set_df_property('sales_order', 'options',v.message)
+			s.set_df_property('sales_order', 'options', v.message)
 			// s.hide();
 		},
 	});
